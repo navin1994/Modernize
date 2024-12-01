@@ -3,12 +3,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { TablerIconsModule } from 'angular-tabler-icons';
 
 @Component({
   selector: 'app-menu',
   standalone: true,
-  imports: [MatCardModule, MatMenuModule, MatIconModule, TablerIconsModule, MatButtonModule],
+  imports: [MatCardModule, MatMenuModule, MatIconModule, MatButtonModule],
   templateUrl: './menu.component.html',
 })
 export class AppMenuComponent {

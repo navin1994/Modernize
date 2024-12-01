@@ -1,29 +1,19 @@
-# Use the official Node.js image as the base image
-FROM node:18 AS build
+FROM node:18-alpine
 
-# Set the working directory
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Copy package.json and package-lock.json into the container
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install --legacy-peer-deps
+# Install Angular CLI globally and dependencies
+RUN npm install -g @angular/cli@18 && npm install --legacy-peer-deps
 
-# Copy the rest of the application code
+# Copy the rest of the application files into the container
 COPY . .
 
-# Build the Angular app
-RUN npm run build --prod
+# Expose port 4200 for Angular live reload
+EXPOSE 4200
 
-# Use a web server to serve the app
-FROM nginx:alpine
-
-# Copy the built application from the previous stage
-COPY --from=build /app/dist/Modernize /usr/share/nginx/html
-
-# Expose port 80
-EXPOSE 80
-
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Default command
+CMD ["ng", "serve", "--host", "0.0.0.0"]

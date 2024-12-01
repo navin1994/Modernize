@@ -1,5 +1,4 @@
 import { Component, ViewChild } from '@angular/core';
-import { TablerIconsModule } from 'angular-tabler-icons';
 import { MaterialModule } from 'src/app/material.module';
 
 import {
@@ -44,7 +43,7 @@ export interface salesOverviewChart {
 @Component({
   selector: 'app-sales-overview',
   standalone: true,
-  imports: [MaterialModule, TablerIconsModule, NgApexchartsModule, MatButtonModule],
+  imports: [MaterialModule, NgApexchartsModule, MatButtonModule],
   templateUrl: './sales-overview.component.html',
 })
 export class AppSalesOverviewComponent {

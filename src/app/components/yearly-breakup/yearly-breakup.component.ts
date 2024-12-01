@@ -1,5 +1,4 @@
 import { Component, ViewEncapsulation, ViewChild } from '@angular/core';
-import { TablerIconsModule } from 'angular-tabler-icons';
 import {
     ApexChart,
     ChartComponent,
@@ -37,7 +36,7 @@ export interface yearlyChart {
     selector: 'app-yearly-breakup',
     standalone: true,
     templateUrl: './yearly-breakup.component.html',
-    imports: [MaterialModule, NgApexchartsModule, TablerIconsModule],
+    imports: [MaterialModule, NgApexchartsModule],
     encapsulation: ViewEncapsulation.None,
 })
 export class AppYearlyBreakupComponent {

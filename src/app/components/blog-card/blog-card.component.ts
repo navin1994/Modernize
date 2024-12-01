@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { TablerIconsModule } from 'angular-tabler-icons';
 
 // ecommerce card
 interface productCards {
@@ -15,7 +14,7 @@ interface productCards {
 @Component({
     selector: 'app-blog-card',
     standalone: true,
-    imports: [MatCardModule, TablerIconsModule, MatButtonModule],
+    imports: [MatCardModule, MatButtonModule],
     templateUrl: './blog-card.component.html',
 })
 export class AppBlogCardsComponent {

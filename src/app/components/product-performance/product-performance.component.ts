@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { NgApexchartsModule } from 'ng-apexcharts';
-import { TablerIconsModule } from 'angular-tabler-icons';
 import { CommonModule } from '@angular/common';
 import { MaterialModule } from 'src/app/material.module';
 
@@ -64,7 +63,6 @@ interface month {
   imports: [
     NgApexchartsModule,
     MaterialModule,
-    TablerIconsModule,
     CommonModule,
   ],
   templateUrl: './product-performance.component.html',
