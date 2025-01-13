@@ -1,0 +1,23 @@
+<mat-card class="cardWithShadow theme-card">
+  <mat-card-header>
+    <mat-card-title class="m-b-0">{{ config().ui.formLabel }}</mat-card-title>
+  </mat-card-header>
+  <mat-card-content class="b-t-1">
+    <!-- Display row elements -->
+    @for(elements of config().ui.elementsLayout; track elements) {
+        <div class="row m-x-10 gx-2">
+          @for(element of elements; track element) {
+            <div class="col">
+              @if(element._refAttributes) {
+                <app-field-selector
+                [fullForm]="formGroup()"
+                [formField]="$any(formGroup()?.get(element._refAttributes))"
+                [element]="config().ui.references.attributes[element._refAttributes]">
+              </app-field-selector>
+              }
+            </div>
+          }
+        </div>
+    }
+  </mat-card-content>
+</mat-card>

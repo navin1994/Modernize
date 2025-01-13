@@ -2,6 +2,14 @@ import { NavItem } from './nav-item/nav-item';
 
 export const navItems: NavItem[] = [
   {
+    navCap: 'Support',
+  },
+  {
+    displayName: 'Config Form',
+    iconName: 'layout-grid-add',
+    route: '/form',
+  },
+  {
     navCap: 'Home',
   },
   {

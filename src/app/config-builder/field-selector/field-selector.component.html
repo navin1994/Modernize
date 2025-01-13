@@ -1,0 +1,35 @@
+<mat-label class="f-w-600 m-b-8 d-block"><span [innerHTML]="element.label | sanitizeTrustedHtml"></span></mat-label>
+<mat-form-field appearance="outline" class="w-100" color="primary">
+    @if(element.hint) {
+        <mat-icon matPrefix (click)="showHideHint($event)" color="accent" fontIcon="info"></mat-icon>
+    }
+    @switch(element.type) { @case (fieldTypes.BASIC) {
+    <!-- If field is input-select -->
+    <input matInput [placeholder]="element?.placeholder ?? ''" [formControl]="formField" />
+    } @case (fieldTypes.AUTOCOMPLETE) {
+    <!-- If field is input-autocomplete -->
+    <input matInput [placeholder]="element?.placeholder ?? ''" [formControl]="formField" [matAutocomplete]="auto" />
+    <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+        @for (option of filteredOptions$ | async; track option) {
+        <mat-option [value]="option"><span [innerHTML]="getDisplayLabel(option) | sanitizeTrustedHtml"></span></mat-option>
+        }
+    </mat-autocomplete>
+    } @case (fieldTypes.SELECT) {
+    <!-- If field is input-select -->
+    <mat-select [placeholder]="element?.placeholder ?? ''" [formControl]="formField">
+        @for (option of filteredOptions$ | async; track option) {
+        <mat-option [value]="option.value"><span [innerHTML]="getDisplayLabel(option) | sanitizeTrustedHtml"></span></mat-option>
+        }
+    </mat-select>
+    } @case (fieldTypes.NUMBER) { } @case (fieldTypes.TEXTAREA) { } @case
+    (fieldTypes.DATE) { } @case (fieldTypes.DATE_RANGE) { } @case
+    (fieldTypes.CHIPS_SELECT) { } @case (fieldTypes.CHIPS_MULTI_SELECT) { } @case
+    (fieldTypes.RADIO_BUTTON) { } @case (fieldTypes.CHECKBOX) { } @case
+    (fieldTypes.PASSWORD) { } }
+    @if(element.type === fieldTypes.SELECT || element.type === fieldTypes.AUTOCOMPLETE) {
+        <mat-icon matSuffix (click)="clearField($event)" color="warn" fontIcon="clear"></mat-icon>
+    }
+    @if(hint()) {
+        <mat-hint [innerHTML]="element.hint | sanitizeTrustedHtml" />
+    }
+</mat-form-field>

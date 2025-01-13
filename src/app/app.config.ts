@@ -3,10 +3,12 @@ import {
   provideZoneChangeDetection,
   importProvidersFrom,
 } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import {
   HttpClient,
   provideHttpClient,
   withInterceptorsFromDi,
+  HttpClientModule,
 } from '@angular/common/http';
 import { routes } from './app.routes';
 import {
@@ -47,10 +49,12 @@ export const appConfig: ApplicationConfig = {
     provideClientHydration(),
     provideAnimationsAsync(),
     importProvidersFrom(
+      CommonModule,
       FormsModule,
       ReactiveFormsModule,
       MaterialModule,
       NgScrollbarModule,
+      HttpClientModule
       // TranslateModule.forRoot({
       //   loader: {
       //     provide: TranslateLoader,
