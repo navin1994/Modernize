@@ -9,5 +9,5 @@ services:
       - "4000:4200"  # Map the container's port 4200 to the host's port 4200
     volumes:
       - .:/app       # Mount the current directory to /app in the container
-      - /app/node_modules  # Ignore node_modules on the host for incompatibility issues
+      # - /app/node_modules  # Ignore node_modules on the host for incompatibility issues
     command: sh -c "npm install && ng serve --host 0.0.0.0 --poll 1000"
