@@ -3,6 +3,7 @@ export const FIELD_TYPES = {
     BASIC: "input-basic",
     AUTOCOMPLETE: "input-autocomplete",
     NUMBER: "input-number",
+    RICH_TEXT: "rich-text",
     SELECT: "input-select",
     TEXTAREA: "input-textarea",
     DATE: "input-date",

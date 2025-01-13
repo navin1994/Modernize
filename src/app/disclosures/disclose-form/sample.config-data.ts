@@ -53,6 +53,21 @@ export const attribute_editor = {
           placeholder: "Attribute Label",
           validations: ["required"],
         },
+        ATTRIBUTE_LABEL_RTE: {
+          id: "ATTRIBUTE_LABEL_RTE",
+          type: FIELD_TYPES.RICH_TEXT,
+          label: "Attribute Label",
+          hint: "Write label to show for this attribute field",
+          placeholder: "Attribute Label",
+          validations: ["required"],
+        },
+        USE_RICH_TEXT: {
+          id: "USE_RICH_TEXT",
+          type: FIELD_TYPES.CHECKBOX,
+          label: "Use reach text editor for label",
+          validations: ["required"],
+        },
+
       },
     },
     elementsLayout: [
@@ -61,6 +76,8 @@ export const attribute_editor = {
         { _refAttributes: "ATTRIBUTE_TYPE" },
       ],
       [{ _refAttributes: "ATTRIBUTE_LABEL" }],
+      [{ _refAttributes: "ATTRIBUTE_LABEL_RTE" }],
+      [{ _refAttributes: "USE_RICH_TEXT" }],
       [{ paragraph: "<p>The criteria parameter is a hash containing...</p>" }],
     ],
   },

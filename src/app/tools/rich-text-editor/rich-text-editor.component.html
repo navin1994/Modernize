@@ -1,0 +1,15 @@
+<!-- tiny mce -->
+@if(initEditor()) {
+<div>
+    <editor [init]="{
+        base_url: '/tinymce',
+        suffix: '.min',
+        browser_spellcheck: true,
+        menubar: false,
+        height: '200px'
+    }" [initialValue]="existingValue()" [spellcheck]="true" [inline]="false" [disabled]="isDisabled()"
+        (onBlur)="updateContent($event)" plugins="lists"
+        toolbar="undo redo | styles | forecolor backcolor | bold italic underline | bullist numlist | alignleft aligncenter alignright alignjustify outdent indent">
+    </editor>
+</div>
+}

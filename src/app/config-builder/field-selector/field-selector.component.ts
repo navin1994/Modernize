@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnInit, signal } from "@angular/core";
+import { Component, computed, inject, Input, OnInit, signal } from "@angular/core";
 import { AsyncPipe } from "@angular/common";
 import {
   UntypedFormControl,
@@ -9,6 +9,7 @@ import {
 import { switchMap, startWith, debounceTime } from "rxjs/operators";
 import {
   FIELD_TYPES,
+  FieldType,
   ReferenceAttribute,
 } from "src/app/models/ui-form-config.interface";
 import { MatInputModule } from "@angular/material/input";
@@ -22,6 +23,7 @@ import { Observable } from "rxjs";
 import { DataService } from "src/app/services/data.service";
 import { isEmptyArray } from "src/app/utility/utility";
 import { SanitizeTrustedHtmlPipe } from "src/app/pipes/sanitize-trusted-html.pipe";
+import { RichTextEditorComponent } from "src/app/tools/rich-text-editor/rich-text-editor.component";
 
 @Component({
   selector: "app-field-selector",
@@ -37,7 +39,8 @@ import { SanitizeTrustedHtmlPipe } from "src/app/pipes/sanitize-trusted-html.pip
     MatCheckboxModule,
     MatAutocompleteModule,
     MatIconModule,
-    SanitizeTrustedHtmlPipe
+    SanitizeTrustedHtmlPipe,
+    RichTextEditorComponent
   ],
   templateUrl: "./field-selector.component.html",
   styleUrl: "./field-selector.component.scss",
@@ -57,6 +60,14 @@ export class FieldSelectorComponent implements OnInit {
   dropdownOptions:any[] = [];
   displayFn:any = '';
   hint = signal<boolean>(false);
+  hideLabel = computed<boolean>(() => {
+    return !(this.fieldTypes.CHECKBOX === this.element.type);
+  });
+  fieldsWithoutMatForm = computed<boolean>(() => {
+    return !(this.fieldTypes.CHECKBOX === this.element.type ||
+      this.fieldTypes.RICH_TEXT === this.element.type
+    );
+  });
 
   ngOnInit(): void {
     this.initField();
