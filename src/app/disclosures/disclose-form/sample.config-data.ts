@@ -1,6 +1,6 @@
-import { FIELD_TYPES } from "src/app/models/ui-form-config.interface";
+import { AttributeType, ConditionType, FIELD_TYPES, FormConfig } from "src/app/models/ui-form-config.interface";
 
-export const attribute_editor = {
+export const attribute_editor: FormConfig = {
   disclosure_name: "UI Attribute Editor",
   disclosure_type: "ATTRIBUTE_EDITOR",
   ui: {
@@ -51,6 +51,20 @@ export const attribute_editor = {
           label: "Attribute Label",
           hint: "Write label to show for this attribute field",
           placeholder: "Attribute Label",
+          visibility: {
+            matchAllGroup: true,
+            matchConditionsGroup: true,
+            conditionGroups: [
+              [{
+                attributeType: 'form-attribute',
+                groupName: 'A',
+                description: 'Show if basic input is used for label',
+                sourceAttribute: 'USE_RICH_TEXT',
+                condition: 'equal',
+                conditionValue: 'false'
+              }]
+            ]
+          },
           validations: ["required"],
         },
         ATTRIBUTE_LABEL_RTE: {
@@ -59,6 +73,20 @@ export const attribute_editor = {
           label: "Attribute Label",
           hint: "Write label to show for this attribute field",
           placeholder: "Attribute Label",
+          visibility: {
+            matchAllGroup: true,
+            matchConditionsGroup: true,
+            conditionGroups: [
+              [{
+                attributeType: 'form-attribute',
+                groupName: 'A',
+                description: 'Show if rich text editor is used for label',
+                sourceAttribute: 'USE_RICH_TEXT',
+                condition: 'equal',
+                conditionValue: 'true'
+              }]
+            ]
+          },
           validations: ["required"],
         },
         USE_RICH_TEXT: {
@@ -81,5 +109,5 @@ export const attribute_editor = {
       [{ paragraph: "<p>The criteria parameter is a hash containing...</p>" }],
     ],
   },
-  version: "ajadh83usdfbyHSYSB93nsjn",
+  version_id: "ajadh83usdfbyHSYSB93nsjn",
 };

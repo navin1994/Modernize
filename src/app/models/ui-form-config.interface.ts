@@ -21,10 +21,10 @@ export interface FormConfig {
     disclosure_name: string;
     disclosure_type: string;
     ui: UiFormConfig;
+    version_id?: string;
 }
 
 export interface UiFormConfig {
-    version_id?: string;
     formLabel: string;
     references: {
         attributes: Record<string, ReferenceAttribute>;
@@ -38,11 +38,11 @@ export interface ReferenceAttribute {
     label: string;
     placeholder?: string;
     hint?: string;
-    visibility?: Visibility;
+    visibility?: AccessControls;
+    editableLogic?: AccessControls;
     staticSelection?: StaticSelection;
     get?: GetServerRequest;
     validations?: Validations;
-    editableLogic?: EditableLogic;
 }
 
 export interface GetServerRequest {
@@ -68,21 +68,28 @@ export interface ElementLayoutData {
 }
 
 // Assuming these interfaces will have further implementation details.
-export interface Visibility {
-    // Define properties as needed
+export interface AccessControls {
+    matchAllGroup: boolean;
+    matchConditionsGroup: boolean;
+    conditionGroups: ConditionGroup[][];
+    statuses?: string[];
+    userPermissions?: string[];
+    allWaysEditable?: boolean;
+}
+
+export type ConditionType = 'equal' | 'not-equal' | 'regex' | 'contains' | 'greater-than' | 'less-than' | 'start-with';
+export type AttributeType = 'form-attribute' | 'user-attribute';
+export interface ConditionGroup {
+    attributeType: AttributeType;
+    groupName: string;
+    description: string;
+    sourceAttribute?: string;
+    userAttribute?: string;
+    condition: ConditionType;
+    conditionValue: string;
 }
 
 export interface Validations {
     // Define properties, like required, min/max, custom messages, etc.
 }
 
-export interface EditableLogic {
-    statuses?: string[];
-    userRole?: string[];
-    alwaysEditable?: boolean;
-    attributeConditions?: AttributeConditions;
-}
-
-export interface AttributeConditions {
-    // Define condition-related properties
-}

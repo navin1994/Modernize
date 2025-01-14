@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:22-bullseye
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install Angular CLI globally and dependencies
-RUN npm install -g @angular/cli@18 && npm install --legacy-peer-deps
+RUN npm install -g @angular/cli@19 && npm install --legacy-peer-deps
 
 # Copy the rest of the application files into the container
 COPY . .

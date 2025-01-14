@@ -5,3 +5,7 @@ export const isEmptyArray = (input: any):boolean => {
 export const isArray = (type: any):boolean => {
     return !!Array.isArray(type) ? true : false;
 }
+
+export const toBoolean = (input: string | number | boolean): boolean => {
+    return  input?.toString()?.toLowerCase() === 'true' || input === 1 || input === true;
+}
