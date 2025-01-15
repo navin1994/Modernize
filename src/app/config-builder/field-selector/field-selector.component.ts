@@ -19,7 +19,7 @@ import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatRadioModule } from "@angular/material/radio";
 import { MatAutocompleteModule } from "@angular/material/autocomplete";
 import { MatIconModule} from '@angular/material/icon';
-import { Observable } from "rxjs";
+import { lastValueFrom, Observable } from "rxjs";
 import { DataService } from "src/app/services/data.service";
 import { isEmptyArray } from "src/app/utility/utility";
 import { SanitizeTrustedHtmlPipe } from "src/app/pipes/sanitize-trusted-html.pipe";
@@ -103,7 +103,8 @@ export class FieldSelectorComponent implements OnInit {
           const displayAttribute = mapping.label.split('|')[0];
           const isDynamicUrl = !!from.includes('{{}}');
           if (isDynamicUrl || isEmptyArray(this.dropdownOptions)) {
-            this.dropdownOptions = await this.dataService.getFieldData(from).toPromise();
+            // this.dropdownOptions = await lastValueFrom(this.dataService.getFieldData(from));
+            this.dropdownOptions = []
           }
           if (this.fieldTypes.SELECT === this.element.type) {
             return this.dropdownOptions.slice();

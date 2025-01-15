@@ -55,14 +55,16 @@ export const attribute_editor: FormConfig = {
             matchAllGroup: true,
             matchConditionsGroup: true,
             conditionGroups: [
-              [{
-                attributeType: 'form-attribute',
-                groupName: 'A',
-                description: 'Show if basic input is used for label',
-                sourceAttribute: 'USE_RICH_TEXT',
-                condition: 'equal',
-                conditionValue: 'false'
-              }]
+              [
+                {
+                  attributeType: 'form-attribute',
+                  groupName: 'A',
+                  description: 'Show if basic input is used for label',
+                  sourceAttribute: 'USE_RICH_TEXT',
+                  condition: 'equal',
+                  conditionValue: 'false'
+                }
+              ]
             ]
           },
           validations: ["required"],
@@ -77,14 +79,16 @@ export const attribute_editor: FormConfig = {
             matchAllGroup: true,
             matchConditionsGroup: true,
             conditionGroups: [
-              [{
-                attributeType: 'form-attribute',
-                groupName: 'A',
-                description: 'Show if rich text editor is used for label',
-                sourceAttribute: 'USE_RICH_TEXT',
-                condition: 'equal',
-                conditionValue: 'true'
-              }]
+              [
+                {
+                  attributeType: 'form-attribute',
+                  groupName: 'A',
+                  description: 'Show if rich text editor is used for label',
+                  sourceAttribute: 'USE_RICH_TEXT',
+                  condition: 'equal',
+                  conditionValue: 'true'
+                }
+              ]
             ]
           },
           validations: ["required"],

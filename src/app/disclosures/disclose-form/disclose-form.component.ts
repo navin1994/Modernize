@@ -17,7 +17,7 @@ import { FormConfig } from 'src/app/models/ui-form-config.interface';
 export class DiscloseFormComponent implements OnInit{
   private configBuilderService = inject(ConfigBuilderService);
   config = signal<FormConfig>(attribute_editor);
-  formGroup?: UntypedFormGroup;
+  formGroup: UntypedFormGroup = new UntypedFormGroup({});
   missingDisclosure = false;
 
   constructor(private title: Title) {}

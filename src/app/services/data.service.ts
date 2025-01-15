@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, catchError, throwError } from 'rxjs';
+import { Observable, catchError, of, throwError } from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
@@ -18,8 +18,12 @@ private http = inject(HttpClient);
       }
 
     getFieldData(url: string): Observable<any> {
-        return this.http.get(url, this.getHeaders())
-        .pipe(catchError(this.handleError));
+      try {
+        return this.http.get(url, this.getHeaders());
+      } catch(error) {
+        console.log(error);
+        return of([]);
+      }
     }
 
     private handleError(error: any): Observable<never> {
