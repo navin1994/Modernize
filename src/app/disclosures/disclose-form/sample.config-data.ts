@@ -76,6 +76,7 @@ export const attribute_editor: FormConfig = {
           hint: "Write label to show for this attribute field",
           placeholder: "Attribute Label",
           visibility: {
+            statuses: ['Unsaved'],
             matchAllGroup: true,
             matchConditionsGroup: true,
             conditionGroups: [

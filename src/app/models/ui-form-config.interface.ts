@@ -69,11 +69,12 @@ export interface ElementLayoutData {
 
 // Assuming these interfaces will have further implementation details.
 export interface AccessControls {
-    matchAllGroup: boolean;
-    matchConditionsGroup: boolean;
-    conditionGroups: ConditionGroup[][];
+    matchAllGroup?: boolean;
+    matchConditionsGroup?: boolean;
+    conditionGroups?: ConditionGroup[][];
     statuses?: string[];
     userPermissions?: string[];
+    userRole?: string[];
     allWaysEditable?: boolean;
 }
 

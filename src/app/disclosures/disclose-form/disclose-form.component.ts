@@ -6,6 +6,7 @@ import { FormLayoutComponent } from 'src/app/config-builder/form-layout/form-lay
 import { ConfigBuilderService } from 'src/app/config-builder/config-builder.service';
 import { attribute_editor } from './sample.config-data';
 import { FormConfig } from 'src/app/models/ui-form-config.interface';
+import { UNSAVED } from 'src/app/models/constants';
 
 @Component({
   selector: 'app-disclose-form',
@@ -19,6 +20,7 @@ export class DiscloseFormComponent implements OnInit{
   config = signal<FormConfig>(attribute_editor);
   formGroup: UntypedFormGroup = new UntypedFormGroup({});
   missingDisclosure = false;
+  status = UNSAVED;
 
   constructor(private title: Title) {}
 

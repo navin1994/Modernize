@@ -6,6 +6,7 @@ import { AccessControls, AttributeType, ConditionGroup, ElementLayoutData, FormC
 import { debounceTime } from 'rxjs/operators';
 import { areObjectsEqual } from 'src/app/utility/utility';
 import { AsyncPipe } from '@angular/common';
+import { UNSAVED } from 'src/app/models/constants';
 
 @Component({
   selector: 'app-form-layout',
@@ -16,7 +17,8 @@ import { AsyncPipe } from '@angular/common';
 })
 export class FormLayoutComponent implements OnInit {
   @Input({ required: true }) formGroup: UntypedFormGroup;
-  @Input({ required: true }) config!: FormConfig;  
+  @Input({ required: true }) config!: FormConfig;
+  @Input() status = UNSAVED;
   
   // Signals for visibility layers and previous form value
   visibleLayers = signal<ElementLayoutData[][]>([]);
@@ -67,11 +69,23 @@ export class FormLayoutComponent implements OnInit {
     const isExist = checkType in attributes[id];
     if (!isExist) return true;
 
-    const { matchAllGroup, matchConditionsGroup, conditionGroups } = attributes[id].visibility as AccessControls;
+    const { matchAllGroup, matchConditionsGroup, conditionGroups, statuses, userPermissions, userRole } = attributes[id].visibility as AccessControls;
     const mainFunc = matchAllGroup ? 'every' : 'some';
     const groupFunc = matchConditionsGroup ? 'every' : 'some';
+  
+    if (statuses && !statuses.includes(this.status)) {
+      return false;
+    }
 
-    return conditionGroups?.[mainFunc]((groupArray) => {
+    if (userPermissions && !userPermissions.includes('read')) {
+      return false;
+    }
+    
+    if (userRole && !userRole.includes('compliance')) {
+      return false;
+    }
+
+    return !!conditionGroups && conditionGroups[mainFunc]((groupArray) => {
       return groupArray?.[groupFunc]((group: ConditionGroup) => {
         if (group.attributeType === ('form-attribute' as AttributeType) && group?.sourceAttribute) {
           const currentValue = data[group.sourceAttribute]?.toString() ?? 'false';
