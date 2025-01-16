@@ -81,6 +81,14 @@ export const attribute_editor: FormConfig = {
                   sourceAttribute: 'USE_RICH_TEXT',
                   condition: 'equal',
                   conditionValue: 'false'
+                },
+                {
+                  attributeType: 'form-attribute',
+                  groupName: 'A',
+                  description: 'Show if basic input is used for label',
+                  sourceAttribute: 'ATTRIBUTE_ID',
+                  condition: 'regex',
+                  conditionValue: '.+'
                 }
               ]
             ]

@@ -4,7 +4,7 @@ import { EditorModule, TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
 import { ReplaySubject, takeUntil } from 'rxjs';
 
 @Component({
-  selector: 'app-rich-text-editor[formFieldControl]',
+  selector: 'app-rich-text-editor',
   standalone: true,
   imports: [EditorModule],
   providers: [{provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js'}],

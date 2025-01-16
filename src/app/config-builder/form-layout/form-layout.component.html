@@ -8,16 +8,17 @@
       @for(layer of this.config.ui.elementsLayout; track layer) {
         <div [ngClass]="isLayerVisible(layer) ? 'row m-x-10 gx-2' : 'd-none'">
           @for(element of layer; track element) {
-            <div class="col" [ngClass]="isShown(element) ? 'col' : 'd-none'">
-              @if(element._refAttributes) {
-                <app-field-selector
-                  (onChange)="updateAccessControl()"
-                  [fullForm]="formGroup"
-                  [formField]="$any(formGroup.get(element._refAttributes))"
-                  [element]="config.ui.references.attributes[element._refAttributes]">
-                </app-field-selector>
+            <!-- <div class="col" [ngClass]="isShown(element) ? 'col' : 'd-none'"> -->
+              @if(this.visibleLayers().flat().includes(element) && element._refAttributes) {
+                <div class="col">
+                  <app-field-selector
+                    (onChange)="updateAccessControl()"
+                    [fullForm]="formGroup"
+                    [formField]="$any(formGroup.get(element._refAttributes))"
+                    [element]="config.ui.references.attributes[element._refAttributes]">
+                  </app-field-selector>
+                </div>
               }
-            </div>
           }
         </div>
       }

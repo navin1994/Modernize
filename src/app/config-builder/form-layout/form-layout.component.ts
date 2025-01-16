@@ -115,7 +115,4 @@ export class FormLayoutComponent implements OnInit {
     return !!layer.find((element) => this.visibleLayers()?.flat()?.includes(element));
   }
 
-  isShown(element: ElementLayoutData): boolean {
-    return this.visibleLayers()?.flat()?.includes(element);
-  }
 }
