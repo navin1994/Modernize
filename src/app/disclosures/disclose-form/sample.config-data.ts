@@ -1,4 +1,4 @@
-import { AttributeType, ConditionType, FIELD_TYPES, FormConfig } from "src/app/models/ui-form-config.interface";
+import { FIELD_TYPES, FormConfig } from "src/app/models/ui-form-config.interface";
 
 export const attribute_editor: FormConfig = {
   disclosure_name: "UI Attribute Editor",
@@ -42,6 +42,24 @@ export const attribute_editor: FormConfig = {
               { value: FIELD_TYPES.DATE_RANGE, label: "Date Range" },
               { value: FIELD_TYPES.PASSWORD, label: "Password" },
             ],
+          },
+          editableLogic: {
+            // allWaysEditable: true,
+            statuses: ['Test'],
+            // matchAllGroup: true,
+            // matchConditionsGroup: true,
+            // conditionGroups: [
+            //   [
+            //     {
+            //       attributeType: 'form-attribute',
+            //       groupName: 'A',
+            //       description: 'Show if text in attribute label',
+            //       sourceAttribute: 'ATTRIBUTE_LABEL',
+            //       condition: 'equal',
+            //       conditionValue: 'test'
+            //     }
+            //   ]
+            // ]
           },
           validations: ["required"],
         },

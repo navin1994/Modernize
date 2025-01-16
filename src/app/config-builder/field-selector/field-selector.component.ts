@@ -1,4 +1,4 @@
-import { Component, computed, inject, Input, OnInit, signal } from "@angular/core";
+import { Component, computed, inject, Input, OnInit, output, signal } from "@angular/core";
 import { AsyncPipe } from "@angular/common";
 import {
   UntypedFormControl,
@@ -9,7 +9,6 @@ import {
 import { switchMap, startWith, debounceTime } from "rxjs/operators";
 import {
   FIELD_TYPES,
-  FieldType,
   ReferenceAttribute,
 } from "src/app/models/ui-form-config.interface";
 import { MatInputModule } from "@angular/material/input";
@@ -51,6 +50,7 @@ export class FieldSelectorComponent implements OnInit {
   @Input({required: true}) element: ReferenceAttribute;
   @Input({required: true}) formField: UntypedFormControl;
   private dataService = inject(DataService);
+  onChange = output<any>();
   // formStatus = input<string>();
 
   fieldTypes = FIELD_TYPES;
@@ -83,6 +83,10 @@ export class FieldSelectorComponent implements OnInit {
         this.setOptions();
       break;
     }
+  }
+
+  emitChange($event: any): void {
+    this.onChange.emit($event);
   }
 
   setOptions() {

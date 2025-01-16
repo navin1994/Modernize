@@ -6,6 +6,10 @@ export const isArray = (type: any):boolean => {
     return !!Array.isArray(type) ? true : false;
 }
 
+export const isBoolean = (input: any): boolean => {
+    const value = input?.toString()?.toLowerCase();
+    return value === 'true' || value === 'false';
+}
 export const toBoolean = (input: string | number | boolean): boolean => {
     return  input?.toString()?.toLowerCase() === 'true' || input === 1 || input === true;
 }

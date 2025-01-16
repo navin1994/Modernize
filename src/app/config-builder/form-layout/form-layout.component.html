@@ -5,12 +5,13 @@
   <mat-card-content class="b-t-1">
     
     <!-- Direct access to visibleLayers with @for -->
-      @for(elements of visibleLayers(); track elements) {
-        <div class="row m-x-10 gx-2">
-          @for(element of elements; track element) {
-            <div class="col">
+      @for(layer of this.config.ui.elementsLayout; track layer) {
+        <div [ngClass]="isLayerVisible(layer) ? 'row m-x-10 gx-2' : 'd-none'">
+          @for(element of layer; track element) {
+            <div class="col" [ngClass]="isShown(element) ? 'col' : 'd-none'">
               @if(element._refAttributes) {
                 <app-field-selector
+                  (onChange)="updateAccessControl()"
                   [fullForm]="formGroup"
                   [formField]="$any(formGroup.get(element._refAttributes))"
                   [element]="config.ui.references.attributes[element._refAttributes]">

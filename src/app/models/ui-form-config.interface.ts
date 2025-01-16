@@ -76,6 +76,7 @@ export interface AccessControls {
     userPermissions?: string[];
     userRole?: string[];
     allWaysEditable?: boolean;
+    readonly?: boolean;
 }
 
 export type ConditionType = 'equal' | 'not-equal' | 'regex' | 'contains' | 'greater-than' | 'less-than' | 'start-with';
