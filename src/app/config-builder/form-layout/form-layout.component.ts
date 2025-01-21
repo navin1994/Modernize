@@ -2,9 +2,9 @@ import { Component, Input, OnInit, signal } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { MatCardModule } from "@angular/material/card";
 import { FieldSelectorComponent } from '../field-selector/field-selector.component';
-import { AccessControls, AttributeType, ConditionGroup, ElementLayoutData, FormConfig } from 'src/app/models/ui-form-config.interface';
+import { AccessControls, AttributeType, COMPARISON_TYPES, ConditionGroup, ElementLayoutData, FormConfig } from 'src/app/models/ui-form-config.interface';
 import { EDITABLE_LOGIC, UNSAVED, VISIBILITY } from 'src/app/models/constants';
-import { areObjectsEqual, isBoolean, isEmptyArray, toBoolean } from 'src/app/utility/utility';
+import { areObjectsEqual, isBoolean, isEmptyArray, isNumeric, isObject, toBoolean } from 'src/app/utility/utility';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -79,25 +79,24 @@ export class FormLayoutComponent implements OnInit {
       return !conditionGroups[mainFunc]((groupArray) => {
         return !!groupArray?.length && groupArray[groupFunc]((group: ConditionGroup) => {
           if (group.attributeType === ('form-attribute' as AttributeType) && group?.sourceAttribute) {
-            let currentValue = data[group.sourceAttribute]?.toString() ?? '';
-            currentValue = isBoolean(currentValue) ? toBoolean(currentValue) : currentValue;
-            const conditionValue = isBoolean(group.conditionValue) ? toBoolean(group.conditionValue) : group.conditionValue;
+            const currentValue = this.getDataByType(data[group.sourceAttribute], group.sourceAttribute);
+            const conditionValue = this.getDataByType(group.conditionValue);
             switch (group.condition) {
-              case 'equal':
+              case COMPARISON_TYPES.EQUAL:
                 return currentValue == conditionValue;
-              case 'not-equal':
+              case COMPARISON_TYPES.NOT_EQUAL:
                 return currentValue != conditionValue;
-              case 'regex':
+              case COMPARISON_TYPES.REGULAR_EXPRESSION:
                 const regex = new RegExp(group.conditionValue);
                 return regex.test(currentValue);
-              case 'contains':
+              case COMPARISON_TYPES.CONTAINS:
                 return currentValue?.includes(group.conditionValue);
-              case 'start-with':
-                return currentValue?.startsWith(group.conditionValue);
-              case 'greater-than':
-                return Number(data[group.sourceAttribute]) > Number(group.conditionValue);
-              case 'less-than':
-                return Number(data[group.sourceAttribute]) < Number(group.conditionValue);
+              case COMPARISON_TYPES.START_WITH:
+                return currentValue?.startsWith(group.conditionValue,1);
+              case COMPARISON_TYPES.GREATER_THAN:
+                return Number(currentValue) > Number(conditionValue);
+              case COMPARISON_TYPES.LESS_THAN:
+                return Number(currentValue) < Number(conditionValue);
             }
           } else if (group.attributeType === ('user-attribute' as AttributeType) && group?.sourceAttribute) {
             // Implementation pending
@@ -109,6 +108,21 @@ export class FormLayoutComponent implements OnInit {
       });
     }
     return false;
+  }
+
+  getDataByType(data: any, sourceAttribute?: string): any {
+    if (data == null || data == undefined || data == '') return '';
+    if (isBoolean(data)) return toBoolean(data);
+    if (isNumeric(data)) return data;
+    if (isObject(data) && sourceAttribute) {
+      const attributeConfig = this.config.ui.references.attributes[sourceAttribute];
+      let valueKey = 'value';
+      if (attributeConfig?.get) {
+        valueKey = attributeConfig.get.mapping.value;
+      }
+      return this.getDataByType(data[valueKey]);
+    }
+    return JSON.stringify(data);
   }
 
   isLayerVisible(layer: ElementLayoutData[]): boolean {

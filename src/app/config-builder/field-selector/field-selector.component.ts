@@ -107,8 +107,8 @@ export class FieldSelectorComponent implements OnInit {
           const displayAttribute = mapping.label.split('|')[0];
           const isDynamicUrl = !!from.includes('{{}}');
           if (isDynamicUrl || isEmptyArray(this.dropdownOptions)) {
-            this.dropdownOptions = await lastValueFrom(this.dataService.getFieldData(from));
-            // this.dropdownOptions = []
+            // this.dropdownOptions = await lastValueFrom(this.dataService.getFieldData(from));
+            this.dropdownOptions = []
           }
           if (this.fieldTypes.SELECT === this.element.type) {
             return this.dropdownOptions.slice();

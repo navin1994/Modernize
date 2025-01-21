@@ -10,8 +10,13 @@ export const isBoolean = (input: any): boolean => {
     const value = input?.toString()?.toLowerCase();
     return value === 'true' || value === 'false';
 }
+
 export const toBoolean = (input: string | number | boolean): boolean => {
     return  input?.toString()?.toLowerCase() === 'true' || input === 1 || input === true;
+}
+
+export const isNumeric = (value: any): boolean => {
+    return !isNaN(value) && !isNaN(parseFloat(value));
 }
 
 export const areObjectsEqual = (obj1: { [x: string]: any; } | null, obj2: { [x: string]: any; } | null): boolean => {
@@ -38,4 +43,8 @@ export const areObjectsEqual = (obj1: { [x: string]: any; } | null, obj2: { [x: 
 
 export const areObjectsSame = (obj1: any, obj2: any): boolean => {
     return JSON.stringify(obj1) === JSON.stringify(obj2);
+}
+
+export const isObject = (input: any): boolean => {
+    return JSON.stringify(input)?.includes('{');
 }

@@ -79,7 +79,17 @@ export interface AccessControls {
     readonly?: boolean;
 }
 
-export type ConditionType = 'equal' | 'not-equal' | 'regex' | 'contains' | 'greater-than' | 'less-than' | 'start-with';
+export const COMPARISON_TYPES = {
+    EQUAL: 'equal',
+    NOT_EQUAL: 'not-equal',
+    REGULAR_EXPRESSION: 'regex',
+    CONTAINS: 'contains',
+    GREATER_THAN: 'greater-than',
+    LESS_THAN: 'less-than',
+    START_WITH: 'start-with'
+};
+
+export type ConditionType = (typeof COMPARISON_TYPES)[keyof typeof COMPARISON_TYPES];
 export type AttributeType = 'form-attribute' | 'user-attribute';
 export interface ConditionGroup {
     attributeType: AttributeType;

@@ -17,7 +17,7 @@ export const attribute_editor: FormConfig = {
             from: "https://my.api.mockaroo.com/attribute_list.json?key=1e24b6b0",
             mapping: {
               label: "attribute_name|id|attribute_type",
-              value: "attribute_name",
+              value: "id",
             },
           },
           validations: ["required"],
@@ -81,14 +81,6 @@ export const attribute_editor: FormConfig = {
                   sourceAttribute: 'USE_RICH_TEXT',
                   condition: 'equal',
                   conditionValue: 'false'
-                },
-                {
-                  attributeType: 'form-attribute',
-                  groupName: 'A',
-                  description: 'Show if basic input is used for label',
-                  sourceAttribute: 'ATTRIBUTE_ID',
-                  condition: 'regex',
-                  conditionValue: '.+'
                 }
               ]
             ]
