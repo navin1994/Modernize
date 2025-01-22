@@ -31,13 +31,14 @@ export class FormLayoutComponent implements OnInit {
 
   updateAccessControl(): void {
     if (areObjectsEqual(this.previousValues(), this.formGroup.getRawValue())) return;
+    if (this.status !== UNSAVED) this.formGroup.disable();
     this.previousValues.set(this.formGroup.getRawValue());
     let layers = this.config.ui.elementsLayout;
     const { attributes } = this.config.ui.references;
 
     for (const id in attributes) {
       const isNotVisible = this.computeAccessControl(VISIBILITY, attributes, id);
-      const isEditable = this.computeAccessControl(EDITABLE_LOGIC, attributes, id);
+      const isEditable = !this.computeAccessControl(EDITABLE_LOGIC, attributes, id);
       if (isNotVisible) layers = this.removeAttributeAndCleanup(layers, id);
       if (isEditable) this.formGroup.get(id)?.enable();
     }
@@ -66,10 +67,17 @@ export class FormLayoutComponent implements OnInit {
   computeAccessControl(checkType: string, attributes: any, id: string): boolean {
     const data = this.formGroup.getRawValue(); 
     const isExist = checkType in attributes[id];
-    if (!isExist) return false;
+    if (!isExist) {
+      return this.checkTypeValue(checkType);
+    }
 
     const { matchAllGroup, matchConditionsGroup, conditionGroups, statuses, userPermissions, userRole, allWaysEditable, readonly } = attributes[id][checkType] as AccessControls;
 
+    if (readonly) {
+      this.formGroup.get(id)?.disable();
+      return true;
+    }
+    if (allWaysEditable) return false;
     if (statuses && !statuses.includes(this.status)) return true;
     if (userPermissions && !userPermissions.includes('read')) return true;
     if (userRole && !userRole.includes('compliance')) return true;
@@ -100,12 +108,21 @@ export class FormLayoutComponent implements OnInit {
             }
           } else if (group.attributeType === ('user-attribute' as AttributeType) && group?.sourceAttribute) {
             // Implementation pending
-            return false;
+            this.checkTypeValue(checkType);
           } else {
-            return false;
+            this.checkTypeValue(checkType);
           }
         });
       });
+    }
+    return false;
+  }
+
+  checkTypeValue(checkType: string): boolean {
+    if (checkType === VISIBILITY) {
+      return false;
+    } else if (checkType === EDITABLE_LOGIC) {
+      return true;
     }
     return false;
   }

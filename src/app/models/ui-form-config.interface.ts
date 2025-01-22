@@ -38,6 +38,7 @@ export interface ReferenceAttribute {
     label: string;
     placeholder?: string;
     hint?: string;
+    initialValue?: any;
     visibility?: AccessControls;
     editableLogic?: AccessControls;
     staticSelection?: StaticSelection;
@@ -54,7 +55,6 @@ export interface GetServerRequest {
 }
 
 export interface StaticSelection {
-    initialValue: string;
     options: {
         value: string;
         label: string;

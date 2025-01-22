@@ -26,8 +26,8 @@ export const attribute_editor: FormConfig = {
           id: "ATTRIBUTE_TYPE",
           type: FIELD_TYPES.SELECT,
           label: "Attribute Type",
+          initialValue: { value: FIELD_TYPES.BASIC, label: "Text Field" },
           staticSelection: {
-            initialValue: "",
             options: [
               { value: FIELD_TYPES.BASIC, label: "Text Field" },
               { value: FIELD_TYPES.AUTOCOMPLETE, label: "Autocomplete Input" },
@@ -44,22 +44,23 @@ export const attribute_editor: FormConfig = {
             ],
           },
           editableLogic: {
-            // allWaysEditable: true,
-            statuses: ['Test'],
-            // matchAllGroup: true,
-            // matchConditionsGroup: true,
-            // conditionGroups: [
-            //   [
-            //     {
-            //       attributeType: 'form-attribute',
-            //       groupName: 'A',
-            //       description: 'Show if text in attribute label',
-            //       sourceAttribute: 'ATTRIBUTE_LABEL',
-            //       condition: 'equal',
-            //       conditionValue: 'test'
-            //     }
-            //   ]
-            // ]
+            allWaysEditable: true
+          },
+          visibility: {
+            matchAllGroup: true,
+            matchConditionsGroup: true,
+            conditionGroups: [
+              [
+                {
+                  attributeType: 'form-attribute',
+                  groupName: 'A',
+                  description: 'Show if basic input is used for label',
+                  sourceAttribute: 'USE_RICH_TEXT',
+                  condition: 'equal',
+                  conditionValue: 'false'
+                }
+              ]
+            ]
           },
           validations: ["required"],
         },
@@ -81,6 +82,25 @@ export const attribute_editor: FormConfig = {
                   sourceAttribute: 'USE_RICH_TEXT',
                   condition: 'equal',
                   conditionValue: 'false'
+                }
+              ]
+            ]
+          },
+          editableLogic: {
+            // readonly: true,
+            // allWaysEditable: true,
+            statuses: ['Disclosed'],
+            matchAllGroup: true,
+            matchConditionsGroup: true,
+            conditionGroups: [
+              [
+                {
+                  attributeType: 'form-attribute',
+                  groupName: 'A',
+                  description: 'Show if text in attribute label',
+                  sourceAttribute: 'ATTRIBUTE_TYPE',
+                  condition: 'regex',
+                  conditionValue: '.+'
                 }
               ]
             ]

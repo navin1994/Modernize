@@ -74,6 +74,9 @@ export class FieldSelectorComponent implements OnInit {
   }
 
   initField(): void {
+    if (this.element?.initialValue) {
+      this.formField.setValue(this.element.initialValue);
+    }
     switch (this.element.type) {
       case this.fieldTypes.BASIC:
         
