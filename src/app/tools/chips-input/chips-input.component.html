@@ -1,0 +1,23 @@
+<mat-form-field appearance="outline" class="w-100" color="primary">
+    @if(element().hint) {
+        <mat-icon matPrefix (click)="showHideHint()" color="accent" fontIcon="info" />
+        }
+    <mat-chip-grid #chipGrid aria-label="Enter values...">
+        @for(chip of formFieldControl.value; track chip) {
+        <mat-chip-row (removed)="remove(chip)" [editable]="true" (edited)="edit(chip, $event)"
+            [aria-description]="'press enter to edit ' + chip" class="f-s-14">
+            {{ chip }}
+            <button matChipRemove [attr.aria-label]="'remove ' + chip">
+                <mat-icon>cancel</mat-icon>
+            </button>
+        </mat-chip-row>
+        }
+
+        <input [disabled]="formFieldControl.disabled" [placeholder]="placeholder()" [matChipInputFor]="chipGrid"
+            [matChipInputSeparatorKeyCodes]="separatorKeysCodes()" [matChipInputAddOnBlur]="true"
+            (matChipInputTokenEnd)="addChipInputValue($event)" />
+    </mat-chip-grid>
+    @if(hint()) {
+        <mat-hint [innerHTML]="element().hint | sanitizeTrustedHtml" />
+        }
+</mat-form-field>

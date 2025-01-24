@@ -7,7 +7,7 @@ export const FIELD_TYPES = {
     SELECT: "input-select",
     TEXTAREA: "input-textarea",
     DATE: "input-date",
-    DATE_RANGE: "input-date-range",
+    CHIPS_INPUT: "input-chips",
     CHIPS_SELECT: "chips-single-select",
     CHIPS_MULTI_SELECT: "chips-multi-select",
     RADIO_BUTTON: "input-radio",
@@ -42,6 +42,8 @@ export interface ReferenceAttribute {
     visibility?: AccessControls;
     editableLogic?: AccessControls;
     staticSelection?: StaticSelection;
+    direction?: DirectionType;
+    multiple?: boolean;
     get?: GetServerRequest;
     validations?: Validations;
 }
@@ -53,8 +55,13 @@ export interface GetServerRequest {
       value: string; // The name of the property to use as the value in UI
     };
 }
+export const DIRECTION = {
+    HORIZONTAL: "HORIZONTAL",
+    VERTICAL: "VERTICAL",
+} as const;
 
-export interface StaticSelection {
+export type DirectionType = (typeof DIRECTION)[keyof typeof DIRECTION];
+export interface StaticSelection { 
     options: {
         value: string;
         label: string;

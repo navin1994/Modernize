@@ -1,4 +1,4 @@
-import { FIELD_TYPES, FormConfig } from "src/app/models/ui-form-config.interface";
+import { DIRECTION, FIELD_TYPES, FormConfig } from "src/app/models/ui-form-config.interface";
 
 export const attribute_editor: FormConfig = {
   disclosure_name: "UI Attribute Editor",
@@ -25,6 +25,7 @@ export const attribute_editor: FormConfig = {
         ATTRIBUTE_TYPE: {
           id: "ATTRIBUTE_TYPE",
           type: FIELD_TYPES.SELECT,
+          multiple: false,
           label: "Attribute Type",
           initialValue: { value: FIELD_TYPES.BASIC, label: "Text Field" },
           staticSelection: {
@@ -39,28 +40,38 @@ export const attribute_editor: FormConfig = {
               { value: FIELD_TYPES.CHIPS_MULTI_SELECT, label: "Multiple Selection Chips" },
               { value: FIELD_TYPES.RADIO_BUTTON, label: "Radio Buttons" },
               { value: FIELD_TYPES.CHECKBOX, label: "Checkbox" },
-              { value: FIELD_TYPES.DATE_RANGE, label: "Date Range" },
               { value: FIELD_TYPES.PASSWORD, label: "Password" },
             ],
           },
           editableLogic: {
             allWaysEditable: true
           },
-          visibility: {
-            matchAllGroup: true,
-            matchConditionsGroup: true,
-            conditionGroups: [
-              [
-                {
-                  attributeType: 'form-attribute',
-                  groupName: 'A',
-                  description: 'Show if basic input is used for label',
-                  sourceAttribute: 'USE_RICH_TEXT',
-                  condition: 'equal',
-                  conditionValue: 'false'
-                }
-              ]
-            ]
+          validations: ["required"],
+        },
+        ATTRIBUTE_SELECT_MULTIPLE: {
+          id: "ATTRIBUTE_SELECT_MULTIPLE",
+          type: FIELD_TYPES.SELECT,
+          label: "Attribute Type",
+          multiple: true,
+          initialValue: { value: FIELD_TYPES.BASIC, label: "Text Field" },
+          staticSelection: {
+            options: [
+              { value: FIELD_TYPES.BASIC, label: "Text Field" },
+              { value: FIELD_TYPES.AUTOCOMPLETE, label: "Autocomplete Input" },
+              { value: FIELD_TYPES.NUMBER, label: "Number" },
+              { value: FIELD_TYPES.SELECT, label: "Select" },
+              { value: FIELD_TYPES.TEXTAREA, label: "Text Area" },
+              { value: FIELD_TYPES.DATE, label: "Date" },
+              { value: FIELD_TYPES.CHIPS_INPUT, label: "Chips Input" },
+              { value: FIELD_TYPES.CHIPS_SELECT, label: "Single Selection Chips" },
+              { value: FIELD_TYPES.CHIPS_MULTI_SELECT, label: "Multiple Selection Chips" },
+              { value: FIELD_TYPES.RADIO_BUTTON, label: "Radio Buttons" },
+              { value: FIELD_TYPES.CHECKBOX, label: "Checkbox" },
+              { value: FIELD_TYPES.PASSWORD, label: "Password" },
+            ],
+          },
+          editableLogic: {
+            allWaysEditable: true
           },
           validations: ["required"],
         },
@@ -107,6 +118,13 @@ export const attribute_editor: FormConfig = {
           },
           validations: ["required"],
         },
+        ATTRIBUTE_COUNT: {
+          id: "ATTRIBUTE_COUNT",
+          type: FIELD_TYPES.NUMBER,
+          label: "Attribute Count",
+          hint: "This is for testing purpose",
+          validations: ["required"],
+        },
         ATTRIBUTE_LABEL_RTE: {
           id: "ATTRIBUTE_LABEL_RTE",
           type: FIELD_TYPES.RICH_TEXT,
@@ -138,7 +156,42 @@ export const attribute_editor: FormConfig = {
           label: "Use reach text editor for label",
           validations: ["required"],
         },
-
+        TEXT_AREA: {
+          id: "TEXT_AREA",
+          type: FIELD_TYPES.TEXTAREA,
+          label: "Attribute TEXTAREA",
+          hint: "This is for testing purpose",
+          validations: ["required"],
+        },
+        DATE: {
+          id: "DATE",
+          type: FIELD_TYPES.DATE,
+          placeholder: "DD/MM/YYYY",
+          label: "Attribute DATE",
+          hint: "This is for testing purpose",
+          validations: ["required"],
+        },
+        ATTRIBUTE_RADIO: {
+          id: "ATTRIBUTE_RADIO",
+          type: FIELD_TYPES.RADIO_BUTTON,
+          label: "Attribute Radio Button",
+          direction: DIRECTION.HORIZONTAL,
+          staticSelection: {
+            options: [
+              { value: FIELD_TYPES.BASIC, label: "Text Field" },
+              { value: FIELD_TYPES.AUTOCOMPLETE, label: "Autocomplete Input" },
+              { value: FIELD_TYPES.NUMBER, label: "Number" }
+            ],
+          },
+          validations: ["required"],
+        },
+        ATTRIBUTE_INPUT_CHIPS: {
+          id: "ATTRIBUTE_INPUT_CHIPS",
+          type: FIELD_TYPES.CHIPS_INPUT,
+          label: "Attribute Chips Input",
+          hint: "This is for testing purpose",
+          validations: ["required"],
+        },
       },
     },
     elementsLayout: [
@@ -146,9 +199,15 @@ export const attribute_editor: FormConfig = {
         { _refAttributes: "ATTRIBUTE_ID" },
         { _refAttributes: "ATTRIBUTE_TYPE" },
       ],
-      [{ _refAttributes: "ATTRIBUTE_LABEL" }],
+      [{ _refAttributes: "ATTRIBUTE_LABEL" },
+        { _refAttributes: "ATTRIBUTE_COUNT" }
+      ],
+      [{ _refAttributes: "DATE" }],
       [{ _refAttributes: "ATTRIBUTE_LABEL_RTE" }],
       [{ _refAttributes: "USE_RICH_TEXT" }],
+      [{ _refAttributes: "TEXT_AREA" }],
+      [{ _refAttributes: "ATTRIBUTE_RADIO" }, { _refAttributes: "ATTRIBUTE_SELECT_MULTIPLE" }],
+      [{ _refAttributes: "ATTRIBUTE_INPUT_CHIPS" }],
       [{ paragraph: "<p>The criteria parameter is a hash containing...</p>" }],
     ],
   },

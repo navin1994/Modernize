@@ -77,7 +77,7 @@ export class AppChipsComponent {
   // Stacked
   //
   availableColors: ChipColor[] = [
-    { name: 'Primary dfshdf sdfjlsdfds sdfsdfjsdf sdfhsdfhhsdfhssd sdfldsf sdfsdfthis is i for navon uelrrlef', color: 'primary' },
+    { name: 'Primary', color: 'primary' },
     { name: 'Accent', color: 'accent' },
     { name: 'Warn', color: 'warn' },
   ];

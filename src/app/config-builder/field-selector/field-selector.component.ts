@@ -5,9 +5,11 @@ import {
   UntypedFormGroup,
   ReactiveFormsModule,
   FormsModule,
+  FormControl,
 } from "@angular/forms";
 import { switchMap, startWith, debounceTime } from "rxjs/operators";
 import {
+  DIRECTION,
   FIELD_TYPES,
   ReferenceAttribute,
 } from "src/app/models/ui-form-config.interface";
@@ -23,9 +25,14 @@ import { DataService } from "src/app/services/data.service";
 import { isEmptyArray } from "src/app/utility/utility";
 import { SanitizeTrustedHtmlPipe } from "src/app/pipes/sanitize-trusted-html.pipe";
 import { RichTextEditorComponent } from "src/app/tools/rich-text-editor/rich-text-editor.component";
+import { MatDatepickerModule } from "@angular/material/datepicker";
+import { provideNativeDateAdapter } from "@angular/material/core";
+import { ChipsInputComponent } from "src/app/tools/chips-input/chips-input.component";
 
 @Component({
   selector: "app-field-selector",
+  templateUrl: "./field-selector.component.html",
+  styleUrl: "./field-selector.component.scss",
   standalone: true,
   imports: [
     AsyncPipe,
@@ -39,10 +46,11 @@ import { RichTextEditorComponent } from "src/app/tools/rich-text-editor/rich-tex
     MatAutocompleteModule,
     MatIconModule,
     SanitizeTrustedHtmlPipe,
-    RichTextEditorComponent
+    RichTextEditorComponent,
+    MatDatepickerModule,
+    ChipsInputComponent
   ],
-  templateUrl: "./field-selector.component.html",
-  styleUrl: "./field-selector.component.scss",
+  providers: [provideNativeDateAdapter()]
 })
 export class FieldSelectorComponent implements OnInit {
   // inputs from parent component
@@ -54,18 +62,27 @@ export class FieldSelectorComponent implements OnInit {
   // formStatus = input<string>();
 
   fieldTypes = FIELD_TYPES;
+  direction = DIRECTION;
 
   // variables used in this component
   filteredOptions$: Observable<any[]>; // this is for autocomplete field
   dropdownOptions:any[] = [];
   displayFn:any = '';
+  showEraser = computed<boolean>(() => {
+    return this.formField.enabled && (this.element.type === this.fieldTypes.RADIO_BUTTON)
+  });
+  showClear = computed<boolean>(()=> {
+    return this.formField.enabled && (this.element.type === this.fieldTypes.SELECT || this.element.type === this.fieldTypes.AUTOCOMPLETE);
+  });
   hint = signal<boolean>(false);
   hideLabel = computed<boolean>(() => {
     return !(this.fieldTypes.CHECKBOX === this.element.type);
   });
   fieldsWithoutMatForm = computed<boolean>(() => {
     return !(this.fieldTypes.CHECKBOX === this.element.type ||
-      this.fieldTypes.RICH_TEXT === this.element.type
+      this.fieldTypes.RICH_TEXT === this.element.type ||
+      this.fieldTypes.RADIO_BUTTON === this.element.type ||
+      this.fieldTypes.CHIPS_INPUT === this.element.type
     );
   });
 
@@ -83,6 +100,7 @@ export class FieldSelectorComponent implements OnInit {
         break;
       case this.fieldTypes.AUTOCOMPLETE:
       case this.fieldTypes.SELECT:
+      case this.fieldTypes.RADIO_BUTTON:
         this.setOptions();
       break;
     }
@@ -93,6 +111,7 @@ export class FieldSelectorComponent implements OnInit {
   }
 
   setOptions() {
+    this.formField = new FormControl([]);
     this.displayFn = this.displayFunction.bind(this);
     this.filteredOptions$ = this.formField.valueChanges.pipe(
       debounceTime(500),
@@ -101,6 +120,8 @@ export class FieldSelectorComponent implements OnInit {
         if (this.element?.staticSelection) {
           const {options} = this.element.staticSelection;
           if (this.fieldTypes.SELECT === this.element.type) {
+            return options.slice();
+          } else if (this.fieldTypes.RADIO_BUTTON === this.element.type) {
             return options.slice();
           } else if (this.fieldTypes.AUTOCOMPLETE === this.element.type) {
             return options.filter(opt => opt.label.toString().toLowerCase().includes(value.toString().toLowerCase())) || options.slice();
@@ -114,6 +135,8 @@ export class FieldSelectorComponent implements OnInit {
             this.dropdownOptions = []
           }
           if (this.fieldTypes.SELECT === this.element.type) {
+            return this.dropdownOptions.slice();
+          } else if (this.fieldTypes.RADIO_BUTTON === this.element.type) {
             return this.dropdownOptions.slice();
           } else if (this.fieldTypes.AUTOCOMPLETE === this.element.type) {
             return this.dropdownOptions.filter((opt: any) => opt[displayAttribute].toString().toLowerCase().includes(value.toString().toLowerCase())) || this.dropdownOptions.slice();
@@ -147,6 +170,7 @@ export class FieldSelectorComponent implements OnInit {
   }
 
   clearField($event: MouseEvent) {
+    if (this.formField.disabled) return;
     this.formField.setValue('');
     $event.stopPropagation();
   }

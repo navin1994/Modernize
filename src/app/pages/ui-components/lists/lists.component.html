@@ -136,7 +136,7 @@
             <mat-card-title>List with single Selection</mat-card-title>
           </mat-card-header>
           <mat-card-content class="b-t-1">
-            <mat-selection-list #shoes2 [multiple]="false">
+            <mat-selection-list  #shoes2 [multiple]="false">
               @for(shoe of typesOfShoes; track shoe) {
               <mat-list-option [value]="shoe">
                 {{ shoe }}

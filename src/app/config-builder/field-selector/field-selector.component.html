@@ -1,44 +1,93 @@
-@if(hideLabel()){<mat-label class="f-w-600 m-b-8 d-block"><span [innerHTML]="element.label | sanitizeTrustedHtml"></span></mat-label>}
-@if(fieldsWithoutMatForm()){<mat-form-field appearance="outline" class="w-100" color="primary">
+@if(hideLabel()){
+<mat-label class="f-w-600 m-b-8 d-block"><span [innerHTML]="element.label | sanitizeTrustedHtml"></span>
+    @if(showEraser()) {
+    &nbsp;<mat-icon matSuffix (click)="clearField($event)" color="warn" fontIcon="clear_all"></mat-icon>
+    }</mat-label>
+}
+@if(fieldsWithoutMatForm()){
+<mat-form-field appearance="outline" class="w-100" color="primary">
     @if(element.hint) {
-        <mat-icon matPrefix (click)="showHideHint($event)" color="accent" fontIcon="info"></mat-icon>
+    <mat-icon matPrefix (click)="showHideHint($event)" color="accent" fontIcon="info" />
     }
-    @switch(element.type) { @case (fieldTypes.BASIC) {
-    <!-- If field is input-select -->
+    @switch(element.type) {
+    @case (fieldTypes.BASIC) {
+    <!-- If field is input-basic -->
     <input matInput [placeholder]="element.placeholder || ''" [formControl]="formField" (blur)="emitChange($event)" />
     } @case (fieldTypes.AUTOCOMPLETE) {
     <!-- If field is input-autocomplete -->
-    <input matInput [placeholder]="element.placeholder || ''" [formControl]="formField" [matAutocomplete]="auto"/>
-    <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="emitChange($event)">
-        @for (option of filteredOptions$ | async; track option) {
-        <mat-option [value]="option"><span [innerHTML]="getDisplayLabel(option) | sanitizeTrustedHtml"></span></mat-option>
-        }
-    </mat-autocomplete>
+    <ng-container>
+        <input matInput [placeholder]="element.placeholder || ''" [formControl]="formField" [matAutocomplete]="auto" />
+        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="emitChange($event)">
+            @for (option of filteredOptions$ | async; track option) {
+                <mat-option [value]="option">
+                    <span [innerHTML]="getDisplayLabel(option) | sanitizeTrustedHtml"></span>
+                </mat-option>
+            }
+        </mat-autocomplete>
+    </ng-container>
     } @case (fieldTypes.SELECT) {
     <!-- If field is input-select -->
-    <mat-select [placeholder]="element.placeholder || ''" [formControl]="formField" (selectionChange)="emitChange($event)">
+    <mat-select [placeholder]="element.placeholder || ''" [formControl]="formField"
+        (selectionChange)="emitChange($event)" [multiple]="element.multiple">
         @for (option of filteredOptions$ | async; track option) {
-        <mat-option [value]="option"><span [innerHTML]="getDisplayLabel(option) | sanitizeTrustedHtml"></span></mat-option>
+        <mat-option [value]="option"><span
+                [innerHTML]="getDisplayLabel(option) | sanitizeTrustedHtml"></span></mat-option>
         }
     </mat-select>
-    } @case (fieldTypes.NUMBER) { } @case (fieldTypes.TEXTAREA) { } @case
-    (fieldTypes.DATE) { } @case (fieldTypes.DATE_RANGE) { } @case
-    (fieldTypes.CHIPS_SELECT) { } @case (fieldTypes.CHIPS_MULTI_SELECT) { } @case
-    (fieldTypes.RADIO_BUTTON) { } @case (fieldTypes.PASSWORD) { } }
-    @if(element.type === fieldTypes.SELECT || element.type === fieldTypes.AUTOCOMPLETE) {
-        <mat-icon matSuffix (click)="clearField($event);emitChange($event)" color="warn" fontIcon="clear"></mat-icon>
+    } @case (fieldTypes.NUMBER) {
+    <!-- If field is input-number -->
+    <input matInput type="number" [placeholder]="element.placeholder || ''" [formControl]="formField"
+        (blur)="emitChange($event)" />
+    } @case (fieldTypes.PASSWORD) {
+    <!-- If field is input-number -->
+    <input matInput type="password" [placeholder]="element.placeholder || ''" [formControl]="formField"
+        (blur)="emitChange($event)" />
+    } @case (fieldTypes.TEXTAREA) {
+    <!-- If field is input-textarea -->
+    <textarea matInput [placeholder]="element.placeholder || ''" [formControl]="formField" (blur)="emitChange($event)"
+        matTextareaAutosize></textarea>
+    } @case (fieldTypes.DATE) {
+    <!-- If field is input-date -->
+    <input matInput [placeholder]="element.placeholder || ''" [matDatepicker]="picker" [formControl]="formField"
+        (dateChange)="emitChange($event)" (click)="picker.open()">
+    }  @case (fieldTypes.PASSWORD) {
+    <!-- If field is input-password -->
+    <input type="password" [placeholder]="element.placeholder || ''" [formControl]="formField"
+        (blur)="emitChange($event)" />
+    }
+    }
+    @if(element.type === fieldTypes.DATE) {
+    <!-- If field is input-input-date -->
+    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+    }
+    @if(this.showClear()) {
+    <mat-icon matSuffix (click)="clearField($event);emitChange($event)" color="warn" fontIcon="clear"></mat-icon>
     }
     @if(hint()) {
-        <mat-hint [innerHTML]="element.hint | sanitizeTrustedHtml" />
+    <mat-hint [innerHTML]="element.hint | sanitizeTrustedHtml" />
     }
 </mat-form-field>
 } @else if (fieldTypes.CHECKBOX === element.type) {
-    <mat-checkbox [formControl]="formField" (change)="emitChange($event)">
-        <strong><span [innerHTML]="element.label | sanitizeTrustedHtml"></span></strong>
-    </mat-checkbox>
+<!-- If field is input-checkbox -->
+<mat-checkbox [formControl]="formField" (change)="emitChange($event)">
+    <strong><span [innerHTML]="element.label | sanitizeTrustedHtml"></span></strong>
+</mat-checkbox>
 } @else if (fieldTypes.RICH_TEXT === element.type) {
-    <app-rich-text-editor
-        (blur)="emitChange($event)"
-        [formFieldControl]="formField"
-    ></app-rich-text-editor>
+<!-- If field is rich-text -->
+<app-rich-text-editor (blur)="emitChange($event)" [formFieldControl]="formField" />
+} @else if (fieldTypes.RADIO_BUTTON === element.type) {
+<!-- If field is input-radio -->
+<mat-radio-group [class]="element.direction === direction.VERTICAL ? 'radio-group-col' : ''" [formControl]="formField"
+    (change)="emitChange($event)">
+    @for (option of filteredOptions$ | async; track option) {
+    <mat-radio-button class="radio-button" [value]="option"><span
+            [innerHTML]="getDisplayLabel(option) | sanitizeTrustedHtml"></span></mat-radio-button>
+    }
+</mat-radio-group>
+} 
+@else if (fieldTypes.CHIPS_INPUT === element.type) {
+    <mat-chips-input [element]="element" (change)="emitChange($event)" [formFieldControl]="formField" [placeholder]="element.placeholder || ''" />
 }
+
+<!-- this is for date fields only -->
+<mat-datepicker #picker></mat-datepicker>
