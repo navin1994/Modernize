@@ -82,7 +82,8 @@
     [placeholder]="element.placeholder || ''" />
 } @else if (fieldTypes.CHIPS_SELECT === element.type) {
 <!-- If field is chips-select -->
-<mat-chip-listbox [formControl]="formField"
+<mat-chip-listbox (change)="emitChange($event)" style="margin-bottom: 8px;"
+    [formControl]="formField"
     [multiple]="element.multiple"
     [class]="element.direction === direction.VERTICAL ? 'mat-mdc-chip-set-stacked' : ''"
     aria-label="chip selection">
@@ -92,6 +93,8 @@
     </mat-chip-option>
     }
 </mat-chip-listbox>
+} @else if (fieldTypes.CHECKBOX_GROUP === element.type) {
+<mat-checkbox-group [formFieldControl]="formField" [options]="filteredOptions$ | async" [element]="element" (change)="emitChange($event)" />
 }
 
 <!-- this is for date fields only -->

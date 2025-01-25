@@ -205,6 +205,20 @@ export const attribute_editor: FormConfig = {
           },
           validations: ["required"],
         },
+        ATTRIBUTE_CHECKBOX_GROUP: {
+          id: "ATTRIBUTE_CHECKBOX_GROUP",
+          direction: DIRECTION.HORIZONTAL,
+          type: FIELD_TYPES.CHECKBOX_GROUP,
+          label: "Attribute Checkbox Group",
+          staticSelection: {
+            options: [
+              { value: FIELD_TYPES.BASIC, label: "Text Field" },
+              { value: FIELD_TYPES.AUTOCOMPLETE, label: "Autocomplete Input" },
+              { value: FIELD_TYPES.NUMBER, label: "Number" }
+            ],
+          },
+          validations: ["required"],
+        },
       },
     },
     elementsLayout: [
@@ -215,12 +229,12 @@ export const attribute_editor: FormConfig = {
       [{ _refAttributes: "ATTRIBUTE_LABEL" },
         { _refAttributes: "ATTRIBUTE_COUNT" }
       ],
-      [{ _refAttributes: "DATE" }],
+      [{ _refAttributes: "DATE" }, { _refAttributes: "ATTRIBUTE_INPUT_CHIPS" }],
       [{ _refAttributes: "ATTRIBUTE_LABEL_RTE" }],
       [{ _refAttributes: "USE_RICH_TEXT" }],
       [{ _refAttributes: "TEXT_AREA" }],
       [{ _refAttributes: "ATTRIBUTE_RADIO" }, { _refAttributes: "ATTRIBUTE_SELECT_MULTIPLE" }],
-      [{ _refAttributes: "ATTRIBUTE_INPUT_CHIPS" }, { _refAttributes: "ATTRIBUTE_CHIPS_MULTI" }],
+      [{ _refAttributes: "ATTRIBUTE_CHIPS_MULTI" }, { _refAttributes: "ATTRIBUTE_CHECKBOX_GROUP" }],
       [{ paragraph: "<p>The criteria parameter is a hash containing...</p>" }],
     ],
   },

@@ -11,6 +11,7 @@ export const FIELD_TYPES = {
     CHIPS_SELECT: "chips-select",
     RADIO_BUTTON: "input-radio",
     CHECKBOX: "input-checkbox",
+    CHECKBOX_GROUP: "input-checkbox-group",
     PASSWORD: "input-password",
 } as const;
 
