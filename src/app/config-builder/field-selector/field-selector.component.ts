@@ -28,6 +28,7 @@ import { RichTextEditorComponent } from "src/app/tools/rich-text-editor/rich-tex
 import { MatDatepickerModule } from "@angular/material/datepicker";
 import { provideNativeDateAdapter } from "@angular/material/core";
 import { ChipsInputComponent } from "src/app/tools/chips-input/chips-input.component";
+import { MatChipsModule } from "@angular/material/chips";
 
 @Component({
   selector: "app-field-selector",
@@ -48,7 +49,8 @@ import { ChipsInputComponent } from "src/app/tools/chips-input/chips-input.compo
     SanitizeTrustedHtmlPipe,
     RichTextEditorComponent,
     MatDatepickerModule,
-    ChipsInputComponent
+    ChipsInputComponent,
+    MatChipsModule
   ],
   providers: [provideNativeDateAdapter()]
 })
@@ -82,7 +84,8 @@ export class FieldSelectorComponent implements OnInit {
     return !(this.fieldTypes.CHECKBOX === this.element.type ||
       this.fieldTypes.RICH_TEXT === this.element.type ||
       this.fieldTypes.RADIO_BUTTON === this.element.type ||
-      this.fieldTypes.CHIPS_INPUT === this.element.type
+      this.fieldTypes.CHIPS_INPUT === this.element.type ||
+      this.fieldTypes.CHIPS_SELECT === this.element.type
     );
   });
 
@@ -101,6 +104,7 @@ export class FieldSelectorComponent implements OnInit {
       case this.fieldTypes.AUTOCOMPLETE:
       case this.fieldTypes.SELECT:
       case this.fieldTypes.RADIO_BUTTON:
+      case this.fieldTypes.CHIPS_SELECT:
         this.setOptions();
       break;
     }
@@ -119,9 +123,7 @@ export class FieldSelectorComponent implements OnInit {
       switchMap(async (value:any) => {
         if (this.element?.staticSelection) {
           const {options} = this.element.staticSelection;
-          if (this.fieldTypes.SELECT === this.element.type) {
-            return options.slice();
-          } else if (this.fieldTypes.RADIO_BUTTON === this.element.type) {
+          if (this.fieldTypes.SELECT === this.element.type || this.fieldTypes.RADIO_BUTTON === this.element.type || this.fieldTypes.CHIPS_SELECT === this.element.type) {
             return options.slice();
           } else if (this.fieldTypes.AUTOCOMPLETE === this.element.type) {
             return options.filter(opt => opt.label.toString().toLowerCase().includes(value.toString().toLowerCase())) || options.slice();
@@ -134,9 +136,7 @@ export class FieldSelectorComponent implements OnInit {
             // this.dropdownOptions = await lastValueFrom(this.dataService.getFieldData(from));
             this.dropdownOptions = []
           }
-          if (this.fieldTypes.SELECT === this.element.type) {
-            return this.dropdownOptions.slice();
-          } else if (this.fieldTypes.RADIO_BUTTON === this.element.type) {
+          if (this.fieldTypes.SELECT === this.element.type || this.fieldTypes.RADIO_BUTTON === this.element.type || this.fieldTypes.CHIPS_SELECT === this.element.type) {
             return this.dropdownOptions.slice();
           } else if (this.fieldTypes.AUTOCOMPLETE === this.element.type) {
             return this.dropdownOptions.filter((opt: any) => opt[displayAttribute].toString().toLowerCase().includes(value.toString().toLowerCase())) || this.dropdownOptions.slice();

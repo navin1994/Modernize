@@ -1,16 +1,13 @@
 @if(hideLabel()){
 <mat-label class="f-w-600 m-b-8 d-block"><span [innerHTML]="element.label | sanitizeTrustedHtml"></span>
-    @if(showEraser()) {
-    &nbsp;<mat-icon matSuffix (click)="clearField($event)" color="warn" fontIcon="clear_all"></mat-icon>
+    @if(showEraser()) { &nbsp;<mat-icon matSuffix (click)="clearField($event)" color="warn"
+        fontIcon="clear_all"></mat-icon>
     }</mat-label>
-}
-@if(fieldsWithoutMatForm()){
+} @if(fieldsWithoutMatForm()){
 <mat-form-field appearance="outline" class="w-100" color="primary">
     @if(element.hint) {
     <mat-icon matPrefix (click)="showHideHint($event)" color="accent" fontIcon="info" />
-    }
-    @switch(element.type) {
-    @case (fieldTypes.BASIC) {
+    } @switch(element.type) { @case (fieldTypes.BASIC) {
     <!-- If field is input-basic -->
     <input matInput [placeholder]="element.placeholder || ''" [formControl]="formField" (blur)="emitChange($event)" />
     } @case (fieldTypes.AUTOCOMPLETE) {
@@ -19,9 +16,9 @@
         <input matInput [placeholder]="element.placeholder || ''" [formControl]="formField" [matAutocomplete]="auto" />
         <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="emitChange($event)">
             @for (option of filteredOptions$ | async; track option) {
-                <mat-option [value]="option">
-                    <span [innerHTML]="getDisplayLabel(option) | sanitizeTrustedHtml"></span>
-                </mat-option>
+            <mat-option [value]="option">
+                <span [innerHTML]="getDisplayLabel(option) | sanitizeTrustedHtml"></span>
+            </mat-option>
             }
         </mat-autocomplete>
     </ng-container>
@@ -49,21 +46,17 @@
     } @case (fieldTypes.DATE) {
     <!-- If field is input-date -->
     <input matInput [placeholder]="element.placeholder || ''" [matDatepicker]="picker" [formControl]="formField"
-        (dateChange)="emitChange($event)" (click)="picker.open()">
-    }  @case (fieldTypes.PASSWORD) {
+        (dateChange)="emitChange($event)" (click)="picker.open()" />
+    } @case (fieldTypes.PASSWORD) {
     <!-- If field is input-password -->
     <input type="password" [placeholder]="element.placeholder || ''" [formControl]="formField"
         (blur)="emitChange($event)" />
-    }
-    }
-    @if(element.type === fieldTypes.DATE) {
+    } } @if(element.type === fieldTypes.DATE) {
     <!-- If field is input-input-date -->
     <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-    }
-    @if(this.showClear()) {
-    <mat-icon matSuffix (click)="clearField($event);emitChange($event)" color="warn" fontIcon="clear"></mat-icon>
-    }
-    @if(hint()) {
+    } @if(this.showClear()) {
+    <mat-icon matSuffix (click)="clearField($event); emitChange($event)" color="warn" fontIcon="clear"></mat-icon>
+    } @if(hint()) {
     <mat-hint [innerHTML]="element.hint | sanitizeTrustedHtml" />
     }
 </mat-form-field>
@@ -84,9 +77,21 @@
             [innerHTML]="getDisplayLabel(option) | sanitizeTrustedHtml"></span></mat-radio-button>
     }
 </mat-radio-group>
-} 
-@else if (fieldTypes.CHIPS_INPUT === element.type) {
-    <mat-chips-input [element]="element" (change)="emitChange($event)" [formFieldControl]="formField" [placeholder]="element.placeholder || ''" />
+} @else if (fieldTypes.CHIPS_INPUT === element.type) {
+<mat-chips-input [element]="element" (change)="emitChange($event)" [formFieldControl]="formField"
+    [placeholder]="element.placeholder || ''" />
+} @else if (fieldTypes.CHIPS_SELECT === element.type) {
+<!-- If field is chips-select -->
+<mat-chip-listbox [formControl]="formField"
+    [multiple]="element.multiple"
+    [class]="element.direction === direction.VERTICAL ? 'mat-mdc-chip-set-stacked' : ''"
+    aria-label="chip selection">
+    @for(chip of filteredOptions$ | async; track chip;) {
+    <mat-chip-option color="accent">
+        <span [innerHTML]="getDisplayLabel(chip) | sanitizeTrustedHtml"></span>
+    </mat-chip-option>
+    }
+</mat-chip-listbox>
 }
 
 <!-- this is for date fields only -->

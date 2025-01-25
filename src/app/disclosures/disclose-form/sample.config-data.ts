@@ -37,7 +37,6 @@ export const attribute_editor: FormConfig = {
               { value: FIELD_TYPES.TEXTAREA, label: "Text Area" },
               { value: FIELD_TYPES.DATE, label: "Date" },
               { value: FIELD_TYPES.CHIPS_SELECT, label: "Single Selection Chips" },
-              { value: FIELD_TYPES.CHIPS_MULTI_SELECT, label: "Multiple Selection Chips" },
               { value: FIELD_TYPES.RADIO_BUTTON, label: "Radio Buttons" },
               { value: FIELD_TYPES.CHECKBOX, label: "Checkbox" },
               { value: FIELD_TYPES.PASSWORD, label: "Password" },
@@ -63,8 +62,7 @@ export const attribute_editor: FormConfig = {
               { value: FIELD_TYPES.TEXTAREA, label: "Text Area" },
               { value: FIELD_TYPES.DATE, label: "Date" },
               { value: FIELD_TYPES.CHIPS_INPUT, label: "Chips Input" },
-              { value: FIELD_TYPES.CHIPS_SELECT, label: "Single Selection Chips" },
-              { value: FIELD_TYPES.CHIPS_MULTI_SELECT, label: "Multiple Selection Chips" },
+              { value: FIELD_TYPES.CHIPS_SELECT, label: "Chips Select" },
               { value: FIELD_TYPES.RADIO_BUTTON, label: "Radio Buttons" },
               { value: FIELD_TYPES.CHECKBOX, label: "Checkbox" },
               { value: FIELD_TYPES.PASSWORD, label: "Password" },
@@ -192,6 +190,21 @@ export const attribute_editor: FormConfig = {
           hint: "This is for testing purpose",
           validations: ["required"],
         },
+        ATTRIBUTE_CHIPS_MULTI: {
+          id: "ATTRIBUTE_RADIO",
+          type: FIELD_TYPES.CHIPS_SELECT,
+          label: "Attribute CHIPS",
+          direction: DIRECTION.HORIZONTAL,
+          multiple: true,
+          staticSelection: {
+            options: [
+              { value: FIELD_TYPES.BASIC, label: "Text Field" },
+              { value: FIELD_TYPES.AUTOCOMPLETE, label: "Autocomplete Input" },
+              { value: FIELD_TYPES.NUMBER, label: "Number" }
+            ],
+          },
+          validations: ["required"],
+        },
       },
     },
     elementsLayout: [
@@ -207,7 +220,7 @@ export const attribute_editor: FormConfig = {
       [{ _refAttributes: "USE_RICH_TEXT" }],
       [{ _refAttributes: "TEXT_AREA" }],
       [{ _refAttributes: "ATTRIBUTE_RADIO" }, { _refAttributes: "ATTRIBUTE_SELECT_MULTIPLE" }],
-      [{ _refAttributes: "ATTRIBUTE_INPUT_CHIPS" }],
+      [{ _refAttributes: "ATTRIBUTE_INPUT_CHIPS" }, { _refAttributes: "ATTRIBUTE_CHIPS_MULTI" }],
       [{ paragraph: "<p>The criteria parameter is a hash containing...</p>" }],
     ],
   },
