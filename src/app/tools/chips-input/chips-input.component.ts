@@ -1,9 +1,9 @@
 import { AfterViewInit, Component, input, Input, OnDestroy, OnInit, output, signal } from "@angular/core";
 import { COMMA, ENTER } from "@angular/cdk/keycodes";
-import { FormControl, UntypedFormControl } from "@angular/forms";
+import { FormControl, ReactiveFormsModule, UntypedFormControl } from "@angular/forms";
 import { MatChipEditedEvent, MatChipInputEvent, MatChipsModule } from "@angular/material/chips";
 import { MatIconModule } from "@angular/material/icon";
-import { ReplaySubject, takeUntil } from "rxjs";
+import { combineLatest, ReplaySubject, takeUntil } from "rxjs";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { SanitizeTrustedHtmlPipe } from "src/app/pipes/sanitize-trusted-html.pipe";
 import { ReferenceAttribute } from "src/app/models/ui-form-config.interface";
@@ -15,38 +15,44 @@ import { ReferenceAttribute } from "src/app/models/ui-form-config.interface";
     standalone: true,
     templateUrl: './chips-input.component.html',
     styleUrl: './chips-input.component.scss',
-    imports: [MatChipsModule, MatIconModule, MatFormFieldModule, SanitizeTrustedHtmlPipe],
+    imports: [MatChipsModule, MatIconModule, MatFormFieldModule, SanitizeTrustedHtmlPipe, ReactiveFormsModule],
 })
-export class ChipsInputComponent implements OnInit, OnDestroy,  AfterViewInit {
+export class ChipsInputComponent implements OnInit, OnDestroy, AfterViewInit {
     private destroyed$ = new ReplaySubject(1);
-    @Input() formFieldControl: UntypedFormControl = new FormControl([]);
-    placeholder = input(''); 
+    @Input() formFieldControl: UntypedFormControl;
+    placeholder = input('');
     separatorKeysCodes = signal([ENTER, COMMA] as const);
     existingValue = signal('');
+    disabled = signal<boolean>(false);
     change = output<any>();
     hint = signal<boolean>(false);
     element = input.required<ReferenceAttribute>();
 
     ngOnInit(): void {
-        this.formFieldControl.valueChanges
+        this.disabled.set(this.formFieldControl.disabled);
+        combineLatest([
+            this.formFieldControl.valueChanges,
+            this.formFieldControl.statusChanges
+        ])
             .pipe(takeUntil(this.destroyed$))
-            .subscribe({
-                next: (value: string) => {
-                    this.existingValue.set(value);
-                },
+            .subscribe(([value, status]) => {
+                this.existingValue.set(value);
+                this.disabled.set(this.formFieldControl.disabled); // see next step
             });
+
     }
 
     ngAfterViewInit(): void {
+        this.disabled.set(this.formFieldControl.disabled);
         this.existingValue.set(this.formFieldControl.value);
-        setTimeout(( )=> {
+        setTimeout(() => {
             this.formFieldControl.updateValueAndValidity();
         });
     }
 
     remove(chip: any): void {
-    const chips = this.formFieldControl.value;
-    const index = chips.indexOf(chip);
+        const chips = this.formFieldControl.value;
+        const index = chips.indexOf(chip);
         if (index >= 0) {
             chips.splice(index, 1);
             this.updateControl(chips);
@@ -54,16 +60,16 @@ export class ChipsInputComponent implements OnInit, OnDestroy,  AfterViewInit {
     }
 
     edit(chip: any, event: MatChipEditedEvent) {
-    const value = event.value.trim();
-    // Remove chip if it no longer has a name
-    if (!value) {
-        this.remove(chip);
-        return;
-    }
+        const value = event.value.trim();
+        // Remove chip if it no longer has a name
+        if (!value) {
+            this.remove(chip);
+            return;
+        }
 
-    // Edit existing chips
-    const chips = this.formFieldControl.value;
-    const index = chips?.indexOf(chip);
+        // Edit existing chips
+        const chips = this.formFieldControl.value;
+        const index = chips?.indexOf(chip);
         if (index >= 0) {
             chips[index] = value;
             this.updateControl(chips);

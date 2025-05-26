@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   computed,
   inject,
@@ -15,7 +16,7 @@ import {
   FormsModule,
   FormControl,
 } from "@angular/forms";
-import { switchMap, startWith, debounceTime } from "rxjs/operators";
+import { switchMap, startWith, debounceTime, distinctUntilChanged } from "rxjs/operators";
 import {
   DIRECTION,
   FIELD_TYPES,
@@ -46,6 +47,7 @@ import { CheckboxGroupComponent } from "src/app/tools/checkbox-group/checkbox-gr
   templateUrl: "./field-selector.component.html",
   styleUrl: "./field-selector.component.scss",
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     AsyncPipe,
     FormsModule,
@@ -138,10 +140,11 @@ export class FieldSelectorComponent implements OnInit {
   setOptions() {
     const fieldsTypes: FieldType[] = [this.fieldTypes.SELECT, this.fieldTypes.RADIO_BUTTON, this.fieldTypes.CHIPS_SELECT, this.fieldTypes.CHECKBOX_GROUP];
     const isOptWithoutFilter = fieldsTypes.includes(this.element.type);
-    this.formField = new FormControl([]);
+    this.formField.setValue([]);
     this.displayFn = this.displayFunction.bind(this);
     this.filteredOptions$ = this.formField.valueChanges.pipe(
       debounceTime(500),
+      distinctUntilChanged(),
       startWith(""),
       switchMap(async (value: any) => {
         if (this.element?.staticSelection) {

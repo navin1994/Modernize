@@ -3,24 +3,34 @@
     <mat-card-title class="m-b-0">{{ config.ui.formLabel }}</mat-card-title>
   </mat-card-header>
   <mat-card-content class="b-t-1">
-    
     <!-- Direct access to visibleLayers with @for -->
-      @for(layer of this.config.ui.elementsLayout; track layer) {
-        <div [ngClass]="isLayerVisible(layer) ? 'row m-x-10 gx-2' : 'd-none'">
-          @for(element of layer; track element) {
-            <!-- <div class="col" [ngClass]="isShown(element) ? 'col' : 'd-none'"> -->
-              @if(this.visibleLayers().flat().includes(element) && element._refAttributes) {
-                <div class="col">
-                  <app-field-selector
-                    (onChange)="updateAccessControl()"
-                    [fullForm]="formGroup"
-                    [formField]="$any(formGroup.get(element._refAttributes))"
-                    [element]="config.ui.references.attributes[element._refAttributes]">
-                  </app-field-selector>
-                </div>
-              }
-          }
-        </div>
-      }
+    @for(layer of this.config.ui.elementsLayout; track layer) {
+    <div [ngClass]="isLayerVisible(layer) ? 'row m-x-10 gx-2' : 'd-none'">
+      @for(element of layer; track element) {
+      <!-- <div class="col" [ngClass]="isShown(element) ? 'col' : 'd-none'"> -->
+      @if(this.visibleLayers().flat().includes(element) &&
+      element._refAttributes) {
+      <div class="col">
+        <app-field-selector
+          (onChange)="updateAccessControl()"
+          [fullForm]="formGroup"
+          [formField]="$any(formGroup.get(element._refAttributes))"
+          [element]="config.ui.references.attributes[element._refAttributes]"
+        >
+        </app-field-selector>
+      </div>
+      } @else if(this.visibleLayers().flat().includes(element) &&
+      element._paragraphAttributes) {
+      <div class="col">
+        <app-text-element
+          [element]="
+            config.ui.paragraphs.textAttributes[element._paragraphAttributes]
+          "
+          [fullForm]="formGroup"
+        ></app-text-element>
+      </div>
+      } }
+    </div>
+    }
   </mat-card-content>
 </mat-card>

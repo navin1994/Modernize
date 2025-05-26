@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DoCheck, Input, OnInit, signal } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { MatCardModule } from "@angular/material/card";
 import { FieldSelectorComponent } from '../field-selector/field-selector.component';
@@ -6,16 +6,18 @@ import { AccessControls, AttributeType, COMPARISON_TYPES, ConditionGroup, Elemen
 import { EDITABLE_LOGIC, UNSAVED, VISIBILITY } from 'src/app/models/constants';
 import { areObjectsEqual, isBoolean, isEmptyArray, isNumeric, isObject, toBoolean } from 'src/app/utility/utility';
 import { CommonModule } from '@angular/common';
+import { TextElementComponent } from './form-elements/text-element/text-element.component';
 
 @Component({
   selector: 'app-form-layout',
   standalone: true,
-  imports: [CommonModule, MatCardModule, FieldSelectorComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CommonModule, MatCardModule, FieldSelectorComponent, TextElementComponent],
   templateUrl: './form-layout.component.html',
   styleUrl: './form-layout.component.scss'
 })
 
-export class FormLayoutComponent implements OnInit {
+export class FormLayoutComponent implements OnInit, DoCheck {
   @Input({ required: true }) formGroup: UntypedFormGroup;
   @Input({ required: true }) config!: FormConfig;
   @Input() status = UNSAVED;
@@ -29,18 +31,32 @@ export class FormLayoutComponent implements OnInit {
     this.updateAccessControl();
   }
 
+  ngDoCheck(): void {
+    // console.log("=========================START=================================")
+    //   Object.entries(this.formGroup.controls).forEach(([key, value]) => {
+    //     console.log('from layout=> ', key, ":", value.disabled)
+    //   })
+    // console.log("=========================END=================================")
+    
+  }
+
   updateAccessControl(): void {
     if (areObjectsEqual(this.previousValues(), this.formGroup.getRawValue())) return;
     if (this.status !== UNSAVED) this.formGroup.disable();
     this.previousValues.set(this.formGroup.getRawValue());
     let layers = this.config.ui.elementsLayout;
     const { attributes } = this.config.ui.references;
+    const { textAttributes } = this.config.ui.paragraphs;
 
     for (const id in attributes) {
       const isNotVisible = this.computeAccessControl(VISIBILITY, attributes, id);
       const isEditable = !this.computeAccessControl(EDITABLE_LOGIC, attributes, id);
       if (isNotVisible) layers = this.removeAttributeAndCleanup(layers, id);
       if (isEditable) this.formGroup.get(id)?.enable();
+    }
+    for (const id in textAttributes) {
+      const isNotVisible = this.computeAccessControl(VISIBILITY, textAttributes, id);
+      if (isNotVisible) layers = this.removeAttributeAndCleanup(layers, id);
     }
     this.visibleLayers.update(()=> [...layers]);
   }
@@ -52,6 +68,8 @@ export class FormLayoutComponent implements OnInit {
           this.formGroup.get(attribute)?.setValue('');
           this.formGroup.get(attribute)?.setErrors(null);
           return false; // Filter out this item
+        } else if (item._paragraphAttributes && item._paragraphAttributes === attribute) {
+          return false; // Filter out this text paragraph
         }
         return true; // Keep the item
       });

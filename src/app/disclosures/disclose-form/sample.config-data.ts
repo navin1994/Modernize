@@ -11,12 +11,12 @@ export const attribute_editor: FormConfig = {
           id: "ATTRIBUTE_ID",
           type: FIELD_TYPES.AUTOCOMPLETE,
           label: "Attribute ID",
-          hint: "Select attribute id from this field",
+          hint: "Select attribute id from this <b>field<b>",
           placeholder: "Attribute ID",
           get: {
             from: "https://my.api.mockaroo.com/attribute_list.json?key=1e24b6b0",
             mapping: {
-              label: "attribute_name|id|attribute_type",
+              label: "attribute_name|attribute_type",
               value: "id",
             },
           },
@@ -50,9 +50,9 @@ export const attribute_editor: FormConfig = {
         ATTRIBUTE_SELECT_MULTIPLE: {
           id: "ATTRIBUTE_SELECT_MULTIPLE",
           type: FIELD_TYPES.SELECT,
-          label: "Attribute Type",
+          label: "Attribute Type multiple select",
           multiple: true,
-          initialValue: { value: FIELD_TYPES.BASIC, label: "Text Field" },
+          // initialValue: { value: FIELD_TYPES.BASIC, label: "Text Field" },
           staticSelection: {
             options: [
               { value: FIELD_TYPES.BASIC, label: "Text Field" },
@@ -68,15 +68,12 @@ export const attribute_editor: FormConfig = {
               { value: FIELD_TYPES.PASSWORD, label: "Password" },
             ],
           },
-          editableLogic: {
-            allWaysEditable: true
-          },
           validations: ["required"],
         },
         ATTRIBUTE_LABEL: {
           id: "ATTRIBUTE_LABEL",
           type: FIELD_TYPES.BASIC,
-          label: "Attribute Label",
+          label: "Attribute Label Basic Input",
           hint: "Write label to show for this attribute field",
           placeholder: "Attribute Label",
           visibility: {
@@ -95,6 +92,7 @@ export const attribute_editor: FormConfig = {
               ]
             ]
           },
+          // Note: If any object is empty then remove it
           editableLogic: {
             // readonly: true,
             // allWaysEditable: true,
@@ -221,21 +219,45 @@ export const attribute_editor: FormConfig = {
         },
       },
     },
+    paragraphs: {
+      textAttributes: {
+        SAMPLE_TEXT: {
+          id: 'SAMPLE_TEXT',
+          text: "<div style=\"color: red; font-weight: bold; margin-top: 10px;\">The <I>criteria</I> parameter is a hash containing...</div>",
+          visibility: {
+            matchAllGroup: true,
+            matchConditionsGroup: true,
+            conditionGroups: [
+              [
+                {
+                  attributeType: 'form-attribute',
+                  groupName: 'A',
+                  description: 'Show if rich text editor is used for label',
+                  sourceAttribute: 'USE_RICH_TEXT',
+                  condition: 'equal',
+                  conditionValue: 'true'
+                }
+              ]
+            ]
+          },
+        }
+      }
+    },
     elementsLayout: [
       [
         { _refAttributes: "ATTRIBUTE_ID" },
-        { _refAttributes: "ATTRIBUTE_TYPE" },
+        { _refAttributes: "ATTRIBUTE_TYPE" }
       ],
       [{ _refAttributes: "ATTRIBUTE_LABEL" },
         { _refAttributes: "ATTRIBUTE_COUNT" }
       ],
+      [{ _paragraphAttributes: "SAMPLE_TEXT" }],
       [{ _refAttributes: "DATE" }, { _refAttributes: "ATTRIBUTE_INPUT_CHIPS" }],
       [{ _refAttributes: "ATTRIBUTE_LABEL_RTE" }],
       [{ _refAttributes: "USE_RICH_TEXT" }],
       [{ _refAttributes: "TEXT_AREA" }],
       [{ _refAttributes: "ATTRIBUTE_RADIO" }, { _refAttributes: "ATTRIBUTE_SELECT_MULTIPLE" }],
       [{ _refAttributes: "ATTRIBUTE_CHIPS_MULTI" }, { _refAttributes: "ATTRIBUTE_CHECKBOX_GROUP" }],
-      [{ paragraph: "<p>The criteria parameter is a hash containing...</p>" }],
     ],
   },
   version_id: "ajadh83usdfbyHSYSB93nsjn",

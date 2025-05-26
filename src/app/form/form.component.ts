@@ -10,7 +10,6 @@ import { MatRadioModule } from "@angular/material/radio";
 import { MatAutocompleteModule } from "@angular/material/autocomplete";
 import { Observable } from "rxjs";
 import { map, startWith } from "rxjs/operators";
-import { AsyncPipe } from "@angular/common";
 import { MatChipsModule } from "@angular/material/chips";
 import { DiscloseFormComponent } from "../disclosures/disclose-form/disclose-form.component";
 
@@ -32,7 +31,6 @@ export interface User {
     MatInputModule,
     MatCheckboxModule,
     MatAutocompleteModule,
-    AsyncPipe,
     MatChipsModule,
     DiscloseFormComponent
   ],

@@ -42,7 +42,7 @@
     } @case (fieldTypes.TEXTAREA) {
     <!-- If field is input-textarea -->
     <textarea matInput [placeholder]="element.placeholder || ''" [formControl]="formField" (blur)="emitChange($event)"
-        matTextareaAutosize></textarea>
+        matTextareaAutosize rows="3" ></textarea>
     } @case (fieldTypes.DATE) {
     <!-- If field is input-date -->
     <input matInput [placeholder]="element.placeholder || ''" [matDatepicker]="picker" [formControl]="formField"
