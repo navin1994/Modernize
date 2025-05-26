@@ -34,13 +34,13 @@ import { lastValueFrom, Observable } from "rxjs";
 import { DataService } from "src/app/services/data.service";
 import { isEmptyArray } from "src/app/utility/utility";
 import { SanitizeTrustedHtmlPipe } from "src/app/pipes/sanitize-trusted-html.pipe";
-import { RichTextEditorComponent } from "src/app/tools/rich-text-editor/rich-text-editor.component";
+import { RichTextEditorComponent } from "src/app/config-builder/form-layout/form-elements/rich-text-editor/rich-text-editor.component";
 import { MatDatepickerModule } from "@angular/material/datepicker";
 import { provideNativeDateAdapter } from "@angular/material/core";
-import { ChipsInputComponent } from "src/app/tools/chips-input/chips-input.component";
+import { ChipsInputComponent } from "src/app/config-builder/form-layout/form-elements/chips-input/chips-input.component";
 import { MatChipsModule } from "@angular/material/chips";
 import { SharedUtilityService } from "src/app/services/shared-utility.service";
-import { CheckboxGroupComponent } from "src/app/tools/checkbox-group/checkbox-group.component";
+import { CheckboxGroupComponent } from "src/app/config-builder/form-layout/form-elements/checkbox-group/checkbox-group.component";
 
 @Component({
   selector: "app-field-selector",
