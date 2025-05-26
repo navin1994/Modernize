@@ -223,7 +223,7 @@ export const attribute_editor: FormConfig = {
       textAttributes: {
         SAMPLE_TEXT: {
           id: 'SAMPLE_TEXT',
-          text: "<div style=\"color: red; font-weight: bold; margin-top: 10px;\">The <I>criteria</I> parameter is a hash containing...</div>",
+          text: "<div style=\"color: red; font-weight: bold; margin-top: 10px;\">The <I>criteria</I> parameter is {{ATTRIBUTE_RADIO.label}} a hash {{ATTRIBUTE_SELECT_MULTIPLE}} containing...{{TEXT_AREA}}</div>", // {{attribute}} add in this way for dynamic text
           visibility: {
             matchAllGroup: true,
             matchConditionsGroup: true,
