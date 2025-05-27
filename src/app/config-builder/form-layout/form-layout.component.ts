@@ -2,17 +2,18 @@ import { ChangeDetectionStrategy, Component, DoCheck, Input, OnInit, signal } fr
 import { UntypedFormGroup } from '@angular/forms';
 import { MatCardModule } from "@angular/material/card";
 import { FieldSelectorComponent } from '../field-selector/field-selector.component';
-import { AccessControls, AttributeType, COMPARISON_TYPES, ConditionGroup, ElementLayoutData, FormConfig } from 'src/app/models/ui-form-config.interface';
+import { AccessControls, ActionButton, AttributeType, COMPARISON_TYPES, ConditionGroup, ElementLayoutData, FormConfig } from 'src/app/models/ui-form-config.interface';
 import { EDITABLE_LOGIC, UNSAVED, VISIBILITY } from 'src/app/models/constants';
 import { areObjectsEqual, isBoolean, isEmptyArray, isNumeric, isObject, toBoolean } from 'src/app/utility/utility';
 import { CommonModule } from '@angular/common';
 import { TextElementComponent } from './form-elements/text-element/text-element.component';
+import { ActionButtonComponent } from './form-elements/action-buttons/action-buttons.component';
 
 @Component({
   selector: 'app-form-layout',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatCardModule, FieldSelectorComponent, TextElementComponent],
+  imports: [CommonModule, MatCardModule, FieldSelectorComponent, TextElementComponent, ActionButtonComponent],
   templateUrl: './form-layout.component.html',
   styleUrl: './form-layout.component.scss'
 })
@@ -25,6 +26,7 @@ export class FormLayoutComponent implements OnInit, DoCheck {
   // Signals for visibility layers and previous form value
   visibleLayers = signal<ElementLayoutData[][]>([]);
   previousValues = signal({});
+  visibleActionButton = signal<ActionButton[]>([]);
 
   ngOnInit(): void {
     this.visibleLayers.set(this.config.ui.elementsLayout);
@@ -47,6 +49,7 @@ export class FormLayoutComponent implements OnInit, DoCheck {
     let layers = this.config.ui.elementsLayout;
     const { attributes } = this.config.ui.references;
     const { textAttributes } = this.config.ui.paragraphs;
+    const actionBtns = this.config.ui?.actions?.buttons;
 
     for (const id in attributes) {
       const isNotVisible = this.computeAccessControl(VISIBILITY, attributes, id);
@@ -58,6 +61,10 @@ export class FormLayoutComponent implements OnInit, DoCheck {
       const isNotVisible = this.computeAccessControl(VISIBILITY, textAttributes, id);
       if (isNotVisible) layers = this.removeAttributeAndCleanup(layers, id);
     }
+    if (actionBtns?.length) {
+      this.visibleActionButton.update(() => actionBtns?.filter((btn: ActionButton, index: number) => !this.computeAccessControl(VISIBILITY, actionBtns, index)))
+    }
+
     this.visibleLayers.update(()=> [...layers]);
   }
 
@@ -82,7 +89,7 @@ export class FormLayoutComponent implements OnInit, DoCheck {
     return cleanedArray;
   }
 
-  computeAccessControl(checkType: string, attributes: any, id: string): boolean {
+  computeAccessControl(checkType: string, attributes: any, id: string|number): boolean {
     const data = this.formGroup.getRawValue(); 
     const isExist = checkType in attributes[id];
     if (!isExist) {
@@ -92,7 +99,7 @@ export class FormLayoutComponent implements OnInit, DoCheck {
     const { matchAllGroup, matchConditionsGroup, conditionGroups, statuses, userPermissions, userRole, allWaysEditable, readonly } = attributes[id][checkType] as AccessControls;
 
     if (readonly) {
-      this.formGroup.get(id)?.disable();
+      this.formGroup.get(id as string)?.disable();
       return true;
     }
     if (allWaysEditable) return false;

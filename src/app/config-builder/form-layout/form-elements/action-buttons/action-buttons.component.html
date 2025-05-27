@@ -1,0 +1,31 @@
+<div class="m-t-12 d-flex align-items-center" [ngClass]="buttonsConfig()?.justification ? buttonsConfig()?.justification : ''">
+    @for(button of buttonsConfig()?.buttons(); track button.label) {
+         @switch
+    (button.type) { @case ("basic") {
+    <button [matTooltip]="button.tooltip" class="m-r-8" [color]="button.color" mat-button>{{ button.label }}</button>
+    } @case ("stroked") {
+    <button [matTooltip]="button.tooltip" class="m-r-8" [color]="button.color" mat-stroked-button>{{ button.label }}</button>
+    } @case ("flat") {
+    <button [matTooltip]="button.tooltip" class="m-r-8" [color]="button.color" mat-flat-button>{{ button.label }}</button>
+    } @case ("icon") {
+    <button [matTooltip]="button.tooltip" class="m-r-8" [color]="button.color" mat-icon-button>
+        <mat-icon>{{ button.icon }}</mat-icon>
+    </button>
+    } @case ("fab") {
+    <button [matTooltip]="button.tooltip" class="m-r-8" [color]="button.color" mat-fab>
+        <mat-icon>{{ button.icon }}</mat-icon>
+    </button>
+    } @case ("mini-fab") {
+        <button [matTooltip]="button.tooltip" class="m-r-8" [color]="button.color" mat-mini-fab>
+          <mat-icon>{{ button.icon }}</mat-icon>
+        </button>
+    } @case ("extended-fab") {
+        <button [matTooltip]="button.tooltip" class="m-r-8" [color]="button.color" mat-fab extended>
+          <mat-icon>{{ button.icon }}</mat-icon>
+          {{ button.label }}
+        </button>
+    } @default {
+    <!-- default will be raised -->
+    <button [matTooltip]="button.tooltip" class="m-r-8" [color]="button.color" mat-raised-button>{{ button.label }}</button>
+    } } }
+</div>

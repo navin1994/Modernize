@@ -25,14 +25,51 @@ export interface FormConfig {
 }
 
 export interface UiFormConfig {
-  formLabel: string;
+  formLabel?: string;
   references: {
     attributes: Record<string, ReferenceAttribute>;
   };
   paragraphs: {
     textAttributes: Record<string, ReferenceTextAttribute>;
   };
+  actions?: {
+    justification: Justification;
+    buttons: ActionButton[];
+  };
   elementsLayout: ElementLayoutData[][];
+}
+
+export type Justification =
+  | "justify-content-center"
+  | "justify-content-around"
+  | "justify-content-between"
+  | "justify-content-end"
+  | "justify-content-start"
+  | "justify-content-evenly";
+
+export type Color = "primary" | "accent" | "warn" | "info";
+
+export interface ActionButton {
+  label: string;
+  color: Color;
+  type:
+    | "basic"
+    | "raised"
+    | "stroked"
+    | "flat"
+    | "icon"
+    | "fab"
+    | "mini-fab"
+    | "extended-fab";
+  icon?: string;
+  runValidation?: boolean;
+  nextStatus?: string;
+  api?: string;
+  confirmationText?: string;
+  confirmBtnLabel?: string;
+  cancelBtnLabel?: string;
+  visibility?: AccessControls;
+  tooltip?: string;
 }
 
 export interface ReferenceTextAttribute {

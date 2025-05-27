@@ -1,7 +1,9 @@
 <mat-card class="cardWithShadow theme-card">
-  <mat-card-header>
-    <mat-card-title class="m-b-0">{{ config.ui.formLabel }}</mat-card-title>
-  </mat-card-header>
+  @if(config.ui.formLabel) {
+    <mat-card-header>
+      <mat-card-title class="m-b-0">{{ config.ui.formLabel }}</mat-card-title>
+    </mat-card-header>
+  }
   <mat-card-content class="b-t-1">
     <!-- Direct access to visibleLayers with @for -->
     @for(layer of this.config.ui.elementsLayout; track layer) {
@@ -33,4 +35,13 @@
     </div>
     }
   </mat-card-content>
+  @if(this.config.ui.actions) {
+    <mat-card-content class="b-t-1">
+    <div class="col">
+      <app-action-buttons
+        [buttonsConfig]="{justification: this.config.ui.actions.justification, buttons: this.visibleActionButton}"
+      ></app-action-buttons>
+    </div>
+  </mat-card-content>
+  }
 </mat-card>

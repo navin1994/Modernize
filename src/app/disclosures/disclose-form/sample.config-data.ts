@@ -243,6 +243,53 @@ export const attribute_editor: FormConfig = {
         }
       }
     },
+    actions: {
+      justification: 'justify-content-center',
+      buttons: [
+        {
+          label: 'Submit',
+          color: 'primary',
+          type: 'extended-fab',
+          icon: 'home',
+          runValidation: true,
+          nextStatus: 'Disclosed',
+          confirmationText: 'Do you really want to save and proceed?',
+          confirmBtnLabel: 'Yes',
+          cancelBtnLabel: 'No',
+          tooltip: 'This is sample button',
+          visibility: {
+            statuses: ['Unsaved'],
+            matchAllGroup: true,
+            matchConditionsGroup: true,
+            conditionGroups: [
+              [
+                {
+                  attributeType: 'form-attribute',
+                  groupName: 'A',
+                  description: 'Show if rich text editor is used for label',
+                  sourceAttribute: 'USE_RICH_TEXT',
+                  condition: 'equal',
+                  conditionValue: 'true'
+                }
+              ]
+            ]
+          },
+        },
+        {
+          label: 'Submit',
+          color: 'primary',
+          type: 'raised',
+          icon: 'home',
+          runValidation: true,
+          nextStatus: 'Disclosed',
+          confirmationText: 'Do you really want to save and proceed?',
+          confirmBtnLabel: 'Yes',
+          cancelBtnLabel: 'No',
+          tooltip: 'This is sample button'
+          // visibility?: AccessControls;
+        }
+      ]
+    },
     elementsLayout: [
       [
         { _refAttributes: "ATTRIBUTE_ID" },
