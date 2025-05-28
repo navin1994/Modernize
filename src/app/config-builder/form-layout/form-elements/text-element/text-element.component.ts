@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -19,14 +20,23 @@ import { isEmptyArray } from "src/app/utility/utility";
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [SanitizeTrustedHtmlPipe],
 })
-export class TextElementComponent implements OnInit {
+export class TextElementComponent implements OnInit, AfterViewInit{
   element = input<ReferenceTextAttribute>();
   formGroup = input<UntypedFormGroup | undefined>();
   text = signal<string | undefined>("");
 
   ngOnInit(): void {
-    this.formGroup()?.valueChanges.subscribe((change) => {
-      this.text.set(
+    this.updateText();
+  }
+
+  ngAfterViewInit(): void {
+      this.formGroup()?.valueChanges.subscribe((change) => {
+      this.updateText();
+    });
+  }
+
+  updateText() {
+    this.text.set(
         this.element()?.text.replace(/{{(.*?)}}/g, (_, key) => {
           const path = key.trim().split(".");
           let value = this.formGroup()?.getRawValue();
@@ -39,6 +49,5 @@ export class TextElementComponent implements OnInit {
           return isEmptyArray(value) ? '' : JSON.stringify(value)?.replace(/^"(.*)"$/, '$1');
         })
       );
-    });
   }
 }

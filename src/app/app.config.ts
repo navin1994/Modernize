@@ -5,10 +5,8 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
-  HttpClient,
   provideHttpClient,
-  withInterceptorsFromDi,
-  HttpClientModule,
+  withInterceptorsFromDi
 } from '@angular/common/http';
 import { routes } from './app.routes';
 import {
@@ -29,6 +27,7 @@ import { NgScrollbarModule } from 'ngx-scrollbar';
 //Import all material modules
 import { MaterialModule } from './material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { provideToastr } from 'ngx-toastr';
 
 // export function HttpLoaderFactory(http: HttpClient): any {
 //   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -48,13 +47,17 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptorsFromDi()),
     provideClientHydration(),
     provideAnimationsAsync(),
+    provideToastr({
+      timeOut: 10000,
+      positionClass: 'toast-top-right',
+      preventDuplicates: true,
+    }),
     importProvidersFrom(
       CommonModule,
       FormsModule,
       ReactiveFormsModule,
       MaterialModule,
-      NgScrollbarModule,
-      HttpClientModule
+      NgScrollbarModule
       // TranslateModule.forRoot({
       //   loader: {
       //     provide: TranslateLoader,

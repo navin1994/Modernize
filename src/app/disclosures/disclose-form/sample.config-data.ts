@@ -20,7 +20,7 @@ export const attribute_editor: FormConfig = {
               value: "id",
             },
           },
-          validations: ["required"],
+          
         },
         ATTRIBUTE_TYPE: {
           id: "ATTRIBUTE_TYPE",
@@ -45,7 +45,11 @@ export const attribute_editor: FormConfig = {
           editableLogic: {
             allWaysEditable: true
           },
-          validations: ["required"],
+          validations: [
+            {
+              _refValidation: "required"
+            }
+          ]
         },
         ATTRIBUTE_SELECT_MULTIPLE: {
           id: "ATTRIBUTE_SELECT_MULTIPLE",
@@ -68,7 +72,7 @@ export const attribute_editor: FormConfig = {
               { value: FIELD_TYPES.PASSWORD, label: "Password" },
             ],
           },
-          validations: ["required"],
+          
         },
         ATTRIBUTE_LABEL: {
           id: "ATTRIBUTE_LABEL",
@@ -112,14 +116,14 @@ export const attribute_editor: FormConfig = {
               ]
             ]
           },
-          validations: ["required"],
+          
         },
         ATTRIBUTE_COUNT: {
           id: "ATTRIBUTE_COUNT",
           type: FIELD_TYPES.NUMBER,
           label: "Attribute Count",
           hint: "This is for testing purpose",
-          validations: ["required"],
+          
         },
         ATTRIBUTE_LABEL_RTE: {
           id: "ATTRIBUTE_LABEL_RTE",
@@ -144,20 +148,20 @@ export const attribute_editor: FormConfig = {
               ]
             ]
           },
-          validations: ["required"],
+          
         },
         USE_RICH_TEXT: {
           id: "USE_RICH_TEXT",
           type: FIELD_TYPES.CHECKBOX,
           label: "Use reach text editor for label",
-          validations: ["required"],
+          
         },
         TEXT_AREA: {
           id: "TEXT_AREA",
           type: FIELD_TYPES.TEXTAREA,
           label: "Attribute TEXTAREA",
           hint: "This is for testing purpose",
-          validations: ["required"],
+          
         },
         DATE: {
           id: "DATE",
@@ -165,7 +169,15 @@ export const attribute_editor: FormConfig = {
           placeholder: "DD/MM/YYYY",
           label: "Attribute DATE",
           hint: "This is for testing purpose",
-          validations: ["required"],
+          
+        },
+        DATE_END: {
+          id: "DATE",
+          type: FIELD_TYPES.DATE,
+          placeholder: "DD/MM/YYYY",
+          label: "Attribute End DATE",
+          hint: "This is for testing purpose",
+          
         },
         ATTRIBUTE_RADIO: {
           id: "ATTRIBUTE_RADIO",
@@ -179,14 +191,14 @@ export const attribute_editor: FormConfig = {
               { value: FIELD_TYPES.NUMBER, label: "Number" }
             ],
           },
-          validations: ["required"],
+          
         },
         ATTRIBUTE_INPUT_CHIPS: {
           id: "ATTRIBUTE_INPUT_CHIPS",
           type: FIELD_TYPES.CHIPS_INPUT,
           label: "Attribute Chips Input",
           hint: "This is for testing purpose",
-          validations: ["required"],
+          
         },
         ATTRIBUTE_CHIPS_MULTI: {
           id: "ATTRIBUTE_RADIO",
@@ -201,7 +213,7 @@ export const attribute_editor: FormConfig = {
               { value: FIELD_TYPES.NUMBER, label: "Number" }
             ],
           },
-          validations: ["required"],
+          
         },
         ATTRIBUTE_CHECKBOX_GROUP: {
           id: "ATTRIBUTE_CHECKBOX_GROUP",
@@ -215,15 +227,24 @@ export const attribute_editor: FormConfig = {
               { value: FIELD_TYPES.NUMBER, label: "Number" }
             ],
           },
-          validations: ["required"],
+          
         },
+      
       },
+      validations: {
+        "required": {
+          type: "required",
+          errorMessage: "This field is required",
+          regex: "^(?!\s*$).+"
+        }
+      },
+      showErrorAfterSubmit: false,
     },
     paragraphs: {
       textAttributes: {
         SAMPLE_TEXT: {
           id: 'SAMPLE_TEXT',
-          text: "<div style=\"color: red; font-weight: bold; margin-top: 10px;\">The <I>criteria</I> parameter is {{ATTRIBUTE_RADIO.label}} <a href=\"https://example.com\" target=\"_blank\">Visit Example.com</a> a hash {{ATTRIBUTE_SELECT_MULTIPLE}} containing...{{TEXT_AREA}}</div>", // {{attribute}} add in this way for dynamic text
+          text: "<div style=\"color: red; font-weight: bold; margin-top: 10px;\">The <I>criteria</I> parameter is <a href=\"https://example.com\" target=\"_blank\">Visit Example.com</a> a hash containing...{{TEXT_AREA}}</div>", // {{attribute}} or {{attribute.label}} add in this way for dynamic text
           visibility: {
             matchAllGroup: true,
             matchConditionsGroup: true,
@@ -232,10 +253,11 @@ export const attribute_editor: FormConfig = {
                 {
                   attributeType: 'form-attribute',
                   groupName: 'A',
-                  description: 'Show if rich text editor is used for label',
-                  sourceAttribute: 'USE_RICH_TEXT',
-                  condition: 'equal',
-                  conditionValue: 'true'
+                  description: 'Show if start date is grater that end date',
+                  sourceAttribute: 'DATE_END',
+                  condition: 'less-than',
+                  conditionalAttribute: 'DATE'
+                  // conditionValue: 'true'
                 }
               ]
             ]
@@ -248,7 +270,7 @@ export const attribute_editor: FormConfig = {
       buttons: [
         {
           label: 'Submit',
-          color: 'primary',
+          color: 'warn',
           type: 'extended-fab',
           icon: 'home',
           runValidation: true,
@@ -299,10 +321,10 @@ export const attribute_editor: FormConfig = {
         { _refAttributes: "ATTRIBUTE_COUNT" }
       ],
       [{ _paragraphAttributes: "SAMPLE_TEXT" }],
-      [{ _refAttributes: "DATE" }, { _refAttributes: "ATTRIBUTE_INPUT_CHIPS" }],
+      [{ _refAttributes: "DATE" },{ _refAttributes: "DATE_END" }],
       [{ _refAttributes: "ATTRIBUTE_LABEL_RTE" }],
       [{ _refAttributes: "USE_RICH_TEXT" }],
-      [{ _refAttributes: "TEXT_AREA" }],
+      [{ _refAttributes: "TEXT_AREA" }, { _refAttributes: "ATTRIBUTE_INPUT_CHIPS" }],
       [{ _refAttributes: "ATTRIBUTE_RADIO" }, { _refAttributes: "ATTRIBUTE_SELECT_MULTIPLE" }],
       [{ _refAttributes: "ATTRIBUTE_CHIPS_MULTI" }, { _refAttributes: "ATTRIBUTE_CHECKBOX_GROUP" }],
     ],

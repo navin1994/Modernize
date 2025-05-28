@@ -28,6 +28,8 @@ export interface UiFormConfig {
   formLabel?: string;
   references: {
     attributes: Record<string, ReferenceAttribute>;
+    validations: Record<string,  ReferenceValidation>;
+    showErrorAfterSubmit: boolean;
   };
   paragraphs: {
     textAttributes: Record<string, ReferenceTextAttribute>;
@@ -90,7 +92,7 @@ export interface ReferenceAttribute {
   direction?: DirectionType;
   multiple?: boolean;
   get?: GetServerRequest;
-  validations?: Validations;
+  validations?: Validation[];
 }
 
 export interface GetServerRequest {
@@ -137,7 +139,9 @@ export const COMPARISON_TYPES = {
   REGULAR_EXPRESSION: "regex",
   CONTAINS: "contains",
   GREATER_THAN: "greater-than",
+  GREATER_THAN_EQUAL_TO: "greater-than-equal-to",
   LESS_THAN: "less-than",
+  LESS_THAN_EQUAL_TO: "less-than-equal-to",
   START_WITH: "start-with",
 };
 
@@ -148,12 +152,20 @@ export interface ConditionGroup {
   attributeType: AttributeType;
   groupName: string;
   description: string;
-  sourceAttribute?: string;
-  userAttribute?: string;
+  sourceAttribute?: string; // Store form attribute
+  userAttribute?: string; // Store user attribute
   condition: ConditionType;
-  conditionValue: string;
+  conditionValue?: string; // provided static value to compare with current value of attribute
+  conditionalAttribute?: string; // provided attribute to dynamically compare with current value of attribute
 }
 
-export interface Validations {
-  // Define properties, like required, min/max, custom messages, etc.
+export interface Validation {
+  _refValidation?: string;
+  comparativeValidations?: AccessControls;
+}
+
+export interface ReferenceValidation {
+  type: string;
+  errorMessage: string;
+  regex: string;
 }

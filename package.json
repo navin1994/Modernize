@@ -27,6 +27,7 @@
     "bootstrap": "^5.3.6",
     "ng-apexcharts": "1.7.6",
     "ngx-scrollbar": "^11.0.0",
+    "ngx-toastr": "^19.0.0",
     "rxjs": "~7.5.0",
     "sass": "^1.57.1",
     "tinymce": "^7.6.0",

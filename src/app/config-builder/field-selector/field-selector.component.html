@@ -42,7 +42,7 @@
     } @case (fieldTypes.TEXTAREA) {
     <!-- If field is input-textarea -->
     <textarea matInput [placeholder]="element.placeholder || ''" [formControl]="formField" (blur)="emitChange($event)"
-        matTextareaAutosize rows="3" ></textarea>
+        matTextareaAutosize rows="3"></textarea>
     } @case (fieldTypes.DATE) {
     <!-- If field is input-date -->
     <input matInput [placeholder]="element.placeholder || ''" [matDatepicker]="picker" [formControl]="formField"
@@ -62,7 +62,7 @@
 </mat-form-field>
 } @else if (fieldTypes.CHECKBOX === element.type) {
 <!-- If field is input-checkbox -->
-<mat-checkbox [formControl]="formField" (change)="emitChange($event)">
+<mat-checkbox class="mb-2" [formControl]="formField" (change)="emitChange($event)">
     <strong><span [innerHTML]="element.label | sanitizeTrustedHtml"></span></strong>
 </mat-checkbox>
 } @else if (fieldTypes.RICH_TEXT === element.type) {
@@ -70,22 +70,22 @@
 <app-rich-text-editor (blur)="emitChange($event)" [formFieldControl]="formField" />
 } @else if (fieldTypes.RADIO_BUTTON === element.type) {
 <!-- If field is input-radio -->
-<mat-radio-group [class]="element.direction === direction.VERTICAL ? 'radio-group-col' : ''" [formControl]="formField"
-    (change)="emitChange($event)">
-    @for (option of filteredOptions$ | async; track option) {
-    <mat-radio-button class="radio-button" [value]="option"><span
-            [innerHTML]="getDisplayLabel(option) | sanitizeTrustedHtml"></span></mat-radio-button>
-    }
-</mat-radio-group>
+ <div class="mb-2">
+     <mat-radio-group [class]="element.direction === direction.VERTICAL ? 'radio-group-col' : ''" [formControl]="formField"
+         (change)="emitChange($event)">
+         @for (option of filteredOptions$ | async; track option) {
+         <mat-radio-button class="radio-button" [value]="option"><span
+                 [innerHTML]="getDisplayLabel(option) | sanitizeTrustedHtml"></span></mat-radio-button>
+         }
+     </mat-radio-group>
+ </div>
 } @else if (fieldTypes.CHIPS_INPUT === element.type) {
 <mat-chips-input [element]="element" (change)="emitChange($event)" [formFieldControl]="formField"
     [placeholder]="element.placeholder || ''" />
 } @else if (fieldTypes.CHIPS_SELECT === element.type) {
 <!-- If field is chips-select -->
-<mat-chip-listbox (change)="emitChange($event)" style="margin-bottom: 8px;"
-    [formControl]="formField"
-    [multiple]="element.multiple"
-    [class]="element.direction === direction.VERTICAL ? 'mat-mdc-chip-set-stacked' : ''"
+<mat-chip-listbox class="mb-3" (change)="emitChange($event)" style="margin-bottom: 8px;" [formControl]="formField"
+    [multiple]="element.multiple" [class]="element.direction === direction.VERTICAL ? 'mat-mdc-chip-set-stacked' : ''"
     aria-label="chip selection">
     @for(chip of filteredOptions$ | async; track chip;) {
     <mat-chip-option color="accent">
@@ -94,8 +94,15 @@
     }
 </mat-chip-listbox>
 } @else if (fieldTypes.CHECKBOX_GROUP === element.type) {
-<mat-checkbox-group [formFieldControl]="formField" [options]="filteredOptions$ | async" [element]="element" (change)="emitChange($event)" />
+<mat-checkbox-group [formFieldControl]="formField" [options]="filteredOptions$ | async" [element]="element"
+    (change)="emitChange($event)" />
 }
 
 <!-- this is for date fields only -->
 <mat-datepicker #picker></mat-datepicker>
+
+@if(isFormSubmitted() && formField.invalid) {
+    <div class="errorMsg">
+        <mat-error>This field is invalid</mat-error>
+    </div>
+}

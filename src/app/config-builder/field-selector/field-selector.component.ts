@@ -1,8 +1,10 @@
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   computed,
   inject,
+  input,
   Input,
   OnInit,
   output,
@@ -47,7 +49,7 @@ import { CheckboxGroupComponent } from "src/app/config-builder/form-layout/form-
   templateUrl: "./field-selector.component.html",
   styleUrl: "./field-selector.component.scss",
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  // changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     AsyncPipe,
     FormsModule,
@@ -76,6 +78,8 @@ export class FieldSelectorComponent implements OnInit {
   private dataService = inject(DataService);
   private sharedUtilityService = inject(SharedUtilityService);
   onChange = output<any>();
+  isFormSubmitted = input<boolean>(false);
+  private cdr = inject(ChangeDetectorRef);
   // formStatus = input<string>();
 
   fieldTypes = FIELD_TYPES;
@@ -127,7 +131,7 @@ export class FieldSelectorComponent implements OnInit {
       case this.fieldTypes.SELECT:
       case this.fieldTypes.RADIO_BUTTON:
       case this.fieldTypes.CHIPS_SELECT:
-        case this.fieldTypes.CHECKBOX_GROUP:
+      case this.fieldTypes.CHECKBOX_GROUP:
         this.setOptions();
         break;
     }
@@ -198,6 +202,7 @@ export class FieldSelectorComponent implements OnInit {
   clearField($event: MouseEvent) {
     if (this.formField.disabled) return;
     this.formField.setValue("");
+    this.onChange.emit($event);
     $event.stopPropagation();
   }
 
