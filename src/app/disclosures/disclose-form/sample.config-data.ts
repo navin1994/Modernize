@@ -94,7 +94,7 @@ export const attribute_editor: FormConfig = {
                   conditionValue: 'false'
                 }
               ]
-            ]
+            ],
           },
           // Note: If any object is empty then remove it
           editableLogic: {
@@ -116,7 +116,11 @@ export const attribute_editor: FormConfig = {
               ]
             ]
           },
-          
+          validations: [
+            {
+              _refValidation: "required"
+            }
+          ]
         },
         ATTRIBUTE_COUNT: {
           id: "ATTRIBUTE_COUNT",
@@ -232,13 +236,13 @@ export const attribute_editor: FormConfig = {
       
       },
       validations: {
-        "required": {
+        required: {
           type: "required",
           errorMessage: "This field is required",
           regex: "^(?!\s*$).+"
         }
       },
-      showErrorAfterSubmit: false,
+      showErrorAfterSubmit: true,
     },
     paragraphs: {
       textAttributes: {

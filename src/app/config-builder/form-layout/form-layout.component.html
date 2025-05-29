@@ -18,7 +18,8 @@
           [fullForm]="formGroup"
           [formField]="$any(formGroup.get(element._refAttributes))"
           [element]="config.ui.references.attributes[element._refAttributes]"
-          [isFormSubmitted]="isFormSubmitted()">
+          [isFormSubmitted]="isFormSubmitted()"
+          >
         </app-field-selector>
       </div>
       } @else if(this.visibleLayers().flat().includes(element) &&

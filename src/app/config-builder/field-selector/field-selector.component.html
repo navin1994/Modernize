@@ -6,7 +6,7 @@
 } @if(fieldsWithoutMatForm()){
 <mat-form-field appearance="outline" class="w-100" color="primary">
     @if(element.hint) {
-    <mat-icon matPrefix (click)="showHideHint($event)" color="accent" fontIcon="info" />
+    <mat-icon matPrefix (click)="showHideHint($event)" [color]="(formField.touched && formField.invalid && isFormSubmitted())? 'warn': 'accent'" fontIcon="info" />
     } @switch(element.type) { @case (fieldTypes.BASIC) {
     <!-- If field is input-basic -->
     <input matInput [placeholder]="element.placeholder || ''" [formControl]="formField" (blur)="emitChange($event)" />
@@ -101,8 +101,12 @@
 <!-- this is for date fields only -->
 <mat-datepicker #picker></mat-datepicker>
 
-@if(isFormSubmitted() && formField.invalid) {
-    <div class="errorMsg">
-        <mat-error>This field is invalid</mat-error>
-    </div>
+<!-- this is for error section only -->
+@for (error of formField.errors | keyvalue; track error.key) {
+    @if(formField.touched && formField.invalid && isFormSubmitted()) {
+        <div class="errorMsg">
+            <mat-error>{{error.value}}</mat-error>
+        </div>
+    }
+        
 }

@@ -2,13 +2,14 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  DoCheck,
   inject,
   Input,
+  OnChanges,
   OnInit,
   signal,
+  SimpleChanges,
 } from "@angular/core";
-import { UntypedFormGroup } from "@angular/forms";
+import { AbstractControl, UntypedFormGroup, ValidationErrors, ValidatorFn } from "@angular/forms";
 import { MatCardModule } from "@angular/material/card";
 import { FieldSelectorComponent } from "../field-selector/field-selector.component";
 import {
@@ -19,6 +20,7 @@ import {
   ConditionGroup,
   ElementLayoutData,
   FormConfig,
+  Validation,
 } from "src/app/models/ui-form-config.interface";
 import { EDITABLE_LOGIC, UNSAVED, VISIBILITY } from "src/app/models/constants";
 import {
@@ -35,11 +37,12 @@ import { CommonModule } from "@angular/common";
 import { TextElementComponent } from "./form-elements/text-element/text-element.component";
 import { ActionButtonComponent } from "./form-elements/action-buttons/action-buttons.component";
 import { ToastrService } from "ngx-toastr";
+import { ConfigBuilderService } from "../config-builder.service";
 
 @Component({
   selector: "app-form-layout",
   standalone: true,
-  // changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     MatCardModule,
@@ -50,12 +53,13 @@ import { ToastrService } from "ngx-toastr";
   templateUrl: "./form-layout.component.html",
   styleUrl: "./form-layout.component.scss",
 })
-export class FormLayoutComponent implements OnInit, DoCheck {
+export class FormLayoutComponent implements OnInit, OnChanges {
   @Input({ required: true }) formGroup: UntypedFormGroup;
   @Input({ required: true }) config!: FormConfig;
   @Input() status = UNSAVED;
   private toaster = inject(ToastrService);
   private cdr = inject(ChangeDetectorRef);
+  private configBuilderService = inject(ConfigBuilderService);
 
   // Signals for visibility layers and previous form value
   visibleLayers = signal<ElementLayoutData[][]>([]);
@@ -69,12 +73,10 @@ export class FormLayoutComponent implements OnInit, DoCheck {
     this.updateAccessControl();
   }
 
-  ngDoCheck(): void {
-    // console.log("=========================START=================================")
-    //   Object.entries(this.formGroup.controls).forEach(([key, value]) => {
-    //     console.log('from layout=> ', key, ":", value.disabled)
-    //   })
-    // console.log("=========================END=================================")
+  ngOnChanges(changes: SimpleChanges): void {
+      if (changes['config'] && changes['config']?.currentValue) {
+        this.configBuilderService.setCustomValidations(this.customValidatorFunction, this.formGroup, changes['config']?.currentValue);
+      }
   }
 
   updateAccessControl(): void {
@@ -294,6 +296,23 @@ export class FormLayoutComponent implements OnInit, DoCheck {
     );
   }
 
+  customValidatorFunction(attributeId: string, config: FormConfig): ValidatorFn[] {
+    const {validations, attributes} = config.ui.references;
+    const attribute = attributes[attributeId];
+    if (!attribute.validations?.length) return [];
+    return attribute.validations.map((validation: Validation) => {
+      return (control: AbstractControl): ValidationErrors | null => {
+        const controlValue = control.value;
+        if (validation?._refValidation) {
+          const val = validations[validation._refValidation];
+          const regex = new RegExp(val.regex);
+          return controlValue && regex.test(controlValue) ? null : {[val.type]: val.errorMessage}
+        }
+      return null;
+    }
+    })
+  }
+
   submit({
     nextStatus,
     runValidation,
@@ -303,6 +322,7 @@ export class FormLayoutComponent implements OnInit, DoCheck {
     runValidation: boolean | undefined;
     api: string | undefined;
   }) {
+    console.log('formData', this.formGroup.getRawValue())
     if (!this.isFormSubmitted()) this.isFormSubmitted.set(true);
     if (runValidation && this.formGroup.invalid) {
       this.toaster.error('Invalid form details');
@@ -310,7 +330,4 @@ export class FormLayoutComponent implements OnInit, DoCheck {
     }
   }
 
-  validateForm(): boolean {
-    return false;
-  }
 }

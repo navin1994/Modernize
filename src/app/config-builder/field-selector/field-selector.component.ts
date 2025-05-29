@@ -10,13 +10,12 @@ import {
   output,
   signal,
 } from "@angular/core";
-import { AsyncPipe } from "@angular/common";
+import { AsyncPipe, CommonModule } from "@angular/common";
 import {
   UntypedFormControl,
   UntypedFormGroup,
   ReactiveFormsModule,
   FormsModule,
-  FormControl,
 } from "@angular/forms";
 import { switchMap, startWith, debounceTime, distinctUntilChanged } from "rxjs/operators";
 import {
@@ -49,8 +48,9 @@ import { CheckboxGroupComponent } from "src/app/config-builder/form-layout/form-
   templateUrl: "./field-selector.component.html",
   styleUrl: "./field-selector.component.scss",
   standalone: true,
-  // changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    CommonModule,
     AsyncPipe,
     FormsModule,
     ReactiveFormsModule,
