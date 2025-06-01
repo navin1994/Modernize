@@ -9,35 +9,16 @@ import {
   signal,
   SimpleChanges,
 } from "@angular/core";
-import {
-  AbstractControl,
-  UntypedFormGroup,
-  ValidationErrors,
-  ValidatorFn,
-} from "@angular/forms";
+import { UntypedFormGroup } from "@angular/forms";
 import { MatCardModule } from "@angular/material/card";
 import { FieldSelectorComponent } from "../field-selector/field-selector.component";
 import {
-  AccessControls,
   ActionButton,
-  AttributeType,
-  COMPARISON_TYPES,
-  ConditionGroup,
   ElementLayoutData,
   FormConfig,
-  Validation,
 } from "src/app/models/ui-form-config.interface";
 import { EDITABLE_LOGIC, UNSAVED, VISIBILITY } from "src/app/models/constants";
-import {
-  areObjectsSame,
-  dateToNumber,
-  isBoolean,
-  isDate,
-  isEmptyArray,
-  isNumeric,
-  isObject,
-  toBoolean,
-} from "src/app/utility/utility";
+import { areObjectsSame } from "src/app/utility/utility";
 import { CommonModule } from "@angular/common";
 import { TextElementComponent } from "./form-elements/text-element/text-element.component";
 import { ActionButtonComponent } from "./form-elements/action-buttons/action-buttons.component";
@@ -99,35 +80,48 @@ export class FormLayoutComponent implements OnInit, OnChanges {
     const actionBtns = this.config.ui?.actions?.buttons;
 
     for (const id in attributes) {
-      const { result: isNotVisible } = this.configBuilderService.computeAccessControl(
-        VISIBILITY,
-        attributes,
-        id,
-        this.config,
-        this.formGroup,
-        this.status
-      );
-      const { result: isNotEditable } = this.configBuilderService.computeAccessControl(
-        EDITABLE_LOGIC,
-        attributes,
-        id,
-        this.config,
-        this.formGroup,
-        this.status
-      );
-      if (isNotVisible) layers = this.configBuilderService.removeAttributeAndCleanup(layers, id, this.formGroup);
+      const { result: isNotVisible } =
+        this.configBuilderService.computeAccessControl(
+          VISIBILITY,
+          attributes,
+          id,
+          this.config,
+          this.formGroup,
+          this.status
+        );
+      const { result: isNotEditable } =
+        this.configBuilderService.computeAccessControl(
+          EDITABLE_LOGIC,
+          attributes,
+          id,
+          this.config,
+          this.formGroup,
+          this.status
+        );
+      if (isNotVisible)
+        layers = this.configBuilderService.removeAttributeAndCleanup(
+          layers,
+          id,
+          this.formGroup
+        );
       if (!isNotEditable) this.formGroup.get(id)?.enable();
     }
     for (const id in textAttributes) {
-      const { result: isTextNotVisible } = this.configBuilderService.computeAccessControl(
-        VISIBILITY,
-        textAttributes,
-        id,
-        this.config,
-        this.formGroup,
-        this.status
-      );
-      if (isTextNotVisible) layers = this.configBuilderService.removeAttributeAndCleanup(layers, id, this.formGroup);
+      const { result: isTextNotVisible } =
+        this.configBuilderService.computeAccessControl(
+          VISIBILITY,
+          textAttributes,
+          id,
+          this.config,
+          this.formGroup,
+          this.status
+        );
+      if (isTextNotVisible)
+        layers = this.configBuilderService.removeAttributeAndCleanup(
+          layers,
+          id,
+          this.formGroup
+        );
     }
     if (actionBtns?.length) {
       this.visibleActionButton.update(() =>
@@ -147,8 +141,6 @@ export class FormLayoutComponent implements OnInit, OnChanges {
 
     this.visibleLayers.update(() => [...layers]);
   }
-
-
 
   isLayerVisible(layer: ElementLayoutData[]): boolean {
     return !!layer.find((element) =>
