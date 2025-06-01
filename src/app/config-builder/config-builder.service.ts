@@ -27,6 +27,7 @@ import {
   isObject,
   toBoolean,
 } from "../utility/utility";
+import { combineLatest } from "rxjs";
 
 @Injectable({ providedIn: "root" })
 export class ConfigBuilderService {
@@ -57,6 +58,13 @@ export class ConfigBuilderService {
         this.customValidatorFunction(id, config, formGroup, status)
       );
     });
+    // update value and validity of dependent fields if value of field on which other fields validation is dependent
+    Object.entries(config.ui.references.validationRelations)?.forEach(([key, values]: [string, string[]]) => {
+      values.forEach(control => {
+        formGroup.get(key)?.valueChanges.subscribe(_=> formGroup.get(control)?.updateValueAndValidity());
+      });
+      
+    }) 
   }
 
   customValidatorFunction(

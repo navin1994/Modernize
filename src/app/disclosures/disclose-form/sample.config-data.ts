@@ -191,6 +191,29 @@ export const attribute_editor: FormConfig = {
           placeholder: "DD/MM/YYYY",
           label: "Attribute DATE",
           hint: "This is for testing purpose",
+          validations: [
+            {
+              _refValidation: "required",
+            },
+            {
+              comparativeValidations: {
+                  matchAllGroup: true,
+                  matchConditionsGroup: true,
+                  conditionGroups: [
+                    [
+                      {
+                        attributeType: "self",
+                          groupName: "Test",
+                          description: "End date should be greater than start date",
+                          // sourceAttribute: 'DATE', // Store form attribute
+                          condition: 'less-than', // provided static value to compare with current value of attribute
+                          conditionalAttribute: 'DATE_END',
+                      }
+                    ]
+                  ],
+              }
+            }
+          ]
           
         },
         DATE_END: {
@@ -259,6 +282,15 @@ export const attribute_editor: FormConfig = {
           errorMessage: "This field is required",
           regex: "^(?!\s*$).+"
         }
+      },
+      validationRelations: {
+        DATE_END: [
+          'ATTRIBUTE_LABEL',
+          'DATE'
+        ],
+        DATE: [
+          'ATTRIBUTE_LABEL'
+        ]
       },
       showErrorAfterSubmit: false,
     },

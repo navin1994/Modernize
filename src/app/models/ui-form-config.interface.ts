@@ -29,6 +29,7 @@ export interface UiFormConfig {
   references: {
     attributes: Record<string, ReferenceAttribute>;
     validations: Record<string,  ReferenceValidation>;
+    validationRelations: Record<string, string[]>;
     showErrorAfterSubmit: boolean;
   };
   paragraphs: {
