@@ -190,7 +190,7 @@ export const attribute_editor: FormConfig = {
           type: FIELD_TYPES.DATE,
           placeholder: "DD/MM/YYYY",
           label: "Attribute DATE",
-          hint: "This is for testing purpose",
+          hint: "The popover content is very dynamic or needs to interact heavily with services without the constraints of mat-menu",
           validations: [
             {
               _refValidation: "required",

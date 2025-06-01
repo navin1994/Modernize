@@ -42,6 +42,8 @@ import { ChipsInputComponent } from "src/app/config-builder/form-layout/form-ele
 import { MatChipsModule } from "@angular/material/chips";
 import { SharedUtilityService } from "src/app/services/shared-utility.service";
 import { CheckboxGroupComponent } from "src/app/config-builder/form-layout/form-elements/checkbox-group/checkbox-group.component";
+import { PopoverModule, PopoverTemplate } from "@ngx-popovers/popover";
+import { MatMenuModule } from "@angular/material/menu";
 
 @Component({
   selector: "app-field-selector",
@@ -66,7 +68,8 @@ import { CheckboxGroupComponent } from "src/app/config-builder/form-layout/form-
     MatDatepickerModule,
     ChipsInputComponent,
     MatChipsModule,
-    CheckboxGroupComponent
+    CheckboxGroupComponent,
+    MatMenuModule
   ],
   providers: [provideNativeDateAdapter()],
 })
@@ -100,7 +103,6 @@ export class FieldSelectorComponent implements OnInit {
         this.element.type === this.fieldTypes.AUTOCOMPLETE)
     );
   });
-  hint = signal<boolean>(false);
   hideLabel = computed<boolean>(() => {
     return !(this.fieldTypes.CHECKBOX === this.element.type);
   });
@@ -206,8 +208,4 @@ export class FieldSelectorComponent implements OnInit {
     $event.stopPropagation();
   }
 
-  showHideHint($event: MouseEvent) {
-    this.hint.update((hint: boolean) => !hint);
-    $event.stopPropagation();
-  }
 }

@@ -6,7 +6,7 @@
 } @if(fieldsWithoutMatForm()){
 <mat-form-field appearance="outline" class="w-100" color="primary">
     @if(element.hint) {
-    <mat-icon matPrefix (click)="showHideHint($event)" [color]="(formField.touched && formField.invalid && isFormSubmitted())? 'warn': 'accent'" fontIcon="info" />
+    <mat-icon matPrefix [matMenuTriggerFor]="popoverMenu" [color]="(formField.touched && formField.invalid && isFormSubmitted())? 'warn': 'accent'" fontIcon="info" />
     } @switch(element.type) { @case (fieldTypes.BASIC) {
     <!-- If field is input-basic -->
     <input matInput [placeholder]="element.placeholder || ''" [formControl]="formField" (blur)="emitChange($event)" />
@@ -56,8 +56,6 @@
     <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
     } @if(this.showClear()) {
     <mat-icon matSuffix (click)="clearField($event); emitChange($event)" color="warn" fontIcon="clear"></mat-icon>
-    } @if(hint()) {
-    <mat-hint [innerHTML]="element.hint | sanitizeTrustedHtml" />
     }
 </mat-form-field>
 } @else if (fieldTypes.CHECKBOX === element.type) {
@@ -100,6 +98,11 @@
 
 <!-- this is for date fields only -->
 <mat-datepicker #picker></mat-datepicker>
+
+<!-- This is for showing hint -->
+<mat-menu #popoverMenu="matMenu">
+  <div class="px-2 w-auto" [innerHTML]="element.hint | sanitizeTrustedHtml"></div>
+</mat-menu>
 
 <!-- this is for error section only -->
 @for (error of formField.errors | keyvalue; track error.key; let i = $index) {
