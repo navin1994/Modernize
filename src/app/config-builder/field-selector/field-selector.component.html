@@ -102,10 +102,10 @@
 <mat-datepicker #picker></mat-datepicker>
 
 <!-- this is for error section only -->
-@for (error of formField.errors | keyvalue; track error.key) {
+@for (error of formField.errors | keyvalue; track error.key; let i = $index) {
     @if(formField.touched && formField.invalid && isFormSubmitted()) {
         <div class="errorMsg">
-            <mat-error>{{error.value}}</mat-error>
+            <mat-error>{{$index+1 +': '+error.value}}</mat-error>
         </div>
     }
         

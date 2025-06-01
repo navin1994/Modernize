@@ -118,7 +118,25 @@ export const attribute_editor: FormConfig = {
           },
           validations: [
             {
-              _refValidation: "required"
+              _refValidation: "required",
+            },
+            {
+              comparativeValidations: {
+                  matchAllGroup: true,
+                  matchConditionsGroup: true,
+                  conditionGroups: [
+                    [
+                      {
+                        attributeType: "form-attribute",
+                          groupName: "Navin",
+                          description: "End date should be greater than start date",
+                          sourceAttribute: 'DATE', // Store form attribute
+                          condition: 'less-than', // provided static value to compare with current value of attribute
+                          conditionalAttribute: 'DATE_END',
+                      }
+                    ]
+                  ],
+              }
             }
           ]
         },
@@ -242,7 +260,7 @@ export const attribute_editor: FormConfig = {
           regex: "^(?!\s*$).+"
         }
       },
-      showErrorAfterSubmit: true,
+      showErrorAfterSubmit: false,
     },
     paragraphs: {
       textAttributes: {

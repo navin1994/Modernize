@@ -147,7 +147,7 @@ export const COMPARISON_TYPES = {
 
 export type ConditionType =
   (typeof COMPARISON_TYPES)[keyof typeof COMPARISON_TYPES];
-export type AttributeType = "form-attribute" | "user-attribute";
+export type AttributeType = "form-attribute" | "user-attribute" | "self";
 export interface ConditionGroup {
   attributeType: AttributeType;
   groupName: string;
