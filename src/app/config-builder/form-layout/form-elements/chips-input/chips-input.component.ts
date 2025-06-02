@@ -7,6 +7,7 @@ import { combineLatest, ReplaySubject, takeUntil } from "rxjs";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { SanitizeTrustedHtmlPipe } from "src/app/pipes/sanitize-trusted-html.pipe";
 import { ReferenceAttribute } from "src/app/models/ui-form-config.interface";
+import { MatMenuModule } from "@angular/material/menu";
 
 
 
@@ -15,7 +16,7 @@ import { ReferenceAttribute } from "src/app/models/ui-form-config.interface";
     standalone: true,
     templateUrl: './chips-input.component.html',
     styleUrl: './chips-input.component.scss',
-    imports: [MatChipsModule, MatIconModule, MatFormFieldModule, SanitizeTrustedHtmlPipe, ReactiveFormsModule],
+    imports: [MatChipsModule, MatIconModule, MatFormFieldModule, SanitizeTrustedHtmlPipe, ReactiveFormsModule, MatMenuModule],
 })
 export class ChipsInputComponent implements OnInit, OnDestroy, AfterViewInit {
     private destroyed$ = new ReplaySubject(1);
@@ -25,8 +26,8 @@ export class ChipsInputComponent implements OnInit, OnDestroy, AfterViewInit {
     existingValue = signal('');
     disabled = signal<boolean>(false);
     change = output<any>();
-    hint = signal<boolean>(false);
     element = input.required<ReferenceAttribute>();
+    isSubmitted = input(false);
 
     ngOnInit(): void {
         this.disabled.set(this.formFieldControl.disabled);
@@ -91,10 +92,6 @@ export class ChipsInputComponent implements OnInit, OnDestroy, AfterViewInit {
         this.formFieldControl.markAsDirty();
         this.formFieldControl.updateValueAndValidity();
         this.change.emit(this.formFieldControl?.value);
-    }
-
-    showHideHint() {
-        this.hint.update((hint) => !hint);
     }
 
     ngOnDestroy(): void {

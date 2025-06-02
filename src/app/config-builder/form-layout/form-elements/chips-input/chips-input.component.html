@@ -4,7 +4,7 @@
   color="primary"
 >
   @if(element().hint) {
-  <mat-icon matPrefix (click)="showHideHint()" color="accent" fontIcon="info" />
+  <mat-icon matPrefix [matMenuTriggerFor]="popoverMenu" [color]="(formFieldControl.touched && formFieldControl.invalid && isSubmitted())? 'warn': 'accent'" color="accent" fontIcon="info" />
   }
   <mat-chip-grid #chipGrid aria-label="Enter values..." [formControl]="formFieldControl">
     @for(chip of formFieldControl.value; track chip) {
@@ -33,7 +33,11 @@
       (matChipInputTokenEnd)="addChipInputValue($event)"
     />
   </mat-chip-grid>
-  @if(hint()) {
-  <mat-hint [innerHTML]="element().hint | sanitizeTrustedHtml" />
-  }
 </mat-form-field>
+
+
+<!-- This is for showing hint -->
+<mat-menu #popoverMenu="matMenu">
+  <div class="px-2 w-auto" [innerHTML]="element().hint | sanitizeTrustedHtml"></div>
+</mat-menu>
+

@@ -202,7 +202,7 @@ export const attribute_editor: FormConfig = {
                   conditionGroups: [
                     [
                       {
-                        attributeType: "self",
+                        attributeType: "self", // When attributeType is self then sourceAttribute is not required
                           groupName: "Test",
                           description: "End date should be greater than start date",
                           // sourceAttribute: 'DATE', // Store form attribute

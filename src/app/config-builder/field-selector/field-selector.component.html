@@ -78,7 +78,7 @@
      </mat-radio-group>
  </div>
 } @else if (fieldTypes.CHIPS_INPUT === element.type) {
-<mat-chips-input [element]="element" (change)="emitChange($event)" [formFieldControl]="formField"
+<mat-chips-input [element]="element" (change)="emitChange($event)" [formFieldControl]="formField" [isSubmitted]="this.isFormSubmitted()"
     [placeholder]="element.placeholder || ''" />
 } @else if (fieldTypes.CHIPS_SELECT === element.type) {
 <!-- If field is chips-select -->

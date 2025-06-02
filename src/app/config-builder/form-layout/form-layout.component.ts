@@ -5,6 +5,7 @@ import {
   inject,
   Input,
   OnChanges,
+  OnDestroy,
   OnInit,
   signal,
   SimpleChanges,
@@ -24,6 +25,7 @@ import { TextElementComponent } from "./form-elements/text-element/text-element.
 import { ActionButtonComponent } from "./form-elements/action-buttons/action-buttons.component";
 import { ToastrService } from "ngx-toastr";
 import { ConfigBuilderService } from "../config-builder.service";
+import { ReplaySubject, takeUntil } from "rxjs";
 
 @Component({
   selector: "app-form-layout",
@@ -39,7 +41,8 @@ import { ConfigBuilderService } from "../config-builder.service";
   templateUrl: "./form-layout.component.html",
   styleUrl: "./form-layout.component.scss",
 })
-export class FormLayoutComponent implements OnInit, OnChanges {
+export class FormLayoutComponent implements OnInit, OnChanges, OnDestroy {
+  private destroyed$ = new ReplaySubject(1);
   @Input({ required: true }) formGroup: UntypedFormGroup;
   @Input({ required: true }) config!: FormConfig;
   @Input() status = UNSAVED;
@@ -65,6 +68,19 @@ export class FormLayoutComponent implements OnInit, OnChanges {
         this.formGroup,
         changes["config"]?.currentValue,
         this.status
+      );
+      // update value and validity of dependent fields if value of field on which other fields validation is dependent
+      Object.entries(this.config.ui.references.validationRelations)?.forEach(
+        ([key, values]: [string, string[]]) => {
+          values.forEach((control) => {
+            this.formGroup
+              .get(key)
+              ?.valueChanges.pipe(takeUntil(this.destroyed$))
+              .subscribe((_) =>
+                this.formGroup.get(control)?.updateValueAndValidity()
+              );
+          });
+        }
       );
     }
   }
@@ -157,11 +173,25 @@ export class FormLayoutComponent implements OnInit, OnChanges {
     runValidation: boolean | undefined;
     api: string | undefined;
   }) {
+    const visibleControls = this.visibleLayers().flat(Infinity)
     console.log("formData", this.formGroup.getRawValue());
     if (!this.isFormSubmitted()) this.isFormSubmitted.set(true);
-    if (runValidation && this.formGroup.invalid) {
-      this.toaster.error("Invalid form details");
-      return;
+    if (runValidation) {
+     const isNotValid = visibleControls.some((item: any) => {
+        if (item?._refAttributes && this.formGroup.get(item._refAttributes)?.invalid) return true;
+        return false;
+      })
+      if (isNotValid) {
+        this.toaster.error("Invalid form details");
+        return;
+      }
+      console.log('Form is valid')
+      
     }
+  }
+
+  ngOnDestroy(): void {
+    this.destroyed$.next(true);
+    this.destroyed$.unsubscribe();
   }
 }

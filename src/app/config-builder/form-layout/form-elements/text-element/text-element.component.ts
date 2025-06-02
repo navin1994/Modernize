@@ -4,10 +4,12 @@ import {
   Component,
   computed,
   input,
+  OnDestroy,
   OnInit,
   signal,
 } from "@angular/core";
 import { UntypedFormGroup } from "@angular/forms";
+import { ReplaySubject, takeUntil } from "rxjs";
 import { ReferenceTextAttribute } from "src/app/models/ui-form-config.interface";
 import { SanitizeTrustedHtmlPipe } from "src/app/pipes/sanitize-trusted-html.pipe";
 import { isEmptyArray } from "src/app/utility/utility";
@@ -20,7 +22,8 @@ import { isEmptyArray } from "src/app/utility/utility";
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [SanitizeTrustedHtmlPipe],
 })
-export class TextElementComponent implements OnInit, AfterViewInit{
+export class TextElementComponent implements OnInit, AfterViewInit, OnDestroy {
+  private destroyed$ = new ReplaySubject(1);
   element = input<ReferenceTextAttribute>();
   formGroup = input<UntypedFormGroup | undefined>();
   text = signal<string | undefined>("");
@@ -30,7 +33,7 @@ export class TextElementComponent implements OnInit, AfterViewInit{
   }
 
   ngAfterViewInit(): void {
-      this.formGroup()?.valueChanges.subscribe((change) => {
+      this.formGroup()?.valueChanges.pipe(takeUntil(this.destroyed$)).subscribe((_) => {
       this.updateText();
     });
   }
@@ -49,5 +52,10 @@ export class TextElementComponent implements OnInit, AfterViewInit{
           return isEmptyArray(value) ? '' : JSON.stringify(value)?.replace(/^"(.*)"$/, '$1');
         })
       );
+  }
+
+  ngOnDestroy(): void {
+    this.destroyed$.next(true);
+    this.destroyed$.unsubscribe();
   }
 }
