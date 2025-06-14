@@ -190,6 +190,10 @@ export class FormLayoutComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
+  extractValues() {
+    
+  }
+
   ngOnDestroy(): void {
     this.destroyed$.next(true);
     this.destroyed$.unsubscribe();

@@ -86,6 +86,7 @@ export interface ReferenceAttribute {
   label: string;
   placeholder?: string;
   hint?: string;
+  dateFormat?: string;
   initialValue?: any;
   visibility?: AccessControls;
   editableLogic?: AccessControls;

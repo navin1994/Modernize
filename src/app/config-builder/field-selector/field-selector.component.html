@@ -46,7 +46,7 @@
     } @case (fieldTypes.DATE) {
     <!-- If field is input-date -->
     <input matInput [placeholder]="element.placeholder || ''" [matDatepicker]="picker" [formControl]="formField"
-        (dateChange)="emitChange($event)" (click)="picker.open()" />
+        (dateChange)="emitChange($event)" (click)="picker.open()" [appDateFormat]="element.dateFormat" />
     } @case (fieldTypes.PASSWORD) {
     <!-- If field is input-password -->
     <input type="password" [placeholder]="element.placeholder || ''" [formControl]="formField"

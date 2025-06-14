@@ -20,6 +20,56 @@ export class DiscloseFormComponent implements OnInit{
   config = signal<FormConfig>(attribute_editor);
   formGroup: UntypedFormGroup = new UntypedFormGroup({});
   missingDisclosure = false;
+  fullData = signal({
+    "ATTRIBUTE_ID": {
+        "id": 1,
+        "attribute_name": "season",
+        "attribute_type": "contraction"
+    },
+    "ATTRIBUTE_TYPE": {
+        "value": "input-autocomplete",
+        "label": "Autocomplete Input"
+    },
+    "ATTRIBUTE_LABEL": "Attribute Label Basic Input",
+    "ATTRIBUTE_COUNT": null,
+    "DATE": "2025-06-01T18:30:00.000Z",
+    "DATE_END": "2025-06-25T18:30:00.000Z",
+    "ATTRIBUTE_LABEL_RTE": "",
+    "USE_RICH_TEXT": null,
+    "TEXT_AREA": "Attribute TEXTAREA",
+    "ATTRIBUTE_INPUT_CHIPS": [
+        "Chips value1",
+        "Chips value 2"
+    ],
+    "ATTRIBUTE_RADIO": {
+        "value": "input-basic",
+        "label": "Text Field"
+    },
+    "ATTRIBUTE_SELECT_MULTIPLE": [
+        {
+            "value": "input-number",
+            "label": "Number"
+        },
+        {
+            "value": "input-select",
+            "label": "Select"
+        }
+    ],
+    "ATTRIBUTE_CHIPS_MULTI": [
+        "Autocomplete Input",
+        "Number"
+    ],
+    "ATTRIBUTE_CHECKBOX_GROUP": [
+        {
+            "value": "input-autocomplete",
+            "label": "Autocomplete Input"
+        },
+        {
+            "value": "input-number",
+            "label": "Number"
+        }
+    ]
+});
   status = UNSAVED;
 
   constructor(private title: Title) {}
@@ -30,5 +80,6 @@ export class DiscloseFormComponent implements OnInit{
       this.missingDisclosure = true;
     }
     this.formGroup = this.configBuilderService.setUpConfigFormGroup(new UntypedFormGroup({}), this.config());
+    // this.formGroup.patchValue(this.fullData())
   }
 }

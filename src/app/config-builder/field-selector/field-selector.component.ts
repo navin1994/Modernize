@@ -1,6 +1,5 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   computed,
   inject,
@@ -8,7 +7,6 @@ import {
   Input,
   OnInit,
   output,
-  signal,
 } from "@angular/core";
 import { AsyncPipe, CommonModule } from "@angular/common";
 import {
@@ -37,13 +35,14 @@ import { isEmptyArray } from "src/app/utility/utility";
 import { SanitizeTrustedHtmlPipe } from "src/app/pipes/sanitize-trusted-html.pipe";
 import { RichTextEditorComponent } from "src/app/config-builder/form-layout/form-elements/rich-text-editor/rich-text-editor.component";
 import { MatDatepickerModule } from "@angular/material/datepicker";
-import { provideNativeDateAdapter } from "@angular/material/core";
 import { ChipsInputComponent } from "src/app/config-builder/form-layout/form-elements/chips-input/chips-input.component";
 import { MatChipsModule } from "@angular/material/chips";
 import { SharedUtilityService } from "src/app/services/shared-utility.service";
 import { CheckboxGroupComponent } from "src/app/config-builder/form-layout/form-elements/checkbox-group/checkbox-group.component";
-import { PopoverModule, PopoverTemplate } from "@ngx-popovers/popover";
 import { MatMenuModule } from "@angular/material/menu";
+import { MAT_MOMENT_DATE_ADAPTER_OPTIONS, MatMomentDateModule, MomentDateAdapter } from "@angular/material-moment-adapter";
+import { AppDateFormatDirective } from "src/app/app-directives/app-date-format.directive";
+import { DateAdapter, MAT_DATE_LOCALE, provideNativeDateAdapter } from "@angular/material/core";
 
 @Component({
   selector: "app-field-selector",
@@ -66,12 +65,13 @@ import { MatMenuModule } from "@angular/material/menu";
     SanitizeTrustedHtmlPipe,
     RichTextEditorComponent,
     MatDatepickerModule,
+    MatMomentDateModule,
+    AppDateFormatDirective,
     ChipsInputComponent,
     MatChipsModule,
     CheckboxGroupComponent,
     MatMenuModule
   ],
-  providers: [provideNativeDateAdapter()],
 })
 export class FieldSelectorComponent implements OnInit {
   // inputs from parent component
@@ -82,7 +82,6 @@ export class FieldSelectorComponent implements OnInit {
   private sharedUtilityService = inject(SharedUtilityService);
   onChange = output<any>();
   isFormSubmitted = input<boolean>(false);
-  private cdr = inject(ChangeDetectorRef);
   // formStatus = input<string>();
 
   fieldTypes = FIELD_TYPES;
@@ -172,8 +171,8 @@ export class FieldSelectorComponent implements OnInit {
           const displayAttribute = mapping.label.split("|")[0];
           const isDynamicUrl = !!from.includes("{{}}");
           if (isDynamicUrl || isEmptyArray(this.dropdownOptions)) {
-            // this.dropdownOptions = await lastValueFrom(this.dataService.getFieldData(from));
-            this.dropdownOptions = [];
+            this.dropdownOptions = await lastValueFrom(this.dataService.getFieldData(from));
+            // this.dropdownOptions = [];
           }
           if (isOptWithoutFilter) {
             return this.dropdownOptions.slice();

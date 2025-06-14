@@ -188,8 +188,9 @@ export const attribute_editor: FormConfig = {
         DATE: {
           id: "DATE",
           type: FIELD_TYPES.DATE,
-          placeholder: "DD/MM/YYYY",
+          placeholder: "MMMM Do, YYYY",
           label: "Attribute DATE",
+          dateFormat: 'MMMM Do, YYYY',
           hint: "The popover content is very dynamic or needs to interact heavily with services without the constraints of mat-menu",
           validations: [
             {
@@ -219,10 +220,10 @@ export const attribute_editor: FormConfig = {
         DATE_END: {
           id: "DATE",
           type: FIELD_TYPES.DATE,
-          placeholder: "DD/MM/YYYY",
+          placeholder: "DD-MM-YYYY",
           label: "Attribute End DATE",
           hint: "This is for testing purpose",
-          
+          dateFormat: 'DD-MM-YYYY',
         },
         ATTRIBUTE_RADIO: {
           id: "ATTRIBUTE_RADIO",
