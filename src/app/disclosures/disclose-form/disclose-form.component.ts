@@ -82,4 +82,8 @@ export class DiscloseFormComponent implements OnInit{
     this.formGroup = this.configBuilderService.setUpConfigFormGroup(new UntypedFormGroup({}), this.config());
     // this.formGroup.patchValue(this.fullData())
   }
+
+  onSubmit($event: Record<string, any>) {
+    console.log('$event', $event);
+  }
 }

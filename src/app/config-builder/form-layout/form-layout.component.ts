@@ -214,7 +214,6 @@ export class FormLayoutComponent implements OnInit, OnChanges, OnDestroy {
       }
     }
     const parsedFormValues = this.parseFormValues();
-    console.log("parsedFormValues", parsedFormValues);
     this.submittedFormData.emit({formData: parsedFormValues, nextStatus, api});
   }
 
