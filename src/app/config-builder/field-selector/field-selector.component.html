@@ -1,5 +1,8 @@
 @if(hideLabel()){
 <mat-label class="f-w-600 m-b-8 d-block"><span [innerHTML]="element.label | sanitizeTrustedHtml"></span>
+    @if(isRequiredField()){
+        <span style="color: red;">*</span>
+    }
     @if(showEraser()) { &nbsp;<mat-icon matSuffix (click)="clearField($event)" color="warn"
         fontIcon="clear_all"></mat-icon>
     }</mat-label>
@@ -106,7 +109,7 @@
 
 <!-- this is for error section only -->
 @for (error of formField.errors | keyvalue; track error.key; let i = $index) {
-    @if(formField.touched && formField.invalid && isFormSubmitted()) {
+    @if(formField.invalid && formField.touched && isFormSubmitted()) {
         <div class="errorMsg">
             <mat-error>{{$index+1 +': '+error.value}}</mat-error>
         </div>

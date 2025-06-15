@@ -8,6 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import * as _moment from 'moment';
+import { DEFAULT_DATE_FORMAT } from '../models/constants';
 
 const moment = _moment;
 
@@ -18,7 +19,7 @@ const moment = _moment;
 export class AppDateFormatDirective {
   private el = inject(ElementRef<HTMLInputElement>);
   private renderer = inject(Renderer2);
-  private readonly defaultFormat = signal('DD-MM-YYYY');
+  private readonly defaultFormat = signal(DEFAULT_DATE_FORMAT);
   readonly appDateFormat = input<string|undefined>(this.defaultFormat());
 
   @HostListener('blur', ['$event'])

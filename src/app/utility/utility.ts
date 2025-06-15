@@ -69,8 +69,14 @@ export const areObjectsSame = (obj1: any, obj2: any): boolean => {
 };
 
 export const isObject = (input: any): boolean => {
-  return JSON.stringify(input)?.includes("{");
+  return JSON.stringify(input)?.startsWith("{");
 };
+
+export const isArrayOfObjects = (input: any): boolean => {
+  return JSON.stringify(input)?.startsWith("[{");
+};
+
+export const isObjectEmpty = (input: any): boolean => Object.keys(input).length == 0; 
 
 export const sortObjectByKeys = (obj: any) => {
   // Get all the keys from the object and sort them

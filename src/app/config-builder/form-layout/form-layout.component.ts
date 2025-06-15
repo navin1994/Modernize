@@ -7,6 +7,7 @@ import {
   OnChanges,
   OnDestroy,
   OnInit,
+  output,
   signal,
   SimpleChanges,
 } from "@angular/core";
@@ -17,15 +18,38 @@ import {
   ActionButton,
   ElementLayoutData,
   FormConfig,
+  ReferenceAttribute,
 } from "src/app/models/ui-form-config.interface";
-import { EDITABLE_LOGIC, UNSAVED, VISIBILITY } from "src/app/models/constants";
-import { areObjectsSame } from "src/app/utility/utility";
+import {
+  ARRAY,
+  ARRAY_OF_OBJECTS,
+  BOOLEAN,
+  DATE,
+  DEFAULT_DATE_FORMAT,
+  EDITABLE_LOGIC,
+  NULL,
+  NUMBER,
+  OBJECT,
+  UNDEFINED,
+  UNSAVED,
+  VISIBILITY,
+} from "src/app/models/constants";
+import {
+  areObjectsSame,
+  isArray,
+  isArrayOfObjects,
+  isBoolean,
+  isNumeric,
+  isObject,
+} from "src/app/utility/utility";
 import { CommonModule } from "@angular/common";
 import { TextElementComponent } from "./form-elements/text-element/text-element.component";
 import { ActionButtonComponent } from "./form-elements/action-buttons/action-buttons.component";
 import { ToastrService } from "ngx-toastr";
 import { ConfigBuilderService } from "../config-builder.service";
 import { ReplaySubject, takeUntil } from "rxjs";
+import { isDate } from "moment";
+import * as moment from "moment";
 
 @Component({
   selector: "app-form-layout",
@@ -46,8 +70,8 @@ export class FormLayoutComponent implements OnInit, OnChanges, OnDestroy {
   @Input({ required: true }) formGroup: UntypedFormGroup;
   @Input({ required: true }) config!: FormConfig;
   @Input() status = UNSAVED;
+  submittedFormData = output<Record<string, any>>();
   private toaster = inject(ToastrService);
-  private cdr = inject(ChangeDetectorRef);
   private configBuilderService = inject(ConfigBuilderService);
 
   // Signals for visibility layers and previous form value
@@ -173,25 +197,90 @@ export class FormLayoutComponent implements OnInit, OnChanges, OnDestroy {
     runValidation: boolean | undefined;
     api: string | undefined;
   }) {
-    const visibleControls = this.visibleLayers().flat(Infinity)
-    console.log("formData", this.formGroup.getRawValue());
+    const visibleControls = this.visibleLayers().flat(Infinity);
     if (!this.isFormSubmitted()) this.isFormSubmitted.set(true);
     if (runValidation) {
-     const isNotValid = visibleControls.some((item: any) => {
-        if (item?._refAttributes && this.formGroup.get(item._refAttributes)?.invalid) return true;
+      const isNotValid = visibleControls.some((item: any) => {
+        if (
+          item?._refAttributes &&
+          this.formGroup.get(item._refAttributes)?.invalid
+        )
+          return true;
         return false;
-      })
+      });
       if (isNotValid) {
         this.toaster.error("Invalid form details");
         return;
       }
-      console.log('Form is valid')
-      
     }
+    const parsedFormValues = this.parseFormValues();
+    console.log("parsedFormValues", parsedFormValues);
+    this.submittedFormData.emit({formData: parsedFormValues, nextStatus, api});
   }
 
-  extractValues() {
-    
+  parseFormValues() {
+    const formValues = this.formGroup.getRawValue() as Record<string, any>;
+    return Object.entries(formValues).reduce(
+      (acc, [attributeId, controlValue]) => {
+        const attributeConfig =
+          this.config.ui.references.attributes[attributeId];
+        const { dateFormat, get, staticSelection } = (attributeConfig ??
+          {}) as ReferenceAttribute;
+        const { mapping } = get ?? {};
+        const providedFormat = dateFormat ?? DEFAULT_DATE_FORMAT;
+        const dataType = this.getTypeOfData(controlValue);
+        switch (dataType) {
+          case ARRAY_OF_OBJECTS:
+            if (staticSelection) {
+              acc[attributeId] = controlValue.map(
+                (val: { [x: string]: any }) => val["value"]
+              );
+            } else if (mapping) {
+              acc[attributeId] = controlValue.map(
+                (val: { [x: string]: any }) => val[mapping.value]
+              );
+            } else {
+              acc[attributeId] = controlValue;
+            }
+            return acc;
+          case OBJECT:
+            if (staticSelection) {
+              acc[attributeId] = controlValue["value"];
+            } else if (mapping) {
+              acc[attributeId] = controlValue[mapping.value];
+            } else {
+              acc[attributeId] = controlValue;
+            }
+            return acc;
+          case DATE:
+            acc[attributeId] = moment(controlValue)
+              .format(providedFormat);
+            return acc;
+          case ARRAY:
+          case NUMBER:
+          case UNDEFINED:
+          case NULL:
+          case BOOLEAN:
+          default:
+            acc[attributeId] = controlValue;
+            return acc;
+        }
+      },
+      {} as Record<string, any>
+    );
+  }
+
+  getTypeOfData(data: any): string {
+    let type = "string";
+    if (isArrayOfObjects(data)) type = ARRAY_OF_OBJECTS;
+    else if (isArray(data)) type = ARRAY;
+    if (isObject(data)) type = OBJECT;
+    if (isBoolean(data)) type = BOOLEAN;
+    if (isDate(data)) type = DATE;
+    if (isNumeric(data)) type = NUMBER;
+    if (data === null) type = NULL;
+    if (data === undefined) type = UNDEFINED;
+    return type;
   }
 
   ngOnDestroy(): void {

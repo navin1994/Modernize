@@ -95,6 +95,7 @@ export class FieldSelectorComponent implements OnInit {
       this.element.type === this.fieldTypes.RADIO_BUTTON
     );
   });
+  isRequiredField = computed<boolean>(() => !!this.element?.validations?.find(x=> x._refValidation === 'required'));
   showClear = computed<boolean>(() => {
     return (
       this.formField.enabled &&
@@ -169,8 +170,8 @@ export class FieldSelectorComponent implements OnInit {
         } else if (this.element?.get) {
           const { from, mapping } = this.element.get;
           const displayAttribute = mapping.label.split("|")[0];
-          const isDynamicUrl = !!from.includes("{{}}");
-          if (isDynamicUrl || isEmptyArray(this.dropdownOptions)) {
+          const isDynamicUrl = !!from?.includes("{{}}");
+          if ((isDynamicUrl || isEmptyArray(this.dropdownOptions)) && from) {
             this.dropdownOptions = await lastValueFrom(this.dataService.getFieldData(from));
             // this.dropdownOptions = [];
           }
