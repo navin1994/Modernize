@@ -21,14 +21,13 @@ export class DiscloseFormComponent implements OnInit {
   formGroup: UntypedFormGroup = new UntypedFormGroup({});
   missingDisclosure = false;
   fullData = signal({
-    "ATTRIBUTE_ID": 2,
     "ATTRIBUTE_TYPE": "input-number",
-    "ATTRIBUTE_LABEL": "Attribute Label Basic Input",
+    "ATTRIBUTE_LABEL": "",
     "ATTRIBUTE_COUNT": 67,
     "DATE": "2025-06-09T18:30:00.000Z",
     "DATE_END": "2025-06-26T18:30:00.000Z",
-    "ATTRIBUTE_LABEL_RTE": "",
-    "USE_RICH_TEXT": null,
+    "ATTRIBUTE_LABEL_RTE": "This is test <span style=\"color: #e03e2d;\"><strong>data for reset for data</strong></span>",
+    "USE_RICH_TEXT": true,
     "TEXT_AREA": "Attribute TEXTAREA",
     "ATTRIBUTE_INPUT_CHIPS": [
         "Test chip 1",
@@ -49,14 +48,19 @@ export class DiscloseFormComponent implements OnInit {
     ],
     "ATTRIBUTE_TYPE_GET_SERVER_OPTIONS": [
         {
-            "id": 1,
+            "id": "1",
             "attribute_name": "scarf_length",
             "attribute_type": "sound"
         },
         {
-            "id": 2,
+            "id": "2",
             "attribute_name": "closure",
             "attribute_type": "buoyancy"
+        },
+        {
+            "id": "3",
+            "attribute_name": "western_boot_style",
+            "attribute_type": "excitation"
         }
     ],
     "ATTRIBUTE_SELECT_MULTIPLE_WITH_OBJECT_VALUE": [
@@ -87,7 +91,7 @@ export class DiscloseFormComponent implements OnInit {
       new UntypedFormGroup({}),
       this.config()
     );
-    // this.formGroup.patchValue(this.fullData());
+    this.formGroup.patchValue(this.fullData());
   }
 
   onSubmit($event: Record<string, any>) {

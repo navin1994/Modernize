@@ -20,23 +20,19 @@ export class SharedUtilityService {
         return display || "";
     }
 
-    public getDisplayLabel(option: any, element: ReferenceAttribute): string {
-        let display = this.displayFunction(option, element);
-        if (element?.get) {
-            const { mapping } = element.get;
-            const labels = mapping.label.split("|");
-            display = mapping
-                ? display +
-                (labels.slice(1)
-                    ? '. <small class="text-muted">' +
-                    labels
-                        .slice(1)
-                        .map((key: string) => option[key])
-                        .join(".") +
-                    "</small>"
-                    : "")
-                : option;
-        }
-        return display || "";
+public getDisplayLabel(option: any, element: ReferenceAttribute): string {
+  let display = this.displayFunction(option, element);
+
+  if (element?.get?.mapping?.label) {
+    const labels = element.get.mapping.label.split("|");
+    const extraLabels = labels.slice(1).map((key: string) => option[key]).join(".");
+
+    if (extraLabels) {
+      display += `. <small class="text-muted">${extraLabels}</small>`;
     }
+  }
+
+  return display || "";
+}
+
 }

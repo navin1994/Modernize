@@ -283,7 +283,7 @@ export const attribute_editor: FormConfig = {
           get: {
             from: "http://localhost:3000/options",
             mapping: {
-              label: "attribute_name"
+              label: "attribute_name|attribute_type"
             },
           },
         },
