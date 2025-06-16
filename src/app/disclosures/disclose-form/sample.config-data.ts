@@ -247,7 +247,7 @@ export const attribute_editor: FormConfig = {
           
         },
         ATTRIBUTE_CHIPS_MULTI: {
-          id: "ATTRIBUTE_RADIO",
+          id: "ATTRIBUTE_CHIPS_MULTI",
           type: FIELD_TYPES.CHIPS_SELECT,
           label: "Attribute CHIPS",
           direction: DIRECTION.HORIZONTAL,
@@ -257,6 +257,21 @@ export const attribute_editor: FormConfig = {
               { value: FIELD_TYPES.BASIC, label: "Text Field" },
               { value: FIELD_TYPES.AUTOCOMPLETE, label: "Autocomplete Input" },
               { value: FIELD_TYPES.NUMBER, label: "Number" }
+            ],
+          },
+          
+        },
+        ATTRIBUTE_CHIPS_MULTI_OBJECT_VALUE: {
+          id: "ATTRIBUTE_CHIPS_MULTI_OBJECT_VALUE",
+          type: FIELD_TYPES.CHIPS_SELECT,
+          label: "Attribute CHIPS Multi select with Object values",
+          direction: DIRECTION.HORIZONTAL,
+          multiple: true,
+          staticSelection: {
+            options: [
+              { value: { value: FIELD_TYPES.BASIC, label: "Text Field" }, label: "Text Field" },
+              { value: { value: FIELD_TYPES.AUTOCOMPLETE, label: "Autocomplete Input" }, label: "Autocomplete Input" },
+              { value: { value: FIELD_TYPES.NUMBER, label: "Number" }, label: "Number" }
             ],
           },
           
@@ -439,7 +454,7 @@ export const attribute_editor: FormConfig = {
       [{ _refAttributes: "ATTRIBUTE_RADIO" }, { _refAttributes: "ATTRIBUTE_SELECT_MULTIPLE" }],
       [{ _refAttributes: "ATTRIBUTE_CHIPS_MULTI" }, { _refAttributes: "ATTRIBUTE_CHECKBOX_GROUP" }],
       [{ _refAttributes: "ATTRIBUTE_TYPE_GET_SERVER_OPTIONS" }, {_refAttributes: "ATTRIBUTE_SELECT_MULTIPLE_WITH_OBJECT_VALUE"}],
-      [{_refAttributes: "ATTRIBUTE_SELECT_SINGLE_WITH_OBJECT_VALUE"}]
+      [{_refAttributes: "ATTRIBUTE_SELECT_SINGLE_WITH_OBJECT_VALUE"}, {_refAttributes: "ATTRIBUTE_CHIPS_MULTI_OBJECT_VALUE"}]
     ],
   },
   version_id: "ajadh83usdfbyHSYSB93nsjn",

@@ -218,7 +218,7 @@ export class FieldSelectorComponent implements OnInit {
   setOptions() {
     const type: FieldType = this.element?.type;
     const supportedTypes: FieldType[] = [
-      this.fieldTypes.AUTOCOMPLETE,
+      this.fieldTypes.CHIPS_SELECT,
       this.fieldTypes.SELECT,
       this.fieldTypes.RADIO_BUTTON,
       this.fieldTypes.CHECKBOX_GROUP,
@@ -240,6 +240,7 @@ export class FieldSelectorComponent implements OnInit {
       value: any,
       key: string = "label"
     ) => {
+      if (!value) return options.slice();
       const val = value?.toString()?.toLowerCase?.();
       return options.filter((opt) =>
         opt?.[key]?.toString()?.toLowerCase?.().includes(val)

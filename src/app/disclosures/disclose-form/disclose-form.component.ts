@@ -20,7 +20,9 @@ export class DiscloseFormComponent implements OnInit {
   config = signal<FormConfig>(attribute_editor);
   formGroup: UntypedFormGroup = new UntypedFormGroup({});
   missingDisclosure = false;
-  fullData = signal({
+  fullData = signal(
+    {
+    "ATTRIBUTE_ID": "3",
     "ATTRIBUTE_TYPE": "input-number",
     "ATTRIBUTE_LABEL": "",
     "ATTRIBUTE_COUNT": 67,
@@ -76,8 +78,13 @@ export class DiscloseFormComponent implements OnInit {
     "ATTRIBUTE_SELECT_SINGLE_WITH_OBJECT_VALUE": {
         "value": "input-password",
         "label": "Password"
-    }
-});
+    },
+    "ATTRIBUTE_CHIPS_MULTI_OBJECT_VALUE": [
+        "Autocomplete Input",
+        "Number"
+    ]
+}
+  );
   status = UNSAVED;
 
   constructor(private title: Title) {}
