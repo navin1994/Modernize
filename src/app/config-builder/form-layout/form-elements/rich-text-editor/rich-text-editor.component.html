@@ -1,15 +1,22 @@
 <!-- tiny mce -->
 @if(initEditor()) {
 <div class="mb-2">
-    <editor [init]="{
-        base_url: '/tinymce',
-        suffix: '.min',
-        browser_spellcheck: true,
-        menubar: false,
-        height: '200px'
-    }" [initialValue]="existingValue()" [spellcheck]="true" [inline]="false" [disabled]="isDisabled()"
-        (onBlur)="updateContent($event)" plugins="lists | link"
-        toolbar="undo redo | fontfamily fontsize | styles | forecolor backcolor | bold italic underline | bullist numlist | alignleft aligncenter alignright alignjustify outdent indent | link">
-    </editor>
+  <editor
+    [init]="{
+      base_url: '/tinymce',
+      suffix: '.min',
+      browser_spellcheck: true,
+      menubar: false,
+      height: '200px'
+    }"
+    [initialValue]="existingValue()"
+    [spellcheck]="true"
+    [inline]="false"
+    [disabled]="isDisabled()"
+    (onBlur)="updateContent($event)"
+    plugins="lists link"
+    toolbar="undo redo | fontfamily fontsize | styles | forecolor backcolor | bold italic underline | bullist numlist | alignleft aligncenter alignright alignjustify outdent indent | link"
+  >
+  </editor>
 </div>
 }
