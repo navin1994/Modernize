@@ -27,7 +27,7 @@ export const attribute_editor: FormConfig = {
           type: FIELD_TYPES.SELECT,
           multiple: false,
           label: "Attribute Type",
-          initialValue: { value: FIELD_TYPES.BASIC, label: "Text Field" },
+          initialValue: FIELD_TYPES.BASIC,
           staticSelection: {
             options: [
               { value: FIELD_TYPES.BASIC, label: "Text Field" },
@@ -56,7 +56,7 @@ export const attribute_editor: FormConfig = {
           type: FIELD_TYPES.SELECT,
           label: "Attribute Type multiple select",
           multiple: true,
-          // initialValue: { value: FIELD_TYPES.BASIC, label: "Text Field" },
+          initialValue: [FIELD_TYPES.BASIC],
           staticSelection: {
             options: [
               { value: FIELD_TYPES.BASIC, label: "Text Field" },
@@ -292,7 +292,7 @@ export const attribute_editor: FormConfig = {
           type: FIELD_TYPES.SELECT,
           label: "Attribute Type multiple select object value",
           multiple: true,
-          // initialValue: { value: FIELD_TYPES.BASIC, label: "Text Field" },
+          initialValue: [{ value: FIELD_TYPES.BASIC, label: "Text Field" }],
           staticSelection: {
             options: [
               { value: { value: FIELD_TYPES.BASIC, label: "Text Field" }, label: "Text Field" },
@@ -314,7 +314,7 @@ export const attribute_editor: FormConfig = {
           id: "ATTRIBUTE_SELECT_SINGLE_WITH_OBJECT_VALUE",
           type: FIELD_TYPES.SELECT,
           label: "Attribute Type single select object value",
-          // initialValue: { value: FIELD_TYPES.BASIC, label: "Text Field" },
+          initialValue: { value: FIELD_TYPES.BASIC, label: "Text Field" },
           staticSelection: {
             options: [
               { value: { value: FIELD_TYPES.BASIC, label: "Text Field" }, label: "Text Field" },

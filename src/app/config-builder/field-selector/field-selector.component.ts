@@ -293,4 +293,8 @@ export class FieldSelectorComponent implements OnInit {
     this.onChange.emit($event);
     $event.stopPropagation();
   }
+
+  setErrorMessage(errorMsg: any) :string {
+    return JSON.stringify(errorMsg)?.replace(/^"(.*)"$/, "$1");
+  }
 }

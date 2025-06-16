@@ -40,6 +40,10 @@ export class AppDateFormatDirective implements OnInit{
   formatDate() {
     const raw = this.el.nativeElement.value;
     const parsed = moment(raw).format(this.appDateFormat());
-    this.renderer.setProperty(this.el.nativeElement, 'value', parsed);
+    parsed === 'Invalid date' ? this.setValue('') : this.setValue(parsed);
+  }
+
+  setValue(input: any) {
+    this.renderer.setProperty(this.el.nativeElement, 'value', input);
   }
 }

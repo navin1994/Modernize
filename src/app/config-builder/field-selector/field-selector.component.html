@@ -111,7 +111,7 @@
 @for (error of formField.errors | keyvalue; track error.key; let i = $index) {
     @if(formField.invalid && formField.touched && isFormSubmitted()) {
         <div class="errorMsg">
-            <mat-error>{{$index+1 +': '+error.value}}</mat-error>
+            <mat-error>{{$index+1 +': '+setErrorMessage(error.value)}}</mat-error>
         </div>
     }
         
