@@ -284,8 +284,8 @@ export class ConfigBuilderService {
     if (isObject(data) && sourceAttribute) {
       const attributeConfig = config.ui.references.attributes[sourceAttribute];
       let valueKey = "value";
-      if (attributeConfig?.get) {
-        valueKey = attributeConfig.get.mapping.value;
+      if (attributeConfig?.get && attributeConfig.get?.mapping && attributeConfig.get.mapping.value) {
+          valueKey = attributeConfig.get.mapping.value;
       }
       return this.getDataByType(data[valueKey], config);
     }

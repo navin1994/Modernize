@@ -4,6 +4,7 @@ import {
   HostListener,
   inject,
   input,
+  OnInit,
   Renderer2,
   signal,
 } from '@angular/core';
@@ -16,11 +17,15 @@ const moment = _moment;
   selector: '[appDateFormat]',
   standalone: true,
 })
-export class AppDateFormatDirective {
+export class AppDateFormatDirective implements OnInit{
   private el = inject(ElementRef<HTMLInputElement>);
   private renderer = inject(Renderer2);
   private readonly defaultFormat = signal(DEFAULT_DATE_FORMAT);
   readonly appDateFormat = input<string|undefined>(this.defaultFormat());
+
+  ngOnInit(): void {
+      this.formatDate();
+  }
 
   @HostListener('blur', ['$event'])
   onBlur(event: Event): void {

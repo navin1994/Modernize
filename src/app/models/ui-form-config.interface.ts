@@ -101,7 +101,7 @@ export interface GetServerRequest {
   from: string; // The URL from which to fetch data
   mapping: {
     label: string; // The name of the property to use as the label in UI
-    value: string; // The name of the property to use as the value in UI
+    value?: string; // The name of the property to use as the value in UI
   };
 }
 export const DIRECTION = {
@@ -112,7 +112,7 @@ export const DIRECTION = {
 export type DirectionType = (typeof DIRECTION)[keyof typeof DIRECTION];
 export interface StaticSelection {
   options: {
-    value: string;
+    value: any;
     label: string;
   }[];
 }

@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, inject, input, Input, OnDestroy, OnInit, output, signal } from '@angular/core';
-import { FormControl, UntypedFormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { MatCheckboxChange, MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { combineLatest, ReplaySubject, takeUntil } from 'rxjs';

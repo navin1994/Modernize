@@ -234,9 +234,9 @@ export class FormLayoutComponent implements OnInit, OnChanges, OnDestroy {
               acc[attributeId] = controlValue.map(
                 (val: { [x: string]: any }) => val["value"]
               );
-            } else if (mapping) {
+            } else if (mapping?.value) {
               acc[attributeId] = controlValue.map(
-                (val: { [x: string]: any }) => val[mapping.value]
+                (val: { [x: string]: any }) => val[mapping.value as string]
               );
             } else {
               acc[attributeId] = controlValue;
@@ -245,7 +245,7 @@ export class FormLayoutComponent implements OnInit, OnChanges, OnDestroy {
           case OBJECT:
             if (staticSelection) {
               acc[attributeId] = controlValue["value"];
-            } else if (mapping) {
+            } else if (mapping?.value) {
               acc[attributeId] = controlValue[mapping.value];
             } else {
               acc[attributeId] = controlValue;

@@ -1,0 +1,29 @@
+{
+    "options": [
+    {
+        "id": 1,
+        "attribute_name": "scarf_length",
+        "attribute_type": "sound"
+    },
+    {
+        "id": 2,
+        "attribute_name": "closure",
+        "attribute_type": "buoyancy"
+    },
+    {
+        "id": 3,
+        "attribute_name": "western_boot_style",
+        "attribute_type": "excitation"
+    },
+    {
+        "id": 4,
+        "attribute_name": "hiking_boot_style",
+        "attribute_type": "color"
+    },
+    {
+        "id": 5,
+        "attribute_name": "stretch",
+        "attribute_type": "oxidation"
+    }
+]
+}

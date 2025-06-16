@@ -14,7 +14,7 @@ export const attribute_editor: FormConfig = {
           hint: "Select attribute id from this <b>field<b>",
           placeholder: "Attribute ID",
           get: {
-            from: "https://my.api.mockaroo.com/attribute_list.json?key=1e24b6b0",
+            from: "http://localhost:3000/options",
             mapping: {
               label: "attribute_name|attribute_type",
               value: "id",
@@ -266,6 +266,7 @@ export const attribute_editor: FormConfig = {
           direction: DIRECTION.HORIZONTAL,
           type: FIELD_TYPES.CHECKBOX_GROUP,
           label: "Attribute Checkbox Group",
+          multiple: true,
           staticSelection: {
             options: [
               { value: FIELD_TYPES.BASIC, label: "Text Field" },
@@ -273,9 +274,64 @@ export const attribute_editor: FormConfig = {
               { value: FIELD_TYPES.NUMBER, label: "Number" }
             ],
           },
+        },
+        ATTRIBUTE_TYPE_GET_SERVER_OPTIONS: {
+          id: "ATTRIBUTE_TYPE_GET_SERVER_OPTIONS",
+          type: FIELD_TYPES.SELECT,
+          multiple: true,
+          label: "Options from API call with multiple select",
+          get: {
+            from: "http://localhost:3000/options",
+            mapping: {
+              label: "attribute_name"
+            },
+          },
+        },
+        ATTRIBUTE_SELECT_MULTIPLE_WITH_OBJECT_VALUE: {
+          id: "ATTRIBUTE_SELECT_MULTIPLE_WITH_OBJECT_VALUE",
+          type: FIELD_TYPES.SELECT,
+          label: "Attribute Type multiple select object value",
+          multiple: true,
+          // initialValue: { value: FIELD_TYPES.BASIC, label: "Text Field" },
+          staticSelection: {
+            options: [
+              { value: { value: FIELD_TYPES.BASIC, label: "Text Field" }, label: "Text Field" },
+              { value: { value: FIELD_TYPES.AUTOCOMPLETE, label: "Autocomplete Input" }, label: "Autocomplete Input" },
+              { value: { value: FIELD_TYPES.NUMBER, label: "Number" }, label: "Number" },
+              { value: { value: FIELD_TYPES.SELECT, label: "Select" }, label: "Select" },
+              { value: { value: FIELD_TYPES.TEXTAREA, label: "Text Area" }, label: "Text Area" },
+              { value: { value: FIELD_TYPES.DATE, label: "Date" }, label: "Date" },
+              { value: { value: FIELD_TYPES.CHIPS_INPUT, label: "Chips Input" }, label: "Chips Input" },
+              { value: { value: FIELD_TYPES.CHIPS_SELECT, label: "Chips Select" }, label: "Chips Select" },
+              { value: { value: FIELD_TYPES.RADIO_BUTTON, label: "Radio Buttons" }, label: "Radio Buttons" },
+              { value: { value: FIELD_TYPES.CHECKBOX, label: "Checkbox" }, label: "Checkbox" },
+              { value: { value: FIELD_TYPES.PASSWORD, label: "Password" }, label: "Password" },
+            ],
+          },
           
         },
-      
+        ATTRIBUTE_SELECT_SINGLE_WITH_OBJECT_VALUE: {
+          id: "ATTRIBUTE_SELECT_SINGLE_WITH_OBJECT_VALUE",
+          type: FIELD_TYPES.SELECT,
+          label: "Attribute Type single select object value",
+          // initialValue: { value: FIELD_TYPES.BASIC, label: "Text Field" },
+          staticSelection: {
+            options: [
+              { value: { value: FIELD_TYPES.BASIC, label: "Text Field" }, label: "Text Field" },
+              { value: { value: FIELD_TYPES.AUTOCOMPLETE, label: "Autocomplete Input" }, label: "Autocomplete Input" },
+              { value: { value: FIELD_TYPES.NUMBER, label: "Number" }, label: "Number" },
+              { value: { value: FIELD_TYPES.SELECT, label: "Select" }, label: "Select" },
+              { value: { value: FIELD_TYPES.TEXTAREA, label: "Text Area" }, label: "Text Area" },
+              { value: { value: FIELD_TYPES.DATE, label: "Date" }, label: "Date" },
+              { value: { value: FIELD_TYPES.CHIPS_INPUT, label: "Chips Input" }, label: "Chips Input" },
+              { value: { value: FIELD_TYPES.CHIPS_SELECT, label: "Chips Select" }, label: "Chips Select" },
+              { value: { value: FIELD_TYPES.RADIO_BUTTON, label: "Radio Buttons" }, label: "Radio Buttons" },
+              { value: { value: FIELD_TYPES.CHECKBOX, label: "Checkbox" }, label: "Checkbox" },
+              { value: { value: FIELD_TYPES.PASSWORD, label: "Password" }, label: "Password" },
+            ],
+          },
+          
+        },
       },
       validations: {
         required: {
@@ -382,6 +438,8 @@ export const attribute_editor: FormConfig = {
       [{ _refAttributes: "TEXT_AREA" }, { _refAttributes: "ATTRIBUTE_INPUT_CHIPS" }],
       [{ _refAttributes: "ATTRIBUTE_RADIO" }, { _refAttributes: "ATTRIBUTE_SELECT_MULTIPLE" }],
       [{ _refAttributes: "ATTRIBUTE_CHIPS_MULTI" }, { _refAttributes: "ATTRIBUTE_CHECKBOX_GROUP" }],
+      [{ _refAttributes: "ATTRIBUTE_TYPE_GET_SERVER_OPTIONS" }, {_refAttributes: "ATTRIBUTE_SELECT_MULTIPLE_WITH_OBJECT_VALUE"}],
+      [{_refAttributes: "ATTRIBUTE_SELECT_SINGLE_WITH_OBJECT_VALUE"}]
     ],
   },
   version_id: "ajadh83usdfbyHSYSB93nsjn",

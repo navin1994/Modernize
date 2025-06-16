@@ -15,7 +15,12 @@ import {
   ReactiveFormsModule,
   FormsModule,
 } from "@angular/forms";
-import { switchMap, startWith, debounceTime, distinctUntilChanged } from "rxjs/operators";
+import {
+  switchMap,
+  startWith,
+  debounceTime,
+  distinctUntilChanged,
+} from "rxjs/operators";
 import {
   DIRECTION,
   FIELD_TYPES,
@@ -29,7 +34,7 @@ import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatRadioModule } from "@angular/material/radio";
 import { MatAutocompleteModule } from "@angular/material/autocomplete";
 import { MatIconModule } from "@angular/material/icon";
-import { lastValueFrom, Observable } from "rxjs";
+import { defer, lastValueFrom, Observable } from "rxjs";
 import { DataService } from "src/app/services/data.service";
 import { isEmptyArray } from "src/app/utility/utility";
 import { SanitizeTrustedHtmlPipe } from "src/app/pipes/sanitize-trusted-html.pipe";
@@ -40,9 +45,8 @@ import { MatChipsModule } from "@angular/material/chips";
 import { SharedUtilityService } from "src/app/services/shared-utility.service";
 import { CheckboxGroupComponent } from "src/app/config-builder/form-layout/form-elements/checkbox-group/checkbox-group.component";
 import { MatMenuModule } from "@angular/material/menu";
-import { MAT_MOMENT_DATE_ADAPTER_OPTIONS, MatMomentDateModule, MomentDateAdapter } from "@angular/material-moment-adapter";
+import { MatMomentDateModule } from "@angular/material-moment-adapter";
 import { AppDateFormatDirective } from "src/app/app-directives/app-date-format.directive";
-import { DateAdapter, MAT_DATE_LOCALE, provideNativeDateAdapter } from "@angular/material/core";
 
 @Component({
   selector: "app-field-selector",
@@ -70,7 +74,7 @@ import { DateAdapter, MAT_DATE_LOCALE, provideNativeDateAdapter } from "@angular
     ChipsInputComponent,
     MatChipsModule,
     CheckboxGroupComponent,
-    MatMenuModule
+    MatMenuModule,
   ],
 })
 export class FieldSelectorComponent implements OnInit {
@@ -95,7 +99,10 @@ export class FieldSelectorComponent implements OnInit {
       this.element.type === this.fieldTypes.RADIO_BUTTON
     );
   });
-  isRequiredField = computed<boolean>(() => !!this.element?.validations?.find(x=> x._refValidation === 'required'));
+  isRequiredField = computed<boolean>(
+    () =>
+      !!this.element?.validations?.find((x) => x._refValidation === "required")
+  );
   showClear = computed<boolean>(() => {
     return (
       this.formField.enabled &&
@@ -113,7 +120,7 @@ export class FieldSelectorComponent implements OnInit {
       this.fieldTypes.RADIO_BUTTON,
       this.fieldTypes.CHIPS_INPUT,
       this.fieldTypes.CHIPS_SELECT,
-      this.fieldTypes.CHECKBOX_GROUP
+      this.fieldTypes.CHECKBOX_GROUP,
     ];
     return !fields.includes(this.element.type);
   });
@@ -123,7 +130,7 @@ export class FieldSelectorComponent implements OnInit {
   }
 
   initField(): void {
-    if (this.element?.initialValue) {
+    if (!this.formField.value && this.element?.initialValue) {
       this.formField.setValue(this.element.initialValue);
     }
     switch (this.element.type) {
@@ -137,60 +144,139 @@ export class FieldSelectorComponent implements OnInit {
         this.setOptions();
         break;
     }
+    // setTimeout(() => this.setValue(), 6000);
   }
 
   emitChange($event: any): void {
     this.onChange.emit($event);
   }
 
+  setValue() {
+    const fieldType: FieldType = this.element.type;
+    const supportedTypes: FieldType[] = [
+      this.fieldTypes.AUTOCOMPLETE,
+      this.fieldTypes.SELECT,
+      this.fieldTypes.RADIO_BUTTON,
+      this.fieldTypes.CHECKBOX_GROUP,
+    ];
+
+    if (!supportedTypes.includes(fieldType)) return;
+
+    const { staticSelection, multiple, get } = this.element;
+    const currentValue = this.formField.value;
+
+    // Utility to safely stringify values
+    const normalize = (val: any): string => {
+      try {
+        return JSON.stringify(val);
+      } catch {
+        return String(val);
+      }
+    };
+
+    // Handle static options
+    if (staticSelection?.options) {
+      const options = staticSelection.options;
+
+      if (multiple && Array.isArray(currentValue)) {
+        const valueSet = new Set(currentValue.map(normalize));
+        const matched = options.filter((opt) =>
+          valueSet.has(normalize(opt?.value ?? opt))
+        );
+        this.formField.setValue(matched);
+      } else {
+        const match = options.find(
+          (opt) => normalize(opt?.value ?? opt) === normalize(currentValue)
+        );
+        this.formField.setValue(match);
+      }
+
+      // Handle dynamic options (get.mapping)
+    } else if (get && Array.isArray(this.dropdownOptions)) {
+      const { mapping } = get;
+
+      const extractMapped = (val: any) =>
+        mapping?.value ? val?.[mapping.value] : val;
+
+      if (multiple && Array.isArray(currentValue)) {
+        const valueSet = new Set(
+          currentValue.map((v) => normalize(extractMapped(v)))
+        );
+        const matched = this.dropdownOptions.filter((opt) =>
+          valueSet.has(normalize(extractMapped(opt)))
+        );
+        this.formField.setValue(matched);
+      } else {
+        const match = this.dropdownOptions.find(
+          (opt) => normalize(extractMapped(opt)) === normalize(currentValue)
+        );
+        this.formField.setValue(match);
+      }
+    }
+  }
+
   setOptions() {
-    const fieldsTypes: FieldType[] = [this.fieldTypes.SELECT, this.fieldTypes.RADIO_BUTTON, this.fieldTypes.CHIPS_SELECT, this.fieldTypes.CHECKBOX_GROUP];
-    const isOptWithoutFilter = fieldsTypes.includes(this.element.type);
-    this.formField.setValue([]);
+    const type: FieldType = this.element?.type;
+    const supportedTypes: FieldType[] = [
+      this.fieldTypes.AUTOCOMPLETE,
+      this.fieldTypes.SELECT,
+      this.fieldTypes.RADIO_BUTTON,
+      this.fieldTypes.CHECKBOX_GROUP,
+    ];
+    const isOptWithoutFilter = supportedTypes.includes(type);
+    const isAutocomplete = type === this.fieldTypes.AUTOCOMPLETE;
+    const isStatic = !!this.element?.staticSelection;
+    const isRemote = !!this.element?.get;
+
+    const optionsFromStatic = this.element?.staticSelection?.options || [];
+    const { from, mapping } = this.element?.get || {};
+    const displayAttr = mapping?.label?.split("|")[0];
+    const isDynamicUrl = !!from?.includes("{{}}");
+
     this.displayFn = this.displayFunction.bind(this);
-    this.filteredOptions$ = this.formField.valueChanges.pipe(
-      debounceTime(500),
-      distinctUntilChanged(),
-      startWith(""),
-      switchMap(async (value: any) => {
-        if (this.element?.staticSelection) {
-          const { options } = this.element.staticSelection;
-          if (isOptWithoutFilter) {
-            return options.slice();
-          } else if (this.fieldTypes.AUTOCOMPLETE === this.element.type) {
-            return (
-              options.filter((opt) =>
-                opt.label
-                  .toString()
-                  .toLowerCase()
-                  .includes(value.toString().toLowerCase())
-              ) || options.slice()
-            );
-          }
-        } else if (this.element?.get) {
-          const { from, mapping } = this.element.get;
-          const displayAttribute = mapping.label.split("|")[0];
-          const isDynamicUrl = !!from?.includes("{{}}");
-          if ((isDynamicUrl || isEmptyArray(this.dropdownOptions)) && from) {
-            this.dropdownOptions = await lastValueFrom(this.dataService.getFieldData(from));
-            // this.dropdownOptions = [];
-          }
-          if (isOptWithoutFilter) {
-            return this.dropdownOptions.slice();
-          } else if (this.fieldTypes.AUTOCOMPLETE === this.element.type) {
-            return (
-              this.dropdownOptions.filter((opt: any) =>
-                opt[displayAttribute]
-                  .toString()
-                  .toLowerCase()
-                  .includes(value.toString().toLowerCase())
-              ) || this.dropdownOptions.slice()
-            );
-          }
+
+    const filterOptions = (
+      options: any[],
+      value: any,
+      key: string = "label"
+    ) => {
+      const val = value?.toString()?.toLowerCase?.();
+      return options.filter((opt) =>
+        opt?.[key]?.toString()?.toLowerCase?.().includes(val)
+      );
+    };
+
+  let setValueCalled = false;
+
+  const handleOptions = async (source: any[], value: any, key?: string) => {
+    if (!setValueCalled) {
+      this.setValue();
+      setValueCalled = true;
+    }
+    if (isOptWithoutFilter) return source.slice();
+    if (isAutocomplete) return filterOptions(source, value, key);
+    return [];
+  };
+
+  this.filteredOptions$ = this.formField.valueChanges.pipe(
+    startWith(""),
+    debounceTime(300),
+    distinctUntilChanged(),
+    switchMap((value: any) => defer(async () => {
+      if (isStatic) {
+        return handleOptions(optionsFromStatic, value);
+      }
+
+      if (isRemote && from) {
+        if ((isDynamicUrl || isEmptyArray(this.dropdownOptions))) {
+          this.dropdownOptions = await lastValueFrom(this.dataService.getFieldData(from));
         }
-        return [];
-      })
-    );
+        return handleOptions(this.dropdownOptions, value, displayAttr);
+      }
+
+      return [];
+    }))
+  );
   }
 
   displayFunction(option: any) {
@@ -207,5 +293,4 @@ export class FieldSelectorComponent implements OnInit {
     this.onChange.emit($event);
     $event.stopPropagation();
   }
-
 }
