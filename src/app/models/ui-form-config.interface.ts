@@ -12,6 +12,8 @@ export const FIELD_TYPES = {
   RADIO_BUTTON: "input-radio",
   CHECKBOX: "input-checkbox",
   CHECKBOX_GROUP: "input-checkbox-group",
+  FORM_GROUP: "form-group",
+  FORM_ARRAY: "form-array",
   PASSWORD: "input-password",
 } as const;
 
@@ -95,6 +97,8 @@ export interface ReferenceAttribute {
   multiple?: boolean;
   get?: GetServerRequest;
   validations?: Validation[];
+  formGroupVersionId?: string;
+  formArrayAttributes?: ReferenceAttribute[]|string[];/** versionId array if formGroups */
 }
 
 export interface GetServerRequest {

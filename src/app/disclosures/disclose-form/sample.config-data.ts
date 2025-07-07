@@ -20,7 +20,11 @@ export const attribute_editor: FormConfig = {
               value: "id",
             },
           },
-          
+          validations: [
+            {
+              _refValidation: "required"
+            }
+          ]
         },
         ATTRIBUTE_TYPE: {
           id: "ATTRIBUTE_TYPE",
@@ -72,6 +76,11 @@ export const attribute_editor: FormConfig = {
               { value: FIELD_TYPES.PASSWORD, label: "Password" },
             ],
           },
+          validations: [
+            {
+              _refValidation: "required"
+            }
+          ]
           
         },
         ATTRIBUTE_LABEL: {
@@ -145,7 +154,11 @@ export const attribute_editor: FormConfig = {
           type: FIELD_TYPES.NUMBER,
           label: "Attribute Count",
           hint: "This is for testing purpose",
-          
+          validations: [
+            {
+              _refValidation: "required"
+            }
+          ]
         },
         ATTRIBUTE_LABEL_RTE: {
           id: "ATTRIBUTE_LABEL_RTE",
@@ -170,20 +183,32 @@ export const attribute_editor: FormConfig = {
               ]
             ]
           },
-          
+          validations: [
+            {
+              _refValidation: "required"
+            }
+          ]
         },
         USE_RICH_TEXT: {
           id: "USE_RICH_TEXT",
           type: FIELD_TYPES.CHECKBOX,
           label: "Use reach text editor for label",
-          
+          validations: [
+            {
+              _refValidation: "required"
+            }
+          ]
         },
         TEXT_AREA: {
           id: "TEXT_AREA",
           type: FIELD_TYPES.TEXTAREA,
           label: "Attribute TEXTAREA",
           hint: "This is for testing purpose",
-          
+          validations: [
+            {
+              _refValidation: "required"
+            }
+          ]
         },
         DATE: {
           id: "DATE",
@@ -214,7 +239,7 @@ export const attribute_editor: FormConfig = {
                   ],
               }
             }
-          ]
+          ],
           
         },
         DATE_END: {
@@ -224,6 +249,11 @@ export const attribute_editor: FormConfig = {
           label: "Attribute End DATE",
           hint: "This is for testing purpose",
           dateFormat: 'DD-MM-YYYY',
+          validations: [
+            {
+              _refValidation: "required"
+            }
+          ]
         },
         ATTRIBUTE_RADIO: {
           id: "ATTRIBUTE_RADIO",
@@ -237,14 +267,22 @@ export const attribute_editor: FormConfig = {
               { value: FIELD_TYPES.NUMBER, label: "Number" }
             ],
           },
-          
+          validations: [
+            {
+              _refValidation: "required"
+            }
+          ]
         },
         ATTRIBUTE_INPUT_CHIPS: {
           id: "ATTRIBUTE_INPUT_CHIPS",
           type: FIELD_TYPES.CHIPS_INPUT,
           label: "Attribute Chips Input",
           hint: "This is for testing purpose",
-          
+          validations: [
+            {
+              _refValidation: "required"
+            }
+          ]
         },
         ATTRIBUTE_CHIPS_MULTI: {
           id: "ATTRIBUTE_CHIPS_MULTI",
@@ -259,7 +297,11 @@ export const attribute_editor: FormConfig = {
               { value: FIELD_TYPES.NUMBER, label: "Number" }
             ],
           },
-          
+          validations: [
+            {
+              _refValidation: "required"
+            }
+          ]
         },
         ATTRIBUTE_CHIPS_MULTI_OBJECT_VALUE: {
           id: "ATTRIBUTE_CHIPS_MULTI_OBJECT_VALUE",
@@ -274,7 +316,11 @@ export const attribute_editor: FormConfig = {
               { value: { value: FIELD_TYPES.NUMBER, label: "Number" }, label: "Number" }
             ],
           },
-          
+          validations: [
+            {
+              _refValidation: "required"
+            }
+          ]
         },
         ATTRIBUTE_CHECKBOX_GROUP: {
           id: "ATTRIBUTE_CHECKBOX_GROUP",
@@ -289,6 +335,11 @@ export const attribute_editor: FormConfig = {
               { value: FIELD_TYPES.NUMBER, label: "Number" }
             ],
           },
+          validations: [
+            {
+              _refValidation: "required"
+            }
+          ]
         },
         ATTRIBUTE_TYPE_GET_SERVER_OPTIONS: {
           id: "ATTRIBUTE_TYPE_GET_SERVER_OPTIONS",
@@ -301,6 +352,11 @@ export const attribute_editor: FormConfig = {
               label: "attribute_name|attribute_type"
             },
           },
+          validations: [
+            {
+              _refValidation: "required"
+            }
+          ]
         },
         ATTRIBUTE_SELECT_MULTIPLE_WITH_OBJECT_VALUE: {
           id: "ATTRIBUTE_SELECT_MULTIPLE_WITH_OBJECT_VALUE",
@@ -323,7 +379,11 @@ export const attribute_editor: FormConfig = {
               { value: { value: FIELD_TYPES.PASSWORD, label: "Password" }, label: "Password" },
             ],
           },
-          
+          validations: [
+            {
+              _refValidation: "required"
+            }
+          ]
         },
         ATTRIBUTE_SELECT_SINGLE_WITH_OBJECT_VALUE: {
           id: "ATTRIBUTE_SELECT_SINGLE_WITH_OBJECT_VALUE",
@@ -345,8 +405,13 @@ export const attribute_editor: FormConfig = {
               { value: { value: FIELD_TYPES.PASSWORD, label: "Password" }, label: "Password" },
             ],
           },
-          
+          validations: [
+            {
+              _refValidation: "required"
+            }
+          ]
         },
+        
       },
       validations: {
         required: {

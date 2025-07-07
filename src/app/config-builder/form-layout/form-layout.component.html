@@ -39,7 +39,7 @@
     <div class="col">
       <app-action-buttons
         [buttonsConfig]="{justification: this.config.ui.actions.justification, buttons: this.visibleActionButton}"
-        (onSubmit)="submit($event)"
+        (onClick)="submit($event)"
         ></app-action-buttons>
     </div>
   </mat-card-content>

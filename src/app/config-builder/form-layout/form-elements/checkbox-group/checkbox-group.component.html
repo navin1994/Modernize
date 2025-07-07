@@ -1,5 +1,5 @@
 @for (option of options(); track option) {
     <mat-checkbox class="mb-2" [disabled]="disabled()" [class]="element().direction === direction.VERTICAL ? 'vertical-print' : ''" [checked]="this.formFieldControl.value?.includes(option)" (change)="onChange($event, option)">
-        <strong><span [innerHTML]="getDisplayLabel(option) | sanitizeTrustedHtml"></span></strong>
+        <span [innerHTML]="getDisplayLabel(option) | sanitizeTrustedHtml"></span>
     </mat-checkbox>
 }

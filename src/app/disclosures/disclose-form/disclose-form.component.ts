@@ -19,7 +19,7 @@ export class DiscloseFormComponent implements OnInit {
   private configBuilderService = inject(ConfigBuilderService);
   config = signal<FormConfig>(attribute_editor);
   formGroup: UntypedFormGroup = new UntypedFormGroup({});
-  missingDisclosure = false;
+  missingDisclosure = signal<boolean>(false);
   fullData = signal(
     {
     "ATTRIBUTE_ID": "3",
@@ -92,7 +92,7 @@ export class DiscloseFormComponent implements OnInit {
   ngOnInit(): void {
     this.title.setTitle(this.config().disclosure_name);
     if (!this.config()) {
-      this.missingDisclosure = true;
+      this.missingDisclosure.set(true);
     }
     this.formGroup = this.configBuilderService.setUpConfigFormGroup(
       new UntypedFormGroup({}),

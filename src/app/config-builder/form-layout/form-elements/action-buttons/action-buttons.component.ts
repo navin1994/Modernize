@@ -16,12 +16,12 @@ import { ActionButton, Justification } from "src/app/models/ui-form-config.inter
 })
 
 export class ActionButtonComponent {
-    @Output() onSubmit = new EventEmitter<{nextStatus: string | undefined; runValidation: boolean | undefined; api: string | undefined}>();
+    @Output() onClick = new EventEmitter<{nextStatus: string | undefined; runValidation: boolean | undefined; api: string | undefined}>();
     buttonsConfig = input<{justification: Justification, buttons: Signal<ActionButton[]>}>();
 
     submit(btnObj: ActionButton) {
         const {nextStatus, runValidation, api} = btnObj;
         // WIP: managing confirmationText dialog in this function
-        this.onSubmit.emit({ nextStatus, runValidation, api });
+        this.onClick.emit({ nextStatus, runValidation, api });
     }
 }

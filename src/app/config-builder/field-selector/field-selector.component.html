@@ -1,7 +1,7 @@
 @if(hideLabel()){
 <mat-label class="f-w-600 m-b-8 d-block"><span [innerHTML]="element.label | sanitizeTrustedHtml"></span>
     @if(isRequiredField()){
-        <span style="color: red;">*</span>
+        <span class="text-danger">*</span>
     }
     @if(showEraser()) { &nbsp;<mat-icon matSuffix (click)="clearField($event)" color="warn"
         fontIcon="clear_all"></mat-icon>
@@ -64,7 +64,9 @@
 } @else if (fieldTypes.CHECKBOX === element.type) {
 <!-- If field is input-checkbox -->
 <mat-checkbox class="mb-2" [formControl]="formField" (change)="emitChange($event)">
-    <strong><span [innerHTML]="element.label | sanitizeTrustedHtml"></span></strong>
+    <span [innerHTML]="element.label | sanitizeTrustedHtml"></span>@if(isRequiredField()){
+        &nbsp;<span class="text-danger">*</span>
+    }
 </mat-checkbox>
 } @else if (fieldTypes.RICH_TEXT === element.type) {
 <!-- If field is rich-text -->
