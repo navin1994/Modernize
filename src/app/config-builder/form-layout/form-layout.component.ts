@@ -1,14 +1,18 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  forwardRef,
   inject,
+  input,
   Input,
   OnChanges,
   OnDestroy,
   OnInit,
   output,
+  QueryList,
   signal,
   SimpleChanges,
+  ViewChildren
 } from "@angular/core";
 import { UntypedFormGroup } from "@angular/forms";
 import { MatCardModule } from "@angular/material/card";
@@ -16,6 +20,7 @@ import { FieldSelectorComponent } from "../field-selector/field-selector.compone
 import {
   ActionButton,
   ElementLayoutData,
+  FIELD_TYPES,
   FormConfig,
   ReferenceAttribute,
 } from "src/app/models/ui-form-config.interface";
@@ -29,6 +34,7 @@ import {
   NULL,
   NUMBER,
   OBJECT,
+  sampleUiFormConfig,
   UNDEFINED,
   UNSAVED,
   VISIBILITY,
@@ -59,16 +65,18 @@ import * as moment from "moment";
     MatCardModule,
     FieldSelectorComponent,
     TextElementComponent,
-    ActionButtonComponent,
-  ],
+    ActionButtonComponent
+],
   templateUrl: "./form-layout.component.html",
   styleUrl: "./form-layout.component.scss",
 })
 export class FormLayoutComponent implements OnInit, OnChanges, OnDestroy {
+  @ViewChildren(forwardRef(() => FormLayoutComponent)) childForms!: QueryList<FormLayoutComponent>;
   private destroyed$ = new ReplaySubject(1);
   @Input({ required: true }) formGroup: UntypedFormGroup;
   @Input({ required: true }) config!: FormConfig;
-  @Input() status = UNSAVED;
+  @Input({ required: true }) status = UNSAVED;
+  isChildForm = input<boolean>(false);
   submittedFormData = output<Record<string, any>>();
   private toaster = inject(ToastrService);
   private configBuilderService = inject(ConfigBuilderService);
@@ -78,6 +86,8 @@ export class FormLayoutComponent implements OnInit, OnChanges, OnDestroy {
   previousValues = signal({});
   visibleActionButton = signal<ActionButton[]>([]);
   isFormSubmitted = signal<boolean>(false);
+  dummyUiFormConfig = sampleUiFormConfig;
+  fieldTypes = FIELD_TYPES;
 
   ngOnInit(): void {
     this.visibleLayers.set(this.config.ui.elementsLayout);
@@ -187,7 +197,7 @@ export class FormLayoutComponent implements OnInit, OnChanges, OnDestroy {
     );
   }
 
-  submit({
+  async submit({
     nextStatus,
     runValidation,
     api,
@@ -212,8 +222,32 @@ export class FormLayoutComponent implements OnInit, OnChanges, OnDestroy {
         return;
       }
     }
+        // 1. Recursively collect data from all child FORM_GROUPs
+    const childData: Record<string, any> = {};
+    if (this.childForms && this.childForms.length) {
+      for (const child of this.childForms.toArray()) {
+        // Avoid self-recursion
+        if (child !== this) {
+          const data = await child.submit({ nextStatus, runValidation, api });
+          if (data && data.formData && child.config?.disclosure_type) {
+            childData[child.config.disclosure_type] = data.formData;
+          }
+        }
+      }
+    }
+
+    // 2. Parse this form's data
     const parsedFormValues = this.parseFormValues();
-    this.submittedFormData.emit({formData: parsedFormValues, nextStatus, api});
+
+    // 3. Merge child data into this form's data
+    Object.assign(parsedFormValues, childData);
+
+    // 4. Emit data (or return for parent)
+    const result = { formData: parsedFormValues, nextStatus, api };
+    if (!this.isChildForm()) {
+      this.submittedFormData.emit(result);
+    }
+    return result;
   }
 
   parseFormValues() {

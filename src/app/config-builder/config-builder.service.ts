@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import {
   AbstractControl,
+  FormArray,
   FormGroup,
   UntypedFormControl,
   UntypedFormGroup,
@@ -13,6 +14,7 @@ import {
   COMPARISON_TYPES,
   ConditionGroup,
   ElementLayoutData,
+  FIELD_TYPES,
   FormConfig,
   UiFormConfig,
   Validation,
@@ -37,10 +39,31 @@ export class ConfigBuilderService {
     config.ui.elementsLayout.forEach((layer: ElementLayoutData[]) => {
       layer.forEach((element: ElementLayoutData) => {
         if (element?._refAttributes) {
-          formGroup.addControl(
-            element._refAttributes,
-            new UntypedFormControl()
-          );
+          const attr = config.ui.references.attributes[element._refAttributes];
+          if (!attr) return;
+          if (
+            attr.type === FIELD_TYPES.FORM_GROUP &&
+            attr.formGroupAttributes
+          ) {
+            formGroup.addControl(
+              attr.id,
+              this.setUpConfigFormGroup(new UntypedFormGroup({}), {
+                disclosure_name: attr.label,
+                disclosure_type: attr.id,
+                ui: attr.formGroupAttributes as UiFormConfig,
+              })
+            );
+          } else if (
+            attr.type === FIELD_TYPES.FORM_ARRAY &&
+            attr.formArrayAttributes
+          ) {
+            formGroup.addControl(attr.id, new FormArray([]));
+          } else {
+            formGroup.addControl(
+              element._refAttributes,
+              new UntypedFormControl()
+            );
+          }
         }
       });
     });
@@ -53,10 +76,27 @@ export class ConfigBuilderService {
     status: string
   ): void {
     Object.entries(formGroup.controls).forEach(([id, control]) => {
-      control.addValidators(
-        this.customValidatorFunction(id, config, formGroup, status)
-      );
-    }); 
+      const attr = config.ui.references.attributes[id];
+      if (!attr) return;
+      if (attr.type === FIELD_TYPES.FORM_GROUP && attr.formGroupAttributes) {
+        // WIP: Form group validation is not implemented yet
+        // this.setCustomValidations(
+        //   control as UntypedFormGroup,
+        //   {
+        //     disclosure_name: attr.label,
+        //     disclosure_type: attr.id,
+        //     ui: attr.formGroupAttributes as UiFormConfig,
+        //   },
+        //   status
+        // );
+      }  else if (attr.type === FIELD_TYPES.FORM_ARRAY && attr.formArrayAttributes) {
+        // WIP: Form array validation is not implemented yet
+      } else {
+        control.addValidators(
+          this.customValidatorFunction(id, config, formGroup, status)
+        );
+      }
+    });
   }
 
   customValidatorFunction(
@@ -78,16 +118,19 @@ export class ConfigBuilderService {
             ? null
             : { [val.type]: val.errorMessage };
         } else if (validation?.comparativeValidations) {
-
           const { result, message } = this.computeAccessControl(
             VISIBILITY,
-            {[attributeId]:{ [VISIBILITY]: validation.comparativeValidations }},
+            {
+              [attributeId]: {
+                [VISIBILITY]: validation.comparativeValidations,
+              },
+            },
             attributeId,
             config,
             formGroup,
             status
           );
-          return  result ? {[Math.random().toString()]: message} : null;
+          return result ? { [Math.random().toString()]: message } : null;
         }
         return null;
       };
@@ -182,7 +225,7 @@ export class ConfigBuilderService {
             }
             if (
               (group.attributeType === ("self" as AttributeType) ||
-              group.attributeType === ("form-attribute" as AttributeType)) &&
+                group.attributeType === ("form-attribute" as AttributeType)) &&
               (group?.sourceAttribute || group?.conditionalAttribute)
             ) {
               message = group.description;
@@ -283,8 +326,12 @@ export class ConfigBuilderService {
     if (isObject(data) && sourceAttribute) {
       const attributeConfig = config.ui.references.attributes[sourceAttribute];
       let valueKey = "value";
-      if (attributeConfig?.get && attributeConfig.get?.mapping && attributeConfig.get.mapping.value) {
-          valueKey = attributeConfig.get.mapping.value;
+      if (
+        attributeConfig?.get &&
+        attributeConfig.get?.mapping &&
+        attributeConfig.get.mapping.value
+      ) {
+        valueKey = attributeConfig.get.mapping.value;
       }
       return this.getDataByType(data[valueKey], config);
     }

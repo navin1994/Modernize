@@ -7,30 +7,49 @@
   <mat-card-content class="b-t-1">
     <!-- Direct access to visibleLayers with @for -->
     @for(layer of this.config.ui.elementsLayout; track layer) {
-    <div [ngClass]="isLayerVisible(layer) ? 'row m-x-10 gx-2' : 'd-none'">
+    <div [ngClass]="isLayerVisible(layer) ? 'row gx-2' : 'd-none'">
       @for(element of layer; track element) {
       <!-- <div class="col" [ngClass]="isShown(element) ? 'col' : 'd-none'"> -->
       @if(this.visibleLayers().flat().includes(element) &&
-      element._refAttributes) {
-      <div class="col">
-        <app-field-selector
-          (onChange)="updateAccessControl()"
-          [fullForm]="formGroup"
-          [formField]="$any(formGroup.get(element._refAttributes))"
-          [element]="config.ui.references.attributes[element._refAttributes]"
-          [isFormSubmitted]="isFormSubmitted()"
-          >
-        </app-field-selector>
+      element._refAttributes) { @let attr =
+      config.ui.references.attributes[element._refAttributes]; @if (attr?.type
+      === fieldTypes.FORM_GROUP) {
+      <!-- Render nested form group recursively -->
+      <div class="col-12">
+        <app-form-layout
+          [config]="{
+            disclosure_name: attr.label,
+            disclosure_type: attr.id,
+            ui: attr.formGroupAttributes || this.dummyUiFormConfig
+          }"
+          [formGroup]="$any(formGroup.get(element._refAttributes))"
+          [isChildForm]="true"
+          [status]="status"
+        ></app-form-layout>
       </div>
+      } @else if (config.ui.references.attributes[element._refAttributes]){
+        <div class="col">
+          <app-field-selector
+            (onChange)="updateAccessControl()"
+            [fullForm]="formGroup"
+            [formField]="$any(formGroup.get(element._refAttributes))"
+            [element]="config.ui.references.attributes[element._refAttributes]"
+            [isFormSubmitted]="isFormSubmitted()"
+          >
+          </app-field-selector>
+        </div>
+      }
       } @else if(this.visibleLayers().flat().includes(element) &&
       element._paragraphAttributes) {
       <div class="col">
-        <app-text-element [element]="
+        <app-text-element
+          [element]="
             config.ui.paragraphs.textAttributes[element._paragraphAttributes]
-          " [formGroup]="formGroup"></app-text-element>
+          "
+          [formGroup]="formGroup"
+        ></app-text-element>
       </div>
-      } 
-    }
+      } }
     </div>
     }
   </mat-card-content>
@@ -38,9 +57,12 @@
   <mat-card-content class="b-t-1">
     <div class="col">
       <app-action-buttons
-        [buttonsConfig]="{justification: this.config.ui.actions.justification, buttons: this.visibleActionButton}"
+        [buttonsConfig]="{
+          justification: this.config.ui.actions.justification,
+          buttons: this.visibleActionButton
+        }"
         (onClick)="submit($event)"
-        ></app-action-buttons>
+      ></app-action-buttons>
     </div>
   </mat-card-content>
   }

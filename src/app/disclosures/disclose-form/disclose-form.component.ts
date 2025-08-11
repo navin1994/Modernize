@@ -22,31 +22,31 @@ export class DiscloseFormComponent implements OnInit {
   missingDisclosure = signal<boolean>(false);
   fullData = signal(
     {
-    "ATTRIBUTE_ID": "3",
-    "ATTRIBUTE_TYPE": "input-number",
+    "ATTRIBUTE_ID": "1",
+    "ATTRIBUTE_TYPE": "input-autocomplete",
     "ATTRIBUTE_LABEL": "",
-    "ATTRIBUTE_COUNT": 67,
-    "DATE": "2025-06-09T18:30:00.000Z",
-    "DATE_END": "2025-06-26T18:30:00.000Z",
-    "ATTRIBUTE_LABEL_RTE": "This is test <span style=\"color: #e03e2d;\"><strong>data for reset for data</strong></span>",
+    "ATTRIBUTE_COUNT": 342,
+    "DATE": "2025-08-04T18:30:00.000Z",
+    "DATE_END": "2025-08-29T18:30:00.000Z",
+    "ATTRIBUTE_LABEL_RTE": "<span style=\"font-family: 'arial black', sans-serif; font-size: 14pt; color: #e03e2d; background-color: #fbeeb8;\">Attribute Label</span>",
     "USE_RICH_TEXT": true,
     "TEXT_AREA": "Attribute TEXTAREA",
     "ATTRIBUTE_INPUT_CHIPS": [
-        "Test chip 1",
-        "Test Chip 2"
+        "Chip Parent1",
+        "Chip Parent 2"
     ],
     "ATTRIBUTE_RADIO": "input-autocomplete",
     "ATTRIBUTE_SELECT_MULTIPLE": [
-        "input-number",
-        "input-select"
+        "input-basic",
+        "input-autocomplete"
     ],
     "ATTRIBUTE_CHIPS_MULTI": [
         "Text Field",
         "Autocomplete Input"
     ],
     "ATTRIBUTE_CHECKBOX_GROUP": [
-        "input-autocomplete",
-        "input-number"
+        "input-basic",
+        "input-autocomplete"
     ],
     "ATTRIBUTE_TYPE_GET_SERVER_OPTIONS": [
         {
@@ -58,31 +58,89 @@ export class DiscloseFormComponent implements OnInit {
             "id": "2",
             "attribute_name": "closure",
             "attribute_type": "buoyancy"
-        },
-        {
-            "id": "3",
-            "attribute_name": "western_boot_style",
-            "attribute_type": "excitation"
         }
     ],
     "ATTRIBUTE_SELECT_MULTIPLE_WITH_OBJECT_VALUE": [
         {
-            "value": "input-checkbox",
-            "label": "Checkbox"
+            "value": "input-basic",
+            "label": "Text Field"
         },
         {
-            "value": "input-password",
-            "label": "Password"
+            "value": "input-autocomplete",
+            "label": "Autocomplete Input"
         }
     ],
     "ATTRIBUTE_SELECT_SINGLE_WITH_OBJECT_VALUE": {
-        "value": "input-password",
-        "label": "Password"
+        "value": "input-basic",
+        "label": "Text Field"
     },
     "ATTRIBUTE_CHIPS_MULTI_OBJECT_VALUE": [
-        "Autocomplete Input",
-        "Number"
-    ]
+        "Text Field",
+        "Autocomplete Input"
+    ],
+    "SUB_FORM_GROUP": {
+        "ATTRIBUTE_ID": "2",
+        "ATTRIBUTE_TYPE": "input-basic",
+        "ATTRIBUTE_LABEL": "",
+        "ATTRIBUTE_COUNT": 3333,
+        "DATE": "2025-07-31T18:30:00.000Z",
+        "DATE_END": "2025-08-21T18:30:00.000Z",
+        "ATTRIBUTE_LABEL_RTE": "<span style=\"color: #843fa1;\"><strong><span style=\"font-size: 14pt;\">Attribute Label Child</span></strong></span>",
+        "USE_RICH_TEXT": true,
+        "TEXT_AREA": "Attribute TEXTAREA Child",
+        "ATTRIBUTE_INPUT_CHIPS": [
+            "Chips Child 1",
+            "Chips Child 2"
+        ],
+        "ATTRIBUTE_RADIO": "input-autocomplete",
+        "ATTRIBUTE_SELECT_MULTIPLE": [
+            "input-basic",
+            "input-autocomplete",
+            "input-number"
+        ],
+        "ATTRIBUTE_CHIPS_MULTI": [
+            "Text Field",
+            "Autocomplete Input",
+            "Number"
+        ],
+        "ATTRIBUTE_CHECKBOX_GROUP": [
+            "input-basic",
+            "input-autocomplete",
+            "input-number"
+        ],
+        "ATTRIBUTE_TYPE_GET_SERVER_OPTIONS": [
+            {
+                "id": "1",
+                "attribute_name": "scarf_length",
+                "attribute_type": "sound"
+            },
+            {
+                "id": "2",
+                "attribute_name": "closure",
+                "attribute_type": "buoyancy"
+            },
+            {
+                "id": "3",
+                "attribute_name": "western_boot_style",
+                "attribute_type": "excitation"
+            }
+        ],
+        "ATTRIBUTE_SELECT_MULTIPLE_WITH_OBJECT_VALUE": [
+            {
+                "value": "input-basic",
+                "label": "Text Field"
+            }
+        ],
+        "ATTRIBUTE_SELECT_SINGLE_WITH_OBJECT_VALUE": {
+            "value": "input-autocomplete",
+            "label": "Autocomplete Input"
+        },
+        "ATTRIBUTE_CHIPS_MULTI_OBJECT_VALUE": [
+            "Text Field",
+            "Autocomplete Input",
+            "Number"
+        ]
+    }
 }
   );
   status = UNSAVED;

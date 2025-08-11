@@ -97,8 +97,8 @@ export interface ReferenceAttribute {
   multiple?: boolean;
   get?: GetServerRequest;
   validations?: Validation[];
-  formGroupVersionId?: string;
-  formArrayAttributes?: ReferenceAttribute[]|string[];/** versionId array if formGroups */
+  formGroupAttributes?: UiFormConfig;
+  formArrayAttributes?: ReferenceAttribute[]|UiFormConfig[];
 }
 
 export interface GetServerRequest {
