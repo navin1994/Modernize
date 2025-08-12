@@ -98,7 +98,11 @@ export interface ReferenceAttribute {
   get?: GetServerRequest;
   validations?: Validation[];
   formGroupAttributes?: UiFormConfig;
-  formArrayAttributes?: ReferenceAttribute[]|UiFormConfig[];
+  formArrayAttributes?: {
+    groupConfig?: UiFormConfig;
+    fieldConfig?: ReferenceAttribute;
+  };
+  maxAllowedElementsInRow?: number;
 }
 
 export interface GetServerRequest {

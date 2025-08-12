@@ -12,20 +12,29 @@
       <!-- <div class="col" [ngClass]="isShown(element) ? 'col' : 'd-none'"> -->
       @if(this.visibleLayers().flat().includes(element) &&
       element._refAttributes) { @let attr =
-      config.ui.references.attributes[element._refAttributes]; @if (attr?.type
-      === fieldTypes.FORM_GROUP) {
+      config.ui.references.attributes[element._refAttributes];
+      @if (attr?.type === fieldTypes.FORM_ARRAY) {
+        <app-form-array
+            [formArray]="$any(formGroup.get(element._refAttributes))"
+            [attrConfig]="config.ui.references.attributes[element._refAttributes]"
+            [isFormSubmitted]="isFormSubmitted()"
+            (onChange)="updateAccessControl()"
+            [formGroup]="formGroup"
+            [formStatus]="status"
+        />
+      } @else if (attr?.type === fieldTypes.FORM_GROUP) {
       <!-- Render nested form group recursively -->
       <div class="col-12">
         <app-form-layout
           [config]="{
             disclosure_name: attr.label,
             disclosure_type: attr.id,
-            ui: attr.formGroupAttributes || this.dummyUiFormConfig
+            ui: attr.formGroupAttributes!
           }"
           [formGroup]="$any(formGroup.get(element._refAttributes))"
           [isChildForm]="true"
           [status]="status"
-        ></app-form-layout>
+        />
       </div>
       } @else if (config.ui.references.attributes[element._refAttributes]){
         <div class="col">
@@ -35,8 +44,7 @@
             [formField]="$any(formGroup.get(element._refAttributes))"
             [element]="config.ui.references.attributes[element._refAttributes]"
             [isFormSubmitted]="isFormSubmitted()"
-          >
-          </app-field-selector>
+          />
         </div>
       }
       } @else if(this.visibleLayers().flat().includes(element) &&

@@ -34,7 +34,6 @@ import {
   NULL,
   NUMBER,
   OBJECT,
-  sampleUiFormConfig,
   UNDEFINED,
   UNSAVED,
   VISIBILITY,
@@ -55,6 +54,7 @@ import { ConfigBuilderService } from "../config-builder.service";
 import { ReplaySubject, takeUntil } from "rxjs";
 import { isDate } from "moment";
 import * as moment from "moment";
+import { FormArrayComponent } from "./form-elements/form-array/form-array.component";
 
 @Component({
   selector: "app-form-layout",
@@ -65,7 +65,8 @@ import * as moment from "moment";
     MatCardModule,
     FieldSelectorComponent,
     TextElementComponent,
-    ActionButtonComponent
+    ActionButtonComponent,
+    forwardRef(() => FormArrayComponent),
 ],
   templateUrl: "./form-layout.component.html",
   styleUrl: "./form-layout.component.scss",
@@ -86,7 +87,6 @@ export class FormLayoutComponent implements OnInit, OnChanges, OnDestroy {
   previousValues = signal({});
   visibleActionButton = signal<ActionButton[]>([]);
   isFormSubmitted = signal<boolean>(false);
-  dummyUiFormConfig = sampleUiFormConfig;
   fieldTypes = FIELD_TYPES;
 
   ngOnInit(): void {

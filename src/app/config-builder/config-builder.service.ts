@@ -3,6 +3,7 @@ import {
   AbstractControl,
   FormArray,
   FormGroup,
+  UntypedFormArray,
   UntypedFormControl,
   UntypedFormGroup,
   ValidationErrors,
@@ -41,6 +42,8 @@ export class ConfigBuilderService {
         if (element?._refAttributes) {
           const attr = config.ui.references.attributes[element._refAttributes];
           if (!attr) return;
+
+          // --- FORM GROUP ---
           if (
             attr.type === FIELD_TYPES.FORM_GROUP &&
             attr.formGroupAttributes
@@ -53,15 +56,38 @@ export class ConfigBuilderService {
                 ui: attr.formGroupAttributes as UiFormConfig,
               })
             );
+
+          // --- FORM ARRAY ---
           } else if (
             attr.type === FIELD_TYPES.FORM_ARRAY &&
             attr.formArrayAttributes
           ) {
-            formGroup.addControl(attr.id, new FormArray([]));
+            const initial = attr.initialValue || [];
+            const formArray = new UntypedFormArray([]);
+            // Array of FormGroups
+            if (attr.formArrayAttributes.groupConfig) {
+              for (const item of initial) {
+                formArray.push(
+                  this.setUpConfigFormGroup(new UntypedFormGroup({}), {
+                    disclosure_name: attr.label,
+                    disclosure_type: attr.id,
+                    ui: attr.formArrayAttributes.groupConfig as UiFormConfig,
+                  })
+                );
+              }
+            // Array of single fields
+            } else if (attr.formArrayAttributes.fieldConfig) {
+              for (const item of initial) {
+                formArray.push(new UntypedFormControl(item));
+              }
+            }
+            formGroup.addControl(attr.id, formArray);
+
+          // --- BASIC FIELD ---
           } else {
             formGroup.addControl(
               element._refAttributes,
-              new UntypedFormControl()
+              new UntypedFormControl(attr.initialValue)
             );
           }
         }
