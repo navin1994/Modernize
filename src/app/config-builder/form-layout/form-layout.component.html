@@ -1,10 +1,24 @@
-<mat-card class="cardWithShadow theme-card">
+<mat-card class="cardWithShadow theme-card" [class.void-card]="isChildForm() && !config.ui.formLabel">
   @if(config.ui.formLabel) {
   <mat-card-header>
-    <mat-card-title class="m-b-0">{{ config.ui.formLabel }}</mat-card-title>
+    <div class="header-flex">
+      <mat-card-title class="m-b-0">{{ config.ui.formLabel }}</mat-card-title>
+      <div class="header-actions">
+        @if (showDeleteButton() && !this.formGroup.disabled) {
+          <div class="raised-btn text-danger" (click)="addOrRemoveElement(false)">
+            <mat-icon>delete_forever</mat-icon>
+          </div>
+        }
+        @if (showAddButton() && !this.formGroup.disabled) {
+          <div class="raised-btn text-primary" (click)="addOrRemoveElement(true)">
+            <mat-icon>add</mat-icon>
+          </div>
+        }
+      </div>
+    </div>
   </mat-card-header>
   }
-  <mat-card-content class="b-t-1">
+  <mat-card-content class="b-t-1" [class.void-card-content]="isChildForm() && !config.ui.formLabel">
     <!-- Direct access to visibleLayers with @for -->
     @for(layer of this.config.ui.elementsLayout; track layer) {
     <div [ngClass]="isLayerVisible(layer) ? 'row gx-2' : 'd-none'">
@@ -14,17 +28,18 @@
       element._refAttributes) { @let attr =
       config.ui.references.attributes[element._refAttributes];
       @if (attr?.type === fieldTypes.FORM_ARRAY) {
-        <app-form-array
+        <div class="col-12">
+          <app-form-array
             [formArray]="$any(formGroup.get(element._refAttributes))"
             [attrConfig]="config.ui.references.attributes[element._refAttributes]"
             [isFormSubmitted]="isFormSubmitted()"
             (onChange)="updateAccessControl()"
             [formGroup]="formGroup"
             [formStatus]="status"
-        />
+        /></div>
       } @else if (attr?.type === fieldTypes.FORM_GROUP) {
       <!-- Render nested form group recursively -->
-      <div class="col-12">
+       <div class="col-12">
         <app-form-layout
           [config]="{
             disclosure_name: attr.label,
@@ -33,9 +48,8 @@
           }"
           [formGroup]="$any(formGroup.get(element._refAttributes))"
           [isChildForm]="true"
-          [status]="status"
-        />
-      </div>
+          [status]="status" />
+          </div>
       } @else if (config.ui.references.attributes[element._refAttributes]){
         <div class="col">
           <app-field-selector

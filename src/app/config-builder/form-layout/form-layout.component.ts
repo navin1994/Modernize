@@ -55,6 +55,7 @@ import { ReplaySubject, takeUntil } from "rxjs";
 import { isDate } from "moment";
 import * as moment from "moment";
 import { FormArrayComponent } from "./form-elements/form-array/form-array.component";
+import { MatIcon } from "@angular/material/icon";
 
 @Component({
   selector: "app-form-layout",
@@ -66,6 +67,7 @@ import { FormArrayComponent } from "./form-elements/form-array/form-array.compon
     FieldSelectorComponent,
     TextElementComponent,
     ActionButtonComponent,
+    MatIcon,
     forwardRef(() => FormArrayComponent),
 ],
   templateUrl: "./form-layout.component.html",
@@ -78,6 +80,9 @@ export class FormLayoutComponent implements OnInit, OnChanges, OnDestroy {
   @Input({ required: true }) config!: FormConfig;
   @Input({ required: true }) status = UNSAVED;
   isChildForm = input<boolean>(false);
+  showAddButton = input<boolean>(false);
+  showDeleteButton = input<boolean>(false);
+  addOrRemoveControl = output<boolean>();
   submittedFormData = output<Record<string, any>>();
   private toaster = inject(ToastrService);
   private configBuilderService = inject(ConfigBuilderService);
@@ -313,6 +318,11 @@ export class FormLayoutComponent implements OnInit, OnChanges, OnDestroy {
     if (data === null) type = NULL;
     if (data === undefined) type = UNDEFINED;
     return type;
+  }
+
+  addOrRemoveElement(flag:boolean): void {
+    // Remove when false, add when true
+    this.addOrRemoveControl.emit(flag);
   }
 
   ngOnDestroy(): void {

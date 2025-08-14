@@ -13,3 +13,31 @@
      margin-top: -20px;
      margin-bottom: 20px;
 }
+
+.raised-btn {
+  padding: 0.9rem 0.5rem;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: start;
+  gap: 5px;
+}
+
+.field-main.full-width {
+  grid-column: 1 / span 3;
+}
+.field-main.one-icon {
+  grid-column: 1 / span 2;
+}
+.field-main.two-icons {
+  grid-column: 1;
+}
+
+.icon-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+}

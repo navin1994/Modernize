@@ -523,7 +523,7 @@ export const attribute_editor: FormConfig = {
               elementsLayout: [
                 [{ _refAttributes: "field1" }, { _refAttributes: "field2" }],
               ],
-              formLabel: "Form Group Array",
+              // formLabel: "Form Group Array", // This is optional when this is set then card will show if not set then card will not show
               references: {
                 attributes: {
                   field1: {

@@ -54,7 +54,7 @@ export class FormArrayComponent implements OnInit, AfterViewInit, OnDestroy {
   formStatus = input(UNSAVED);
   onChange = output<any>();
   existingValue = signal("");
-  disabled = signal<boolean>(false);
+  disabled = signal<boolean>(true);
   groupConfig = computed(
     () => this.attrConfig.formArrayAttributes?.groupConfig
   );
@@ -69,7 +69,7 @@ export class FormArrayComponent implements OnInit, AfterViewInit, OnDestroy {
       });
 
     if (this.formArray.length === 0) {
-      this.addNewItem();
+      this.addNewItemAt(0);
     }
   }
 
@@ -81,26 +81,35 @@ export class FormArrayComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  addNewItem(): void {
+  addNewItemAt(index: number = 0): void {
+    let newControl;
     if (this.groupConfig()) {
-      const newGroup = this.configBuilderService.setUpConfigFormGroup(
-      new UntypedFormGroup({}),
-      {
-        disclosure_name: this.attrConfig.label,
-        disclosure_type: this.attrConfig.type,
-        ui: this.attrConfig.formArrayAttributes?.groupConfig!,
-      } 
-    );
-    this.formArray.push(newGroup);
+      newControl = this.configBuilderService.setUpConfigFormGroup(
+        new UntypedFormGroup({}),
+        {
+          disclosure_name: this.attrConfig.label,
+          disclosure_type: this.attrConfig.type,
+          ui: this.attrConfig.formArrayAttributes?.groupConfig!,
+        }
+      );
     } else {
-      this.formArray.push(new UntypedFormControl(""));
+      newControl = new UntypedFormControl("");
     }
+    this.formArray.insert(index, newControl);
     this.updateControl();
   }
 
   removeItem(index: number): void {
   this.formArray.removeAt(index);
   this.updateControl();
+  }
+
+  addOrRemoveElement(flag: boolean, index: number): void {
+    if (flag) {
+      this.addNewItemAt(index + 1);
+    } else {
+      this.removeItem(index);
+    }
   }
 
   updateControl() {

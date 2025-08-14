@@ -74,7 +74,7 @@ import { AppDateFormatDirective } from "src/app/app-directives/app-date-format.d
     ChipsInputComponent,
     MatChipsModule,
     CheckboxGroupComponent,
-    MatMenuModule,
+    MatMenuModule
   ],
 })
 export class FieldSelectorComponent implements OnInit {
@@ -86,6 +86,9 @@ export class FieldSelectorComponent implements OnInit {
   private sharedUtilityService = inject(SharedUtilityService);
   onChange = output<any>();
   isFormSubmitted = input<boolean>(false);
+  showDeleteButton = input<boolean>(false);
+  showAddButton = input<boolean>(false);
+  addOrRemoveControl = output<boolean>();
   // formStatus = input<string>();
 
   fieldTypes = FIELD_TYPES;
@@ -297,5 +300,10 @@ export class FieldSelectorComponent implements OnInit {
 
   setErrorMessage(errorMsg: any) :string {
     return JSON.stringify(errorMsg)?.replace(/^"(.*)"$/, "$1");
+  }
+
+  addOrRemoveElement(flag:boolean): void {
+    // Remove when false, add when true
+    this.addOrRemoveControl.emit(flag);
   }
 }
