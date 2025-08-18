@@ -166,9 +166,7 @@
     <!-- If field is input-radio -->
     <div class="mb-2">
       <mat-radio-group
-        [class]="
-          element.direction === direction.VERTICAL ? 'radio-group-col' : ''
-        "
+  [class]="element.type === fieldTypes.RADIO_BUTTON && element.direction === direction.VERTICAL ? 'radio-group-col' : ''"
         [formControl]="formField"
         (change)="emitChange($event)"
       >
@@ -191,19 +189,15 @@
     />
     } @else if (fieldTypes.CHIPS_SELECT === element.type) {
     <!-- If field is chips-select -->
-    <mat-chip-listbox
-      class="mb-3"
-      (change)="emitChange($event)"
-      style="margin-bottom: 8px"
-      [formControl]="formField"
-      [multiple]="element.multiple"
-      [class]="
-        element.direction === direction.VERTICAL
-          ? 'mat-mdc-chip-set-stacked'
-          : ''
-      "
-      aria-label="chip selection"
-    >
+      <mat-chip-listbox
+        class="mb-3"
+        (change)="emitChange($event)"
+        style="margin-bottom: 8px"
+        [formControl]="formField"
+        [multiple]="element.multiple"
+  [class]="element.type === fieldTypes.CHIPS_SELECT && element.direction === direction.VERTICAL ? 'mat-mdc-chip-set-stacked' : ''"
+        aria-label="chip selection"
+      >
       @for(chip of filteredOptions$ | async; track chip;) {
       <mat-chip-option color="accent">
         <span [innerHTML]="getDisplayLabel(chip) | sanitizeTrustedHtml"></span>

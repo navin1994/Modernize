@@ -11,7 +11,6 @@ import {
 import { AsyncPipe, CommonModule } from "@angular/common";
 import {
   UntypedFormControl,
-  UntypedFormGroup,
   ReactiveFormsModule,
   FormsModule,
 } from "@angular/forms";
@@ -79,7 +78,6 @@ import { AppDateFormatDirective } from "src/app/app-directives/app-date-format.d
 })
 export class FieldSelectorComponent implements OnInit {
   // inputs from parent component
-  @Input() fullForm: UntypedFormGroup | undefined;
   @Input({ required: true }) element: ReferenceAttribute;
   @Input({ required: true }) formField: UntypedFormControl;
   private dataService = inject(DataService);
@@ -102,10 +100,9 @@ export class FieldSelectorComponent implements OnInit {
       this.element.type === this.fieldTypes.RADIO_BUTTON
     );
   });
-  isRequiredField = computed<boolean>(
-    () =>
-      !!this.element?.validations?.find((x) => x._refValidation === "required")
-  );
+  isRequiredField = computed<boolean>(() => {
+    return !!this.element?.validations?.find((x) => x._refValidation === "required");
+  });
   showClear = computed<boolean>(() => {
     return (
       this.formField.enabled &&
@@ -123,7 +120,7 @@ export class FieldSelectorComponent implements OnInit {
       this.fieldTypes.RADIO_BUTTON,
       this.fieldTypes.CHIPS_INPUT,
       this.fieldTypes.CHIPS_SELECT,
-      this.fieldTypes.CHECKBOX_GROUP,
+      this.fieldTypes.CHECKBOX_GROUP
     ];
     return !fields.includes(this.element.type);
   });
@@ -147,7 +144,6 @@ export class FieldSelectorComponent implements OnInit {
         this.setOptions();
         break;
     }
-    // setTimeout(() => this.setValue(), 6000);
   }
 
   emitChange($event: any): void {
@@ -165,10 +161,8 @@ export class FieldSelectorComponent implements OnInit {
 
     if (!supportedTypes.includes(fieldType)) return;
 
-    const { staticSelection, multiple, get } = this.element;
+    // Type guards for discriminated union properties
     const currentValue = this.formField.value;
-
-    // Utility to safely stringify values
     const normalize = (val: any): string => {
       try {
         return JSON.stringify(val);
@@ -178,29 +172,28 @@ export class FieldSelectorComponent implements OnInit {
     };
 
     // Handle static options
-    if (staticSelection?.options) {
-      const options = staticSelection.options;
-
+    if ('staticSelection' in this.element && this.element.staticSelection?.options) {
+      const options = this.element.staticSelection.options;
+      const multiple = 'multiple' in this.element ? this.element.multiple : false;
       if (multiple && Array.isArray(currentValue)) {
         const valueSet = new Set(currentValue.map(normalize));
-        const matched = options.filter((opt) =>
+        const matched = options.filter((opt: { value: any; }) =>
           valueSet.has(normalize(opt?.value ?? opt))
         );
         this.formField.setValue(matched);
       } else {
         const match = options.find(
-          (opt) => normalize(opt?.value ?? opt) === normalize(currentValue)
+          (opt: { value: any; }) => normalize(opt?.value ?? opt) === normalize(currentValue)
         );
         this.formField.setValue(match);
       }
-
-      // Handle dynamic options (get.mapping)
-    } else if (get && Array.isArray(this.dropdownOptions)) {
-      const { mapping } = get;
-
+    }
+    // Handle dynamic options (get.mapping)
+    else if ('get' in this.element && this.element.get && Array.isArray(this.dropdownOptions)) {
+      const { mapping } = this.element.get;
+      const multiple = 'multiple' in this.element ? this.element.multiple : false;
       const extractMapped = (val: any) =>
         mapping?.value ? val?.[mapping.value] : val;
-
       if (multiple && Array.isArray(currentValue)) {
         const valueSet = new Set(
           currentValue.map((v) => normalize(extractMapped(v)))
@@ -228,11 +221,16 @@ export class FieldSelectorComponent implements OnInit {
     ];
     const isOptWithoutFilter = supportedTypes.includes(type);
     const isAutocomplete = type === this.fieldTypes.AUTOCOMPLETE;
-    const isStatic = !!this.element?.staticSelection;
-    const isRemote = !!this.element?.get;
+    const hasStaticSelection = (el: any): el is { staticSelection: any } => 
+      el && typeof el === 'object' && 'staticSelection' in el;
+    const hasGet = (el: any): el is { get: any } => 
+      el && typeof el === 'object' && 'get' in el;
 
-    const optionsFromStatic = this.element?.staticSelection?.options || [];
-    const { from, mapping } = this.element?.get || {};
+    const isStatic = hasStaticSelection(this.element) && !!this.element.staticSelection;
+    const isRemote = hasGet(this.element) && !!this.element.get;
+
+    const optionsFromStatic = hasStaticSelection(this.element) && this.element.staticSelection?.options ? this.element.staticSelection.options : [];
+    const { from, mapping } = hasGet(this.element) && this.element.get ? this.element.get : { from: undefined, mapping: undefined };
     const displayAttr = mapping?.label?.split("|")[0];
     const isDynamicUrl = !!from?.includes("{{}}");
 

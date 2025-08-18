@@ -26,11 +26,35 @@ export interface FormConfig {
   version_id?: string;
 }
 
-export interface UiFormConfig {
+export type UiFormReferences = {
+  attributes: Record<string, ReferenceAttribute>;
+  validations: Record<string, ReferenceValidation>;
+  validationRelations: Record<string, string[]>;
+  showErrorAfterSubmit: boolean;
+};
+
+// Union type for UiFormConfig
+export type UiFormConfig = UiFormConfigFormGroup | UiFormConfigFormArray;
+export interface UiFormConfigFormGroup {
+  type: typeof FIELD_TYPES.FORM_GROUP;
+  formLabel?: string;
+  references: UiFormReferences; // attributes: Record<string, ReferenceAttribute>
+  paragraphs: {
+    textAttributes: Record<string, ReferenceTextAttribute>;
+  };
+  actions?: {
+    justification: Justification;
+    buttons: ActionButton[];
+  };
+  elementsLayout: ElementLayoutData[][];
+}
+
+export interface UiFormConfigFormArray {
+  type: typeof FIELD_TYPES.FORM_ARRAY;
   formLabel?: string;
   references: {
-    attributes: Record<string, ReferenceAttribute>;
-    validations: Record<string,  ReferenceValidation>;
+    attributes: { [key: string]: ReferenceAttribute }; // Only 1 record allowed
+    validations: Record<string, ReferenceValidation>;
     validationRelations: Record<string, string[]>;
     showErrorAfterSubmit: boolean;
   };
@@ -82,27 +106,115 @@ export interface ReferenceTextAttribute {
   text: string;
   visibility?: AccessControls;
 }
-export interface ReferenceAttribute {
+
+// Types for discriminated unions
+export type GetAllowedType =
+  | typeof FIELD_TYPES.AUTOCOMPLETE
+  | typeof FIELD_TYPES.SELECT
+  | typeof FIELD_TYPES.CHIPS_SELECT
+  | typeof FIELD_TYPES.RADIO_BUTTON
+  | typeof FIELD_TYPES.CHECKBOX_GROUP;
+
+export type MultipleRequiredType =
+  | typeof FIELD_TYPES.AUTOCOMPLETE
+  | typeof FIELD_TYPES.SELECT
+  | typeof FIELD_TYPES.CHIPS_SELECT
+  | typeof FIELD_TYPES.CHECKBOX_GROUP;
+
+export type DirectionRequiredType =
+  | typeof FIELD_TYPES.RADIO_BUTTON
+  | typeof FIELD_TYPES.CHIPS_SELECT
+  | typeof FIELD_TYPES.CHECKBOX_GROUP;
+
+export type StaticSelectionRequiredType =
+  | typeof FIELD_TYPES.AUTOCOMPLETE
+  | typeof FIELD_TYPES.SELECT
+  | typeof FIELD_TYPES.RADIO_BUTTON
+  | typeof FIELD_TYPES.CHIPS_SELECT
+  | typeof FIELD_TYPES.CHECKBOX_GROUP;
+
+export type ReferenceAttribute =
+  // input-date: dateFormat required
+  | ({
+      type: typeof FIELD_TYPES.DATE;
+      dateFormat: string;
+      direction?: DirectionType;
+    } & BaseReferenceAttribute)
+  | ({
+      type: typeof FIELD_TYPES.FORM_GROUP;
+      nestedElement: UiFormConfigFormGroup;
+      direction?: DirectionType;
+    } & BaseReferenceAttribute)
+  | ({
+      type: typeof FIELD_TYPES.FORM_ARRAY;
+      nestedElement: UiFormConfigFormArray;
+      direction?: DirectionType;
+    } & BaseReferenceAttribute)
+  | ({
+      type: typeof FIELD_TYPES.RADIO_BUTTON;
+      direction?: DirectionType;
+      staticSelection?: StaticSelection;
+      get?: GetServerRequest;
+    } & BaseReferenceAttribute)
+  | ({
+      type: Exclude<DirectionRequiredType & MultipleRequiredType & StaticSelectionRequiredType, typeof FIELD_TYPES.RADIO_BUTTON>;
+      staticSelection: StaticSelection;
+      multiple: boolean;
+      direction?: DirectionType;
+      get?: never;
+    } & BaseReferenceAttribute)
+  | ({
+      type: Exclude<MultipleRequiredType & StaticSelectionRequiredType, DirectionRequiredType | typeof FIELD_TYPES.RADIO_BUTTON>;
+      staticSelection: StaticSelection;
+      multiple: boolean;
+      get?: never;
+      direction?: DirectionType;
+    } & BaseReferenceAttribute)
+  | ({
+      type: Exclude<DirectionRequiredType & MultipleRequiredType & GetAllowedType, typeof FIELD_TYPES.RADIO_BUTTON>;
+      get: GetServerRequest;
+      multiple: boolean;
+      direction?: DirectionType;
+      staticSelection?: never;
+    } & BaseReferenceAttribute)
+  | ({
+      type: Exclude<MultipleRequiredType & GetAllowedType, DirectionRequiredType | typeof FIELD_TYPES.RADIO_BUTTON>;
+      get: GetServerRequest;
+      multiple: boolean;
+      staticSelection?: never;
+      direction?: DirectionType;
+    } & BaseReferenceAttribute)
+  | ({
+      type: Exclude<GetAllowedType, MultipleRequiredType | typeof FIELD_TYPES.RADIO_BUTTON>;
+      get: GetServerRequest;
+      multiple?: never;
+      direction?: DirectionType;
+      staticSelection?: never;
+    } & BaseReferenceAttribute)
+  | ({
+      type: Exclude<
+        FieldType,
+        typeof FIELD_TYPES.DATE | StaticSelectionRequiredType | GetAllowedType | typeof FIELD_TYPES.FORM_GROUP | typeof FIELD_TYPES.FORM_ARRAY
+      >;
+      staticSelection?: never;
+      get?: never;
+      multiple?: never;
+      direction?: DirectionType;
+      dateFormat?: never;
+      nestedElement?: never;
+    } & BaseReferenceAttribute);
+export interface BaseReferenceAttribute {
   id: string;
-  type: FieldType;
   label: string;
   placeholder?: string;
   hint?: string;
-  dateFormat?: string;
   initialValue?: any;
   visibility?: AccessControls;
   editableLogic?: AccessControls;
-  staticSelection?: StaticSelection;
-  direction?: DirectionType;
-  multiple?: boolean;
-  get?: GetServerRequest;
   validations?: Validation[];
-  formGroupAttributes?: UiFormConfig;
-  formArrayAttributes?: {
-    groupConfig?: UiFormConfig;
-    fieldConfig?: ReferenceAttribute;
-  };
-  maxAllowedElementsInRow?: number;
+  // maxAllowedElementsInRow is only required for attributes in UiFormConfigFormArray,
+  // and only when type is NOT FORM_GROUP or FORM_ARRAY apply condition in code
+  maxAllowedElementsInRow?: number; 
 }
 
 export interface GetServerRequest {

@@ -27,7 +27,6 @@
   <div [class]="fieldClass">
     <app-field-selector
       (onChange)="updateControl()"
-      [fullForm]="formGroup"
       [formField]="$any(control)"
       [element]="attrConfig.formArrayAttributes?.fieldConfig!"
       [isFormSubmitted]="isFormSubmitted()"
@@ -39,7 +38,7 @@
   } }
 </div>
 @if (!!groupConfig() && !groupConfig()?.formLabel) {
-  <div class="d-flex justify-content-center">
+  <div class="d-flex justify-content-center mb-3">
     <button (click)="addOrRemoveElement(true, formArray.controls.length)" mat-raised-button color="primary">Add More Fields</button>
   </div>
 }

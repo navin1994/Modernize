@@ -3,7 +3,7 @@ import { UntypedFormControl } from '@angular/forms';
 import { MatCheckboxChange, MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { combineLatest, ReplaySubject, takeUntil } from 'rxjs';
-import { DIRECTION, ReferenceAttribute } from 'src/app/models/ui-form-config.interface';
+import { DIRECTION, FIELD_TYPES, ReferenceAttribute } from 'src/app/models/ui-form-config.interface';
 import { SanitizeTrustedHtmlPipe } from 'src/app/pipes/sanitize-trusted-html.pipe';
 import { SharedUtilityService } from 'src/app/services/shared-utility.service';
 
@@ -24,6 +24,7 @@ export class CheckboxGroupComponent implements OnInit, OnDestroy, AfterViewInit 
   existingValue = signal('');
   change = output<any>();
   direction = DIRECTION;
+  fieldTypes = FIELD_TYPES;
 
   ngOnInit(): void {
     this.disabled.set(this.formFieldControl.disabled)

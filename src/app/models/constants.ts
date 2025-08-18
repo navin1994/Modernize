@@ -1,3 +1,5 @@
+import { FIELD_TYPES, UiFormConfig } from "./ui-form-config.interface";
+
 export const UNSAVED = 'Unsaved';
 export const VISIBILITY = 'visibility';
 export const EDITABLE_LOGIC = 'editableLogic';
@@ -10,4 +12,16 @@ export const NUMBER = 'number';
 export const BOOLEAN = 'boolean';
 export const NULL = 'null';
 export const UNDEFINED = 'undefined';
-
+export const DUMMY_UI: UiFormConfig = {
+                  type: FIELD_TYPES.FORM_GROUP,
+                  references: {
+                    attributes: {},
+                    validations: {},
+                    validationRelations: {},
+                    showErrorAfterSubmit: false
+                  },
+                  paragraphs: {
+                    textAttributes: {}
+                  },
+                  elementsLayout: []
+                };

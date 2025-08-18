@@ -1,8 +1,6 @@
 import { Injectable } from "@angular/core";
 import {
   AbstractControl,
-  FormArray,
-  FormGroup,
   UntypedFormArray,
   UntypedFormControl,
   UntypedFormGroup,
@@ -17,7 +15,9 @@ import {
   ElementLayoutData,
   FIELD_TYPES,
   FormConfig,
+  ReferenceAttribute,
   UiFormConfig,
+  UiFormReferences,
   Validation,
 } from "../models/ui-form-config.interface";
 import { EDITABLE_LOGIC, VISIBILITY } from "../models/constants";
@@ -33,112 +33,133 @@ import {
 
 @Injectable({ providedIn: "root" })
 export class ConfigBuilderService {
-  public setUpConfigFormGroup(
-    formGroup: UntypedFormGroup,
-    config: FormConfig
-  ): UntypedFormGroup {
-    config.ui.elementsLayout.forEach((layer: ElementLayoutData[]) => {
-      layer.forEach((element: ElementLayoutData) => {
-        if (element?._refAttributes) {
-          const attr = config.ui.references.attributes[element._refAttributes];
-          if (!attr) return;
 
-          // --- FORM GROUP ---
-          if (
-            attr.type === FIELD_TYPES.FORM_GROUP &&
-            attr.formGroupAttributes
-          ) {
-            formGroup.addControl(
-              attr.id,
-              this.setUpConfigFormGroup(new UntypedFormGroup({}), {
-                disclosure_name: attr.label,
-                disclosure_type: attr.id,
-                ui: attr.formGroupAttributes as UiFormConfig,
-              })
-            );
-
-          // --- FORM ARRAY ---
-          } else if (
-            attr.type === FIELD_TYPES.FORM_ARRAY &&
-            attr.formArrayAttributes
-          ) {
-            const initial = attr.initialValue || [];
-            const formArray = new UntypedFormArray([]);
-            // Array of FormGroups
-            if (attr.formArrayAttributes.groupConfig) {
-              for (const item of initial) {
-                formArray.push(
-                  this.setUpConfigFormGroup(new UntypedFormGroup({}), {
-                    disclosure_name: attr.label,
-                    disclosure_type: attr.id,
-                    ui: attr.formArrayAttributes.groupConfig as UiFormConfig,
-                  })
-                );
-              }
-            // Array of single fields
-            } else if (attr.formArrayAttributes.fieldConfig) {
-              for (const item of initial) {
-                formArray.push(new UntypedFormControl(item));
-              }
+  public setUpConfigFormRoot(config: FormConfig): UntypedFormGroup | UntypedFormArray {
+    if (config.ui.type === FIELD_TYPES.FORM_ARRAY) {
+      // Only one attribute allowed in attributes for FORM_ARRAY
+      const attrKeys = Object.keys(config.ui.references.attributes);
+      if (attrKeys.length !== 1) {
+        throw new Error('FORM_ARRAY config must have exactly one attribute in references.attributes');
+      }
+      const attr = config.ui.references.attributes[attrKeys[0]];
+      const initial = attr.initialValue || [];
+      const formArray = new UntypedFormArray([]);
+      // If attribute is a FORM_GROUP or FORM_ARRAY, use nestedElement
+      if (attr.type === FIELD_TYPES.FORM_GROUP && attr.nestedElement) {
+          formArray.push(
+            this.setUpConfigFormRoot({
+              disclosure_name: attr.label,
+              disclosure_type: attr.id,
+              ui: attr.nestedElement as UiFormConfig,
+            }) as UntypedFormGroup
+          );
+      } else if (attr.type === FIELD_TYPES.FORM_ARRAY && attr.nestedElement) {
+          formArray.push(
+            this.setUpConfigFormRoot({
+              disclosure_name: attr.label,
+              disclosure_type: attr.id,
+              ui: attr.nestedElement as UiFormConfig,
+            }) as UntypedFormArray
+          );
+      } else {
+        // Basic field or other types
+          formArray.push(new UntypedFormControl(initial));
+      }
+      return formArray;
+    } else if (config.ui.type === FIELD_TYPES.FORM_GROUP) {
+      const formGroup = new UntypedFormGroup({});
+      config.ui.elementsLayout.forEach((layer: ElementLayoutData[]) => {
+        layer.forEach((element: ElementLayoutData) => {
+          if (element?._refAttributes) {
+            const attr = config.ui.references.attributes[element._refAttributes];
+            if (!attr) return;
+            // --- FORM GROUP ---
+            if (attr.type === FIELD_TYPES.FORM_GROUP && attr.nestedElement) {
+              formGroup.addControl(
+                attr.id,
+                this.setUpConfigFormRoot({
+                  disclosure_name: attr.label,
+                  disclosure_type: attr.id,
+                  ui: attr.nestedElement as UiFormConfig,
+                }) as UntypedFormGroup
+              );
+            // --- FORM ARRAY ---
+            } else if (attr.type === FIELD_TYPES.FORM_ARRAY && attr.nestedElement) {
+              formGroup.addControl(
+                attr.id,
+                this.setUpConfigFormRoot({
+                  disclosure_name: attr.label,
+                  disclosure_type: attr.id,
+                  ui: attr.nestedElement as UiFormConfig,
+                }) as UntypedFormArray
+              );
+            // --- BASIC FIELD ---
+            } else {
+              formGroup.addControl(
+                element._refAttributes,
+                new UntypedFormControl(attr.initialValue)
+              );
             }
-            formGroup.addControl(attr.id, formArray);
-
-          // --- BASIC FIELD ---
-          } else {
-            formGroup.addControl(
-              element._refAttributes,
-              new UntypedFormControl(attr.initialValue)
-            );
           }
-        }
+        });
       });
-    });
-    return formGroup;
+      return formGroup;
+    } else {
+      throw new Error('Unknown config.ui.type: ' + config.ui);
+    }
   }
 
   public setCustomValidations(
-    formGroup: UntypedFormGroup,
-    config: FormConfig,
+    form: UntypedFormGroup | UntypedFormArray,
+    references: UiFormReferences,
     status: string
   ): void {
-    Object.entries(formGroup.controls).forEach(([id, control]) => {
-      const attr = config.ui.references.attributes[id];
-      if (!attr) return;
-      if (attr.type === FIELD_TYPES.FORM_GROUP && attr.formGroupAttributes) {
-        // WIP: Form group validation is not implemented yet
-        // this.setCustomValidations(
-        //   control as UntypedFormGroup,
-        //   {
-        //     disclosure_name: attr.label,
-        //     disclosure_type: attr.id,
-        //     ui: attr.formGroupAttributes as UiFormConfig,
-        //   },
-        //   status
-        // );
-      }  else if (attr.type === FIELD_TYPES.FORM_ARRAY && attr.formArrayAttributes) {
-        // WIP: Form array validation is not implemented yet
-      } else {
+    if (!references || !references.attributes) return;
+    if (form instanceof UntypedFormGroup) {
+      Object.entries(form.controls).forEach(([id, control]) => {
+        const attr = references.attributes[id];
+        if (!attr) return;
         control.addValidators(
-          this.customValidatorFunction(id, config, formGroup, status)
+          this.customValidatorFunction(id, references, form, status)
         );
-      }
-    });
+        // Handle nested FormGroup/FormArray
+        if (control instanceof UntypedFormGroup || control instanceof UntypedFormArray) {
+          this.setCustomValidations(control, references, status);
+        }
+      });
+    } else if (form instanceof UntypedFormArray) {
+      // Only one attribute allowed in references.attributes for FormArray
+      const attrKeys = Object.keys(references.attributes);
+      if (attrKeys.length !== 1) return;
+      const attr = references.attributes[attrKeys[0]];
+      form.controls.forEach((control, idx) => {
+        if (!attr) return;
+        control.addValidators(
+          this.customValidatorFunction(attrKeys[0], references, form, status)
+        );
+        // Handle nested FormGroup/FormArray
+        if (control instanceof UntypedFormGroup || control instanceof UntypedFormArray) {
+          this.setCustomValidations(control, references, status);
+        }
+      });
+    }
   }
 
   customValidatorFunction(
     attributeId: string,
-    config: FormConfig,
-    formGroup: FormGroup,
+    references: UiFormReferences,
+    form: UntypedFormGroup | UntypedFormArray,
     status: string
   ): ValidatorFn[] {
-    const { validations, attributes } = config.ui.references;
+    const { validations, attributes } = references;
     const attribute = attributes[attributeId];
-    if (!attribute.validations?.length) return [];
+    if (!attribute || !attribute.validations?.length) return [];
     return attribute.validations.map((validation: Validation) => {
       return (control: AbstractControl): ValidationErrors | null => {
         const controlValue = control.value;
         if (validation?._refValidation) {
           const val = validations[validation._refValidation];
+          if (!val || !val.regex) return null;
           const regex = new RegExp(val.regex);
           return controlValue && regex.test(controlValue)
             ? null
@@ -152,8 +173,8 @@ export class ConfigBuilderService {
               },
             },
             attributeId,
-            config,
-            formGroup,
+            attributes,
+            form,
             status
           );
           return result ? { [Math.random().toString()]: message } : null;
@@ -166,13 +187,30 @@ export class ConfigBuilderService {
   removeAttributeAndCleanup(
     arr: ElementLayoutData[][],
     attribute: string,
-    formGroup: FormGroup
+    formGroup: UntypedFormGroup | UntypedFormArray
   ) {
     const cleanedArray = arr.reduce((acc, innerArray) => {
       const filteredArray = innerArray.filter((item) => {
         if (item._refAttributes && item._refAttributes === attribute) {
-          formGroup.get(attribute)?.setValue("");
-          formGroup.get(attribute)?.setErrors(null);
+          // Remove value and errors for both FormGroup and FormArray
+          if (formGroup instanceof UntypedFormGroup) {
+            formGroup.get(attribute)?.setValue("");
+            formGroup.get(attribute)?.setErrors(null);
+          } else if (formGroup instanceof UntypedFormArray) {
+            formGroup.controls.forEach(ctrl => {
+              if (ctrl instanceof UntypedFormGroup || ctrl instanceof UntypedFormArray) {
+                // Recursively clean nested groups/arrays
+                this.removeAttributeAndCleanup(
+                  [innerArray],
+                  attribute,
+                  ctrl
+                );
+              } else if (ctrl instanceof UntypedFormControl) {
+                ctrl.setValue("");
+                ctrl.setErrors(null);
+              }
+            });
+          }
           return false; // Filter out this item
         } else if (
           item._paragraphAttributes &&
@@ -195,12 +233,24 @@ export class ConfigBuilderService {
     checkType: string,
     attributes: any,
     id: string | number,
-    config: FormConfig,
-    formGroup: FormGroup,
+    attributesConfig: Record<string, ReferenceAttribute>,
+    formGroup: UntypedFormGroup | UntypedFormArray,
     status: string
   ): { result: boolean; message: string | null } {
-    // WIP: Date format comparison or make single date format applicable all over app
-    const data = formGroup.getRawValue();
+    // Support both FormGroup and FormArray for data extraction
+    let data: any;
+    if (formGroup instanceof UntypedFormGroup) {
+      data = formGroup.getRawValue();
+    } else if (formGroup instanceof UntypedFormArray) {
+      data = formGroup.controls.map(ctrl =>
+        ctrl instanceof UntypedFormGroup || ctrl instanceof UntypedFormArray
+          ? ctrl.getRawValue()
+          : ctrl.value
+      );
+    } else {
+      data = {};
+    }
+
     const isExist = checkType in attributes[id];
     if (!isExist) {
       return {
@@ -221,7 +271,11 @@ export class ConfigBuilderService {
     } = attributes[id][checkType] as AccessControls;
 
     if (readonly) {
-      formGroup.get(id as string)?.disable();
+      if (formGroup instanceof UntypedFormGroup) {
+        formGroup.get(id as string)?.disable();
+      } else if (formGroup instanceof UntypedFormArray) {
+        formGroup.controls.forEach(ctrl => ctrl.disable());
+      }
       return { result: true, message: `${id} attribute is readonly` };
     }
     if (allWaysEditable)
@@ -255,15 +309,23 @@ export class ConfigBuilderService {
               (group?.sourceAttribute || group?.conditionalAttribute)
             ) {
               message = group.description;
-              const currentValue = this.getDataByType(
-                data[group.sourceAttribute as string],
-                config,
-                group.sourceAttribute
-              );
-              const originalValue =
-                group.conditionValue ||
-                data[group.conditionalAttribute as string];
-              const conditionValue = this.getDataByType(originalValue, config);
+              let currentValue, originalValue;
+              if (formGroup instanceof UntypedFormArray) {
+                // For arrays, use index as sourceAttribute if possible
+                const idx = typeof group.sourceAttribute === 'number' ? group.sourceAttribute : 0;
+                currentValue = data[idx];
+                originalValue = group.conditionValue || data[idx];
+              } else {
+                currentValue = this.getDataByType(
+                  data[group.sourceAttribute as string],
+                  attributesConfig,
+                  group.sourceAttribute
+                );
+                originalValue =
+                  group.conditionValue ||
+                  data[group.conditionalAttribute as string];
+              }
+              const conditionValue = this.getDataByType(originalValue, attributesConfig);
               switch (group.condition) {
                 case COMPARISON_TYPES.EQUAL:
                   return currentValue == conditionValue;
@@ -345,21 +407,25 @@ export class ConfigBuilderService {
     return false;
   }
 
-  getDataByType(data: any, config: FormConfig, sourceAttribute?: string): any {
+  getDataByType(data: any, attributes: Record<string, ReferenceAttribute>, sourceAttribute?: string): any {
     if (data == null || data == undefined || data == "") return "";
     if (isBoolean(data)) return toBoolean(data);
     if (isNumeric(data)) return data;
     if (isObject(data) && sourceAttribute) {
-      const attributeConfig = config.ui.references.attributes[sourceAttribute];
+      const attributeConfig = attributes[sourceAttribute];
       let valueKey = "value";
+      // Type guard for discriminated union: only access 'get' if present
       if (
-        attributeConfig?.get &&
-        attributeConfig.get?.mapping &&
+        attributeConfig &&
+        typeof attributeConfig === 'object' &&
+        'get' in attributeConfig &&
+        attributeConfig.get &&
+        attributeConfig.get.mapping &&
         attributeConfig.get.mapping.value
       ) {
         valueKey = attributeConfig.get.mapping.value;
       }
-      return this.getDataByType(data[valueKey], config);
+      return this.getDataByType(data[valueKey], attributes);
     }
     return JSON.stringify(data)?.replace(/^"(.*)"$/, "$1");
   }

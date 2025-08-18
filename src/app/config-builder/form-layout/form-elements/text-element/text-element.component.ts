@@ -8,7 +8,7 @@ import {
   OnInit,
   signal,
 } from "@angular/core";
-import { UntypedFormGroup } from "@angular/forms";
+import { UntypedFormArray, UntypedFormGroup } from "@angular/forms";
 import { ReplaySubject, takeUntil } from "rxjs";
 import { ReferenceTextAttribute } from "src/app/models/ui-form-config.interface";
 import { SanitizeTrustedHtmlPipe } from "src/app/pipes/sanitize-trusted-html.pipe";
@@ -25,7 +25,7 @@ import { isEmptyArray } from "src/app/utility/utility";
 export class TextElementComponent implements OnInit, AfterViewInit, OnDestroy {
   private destroyed$ = new ReplaySubject(1);
   element = input<ReferenceTextAttribute>();
-  formGroup = input<UntypedFormGroup | undefined>();
+  form = input<UntypedFormGroup | UntypedFormArray | undefined>();
   text = signal<string | undefined>("");
 
   ngOnInit(): void {
@@ -33,16 +33,19 @@ export class TextElementComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-      this.formGroup()?.valueChanges.pipe(takeUntil(this.destroyed$)).subscribe((_) => {
-      this.updateText();
-    });
+    const formInstance = this.form();
+    if (formInstance instanceof UntypedFormGroup || formInstance instanceof UntypedFormArray) {
+      formInstance.valueChanges.pipe(takeUntil(this.destroyed$)).subscribe((_) => {
+        this.updateText();
+      });
+    }
   }
 
   updateText() {
     this.text.set(
         this.element()?.text.replace(/{{(.*?)}}/g, (_, key) => {
           const path = key.trim().split(".");
-          let value = this.formGroup()?.getRawValue();
+          let value = this.form()?.getRawValue();
 
           for (const part of path) {
             value = value?.[part];

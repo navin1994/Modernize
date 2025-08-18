@@ -9,7 +9,7 @@
 <ng-template #formAttributeLayout>
     <app-form-layout
       [config]="config()"
-      [formGroup]="formGroup"
+      [mainForm]="form"
       [status]="status"
       (submittedFormData)="onSubmit($event)"
     ></app-form-layout>

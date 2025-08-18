@@ -64,8 +64,26 @@ export const areObjectsEqual = (obj1: any, obj2: any): boolean => {
   return false;
 };
 
+// Memoization utility for deep equality
+const deepEqualMemo = new WeakMap<any, Map<any, boolean>>();
+
 export const areObjectsSame = (obj1: any, obj2: any): boolean => {
-  return JSON.stringify(sortObjectByKeys(obj1)) === JSON.stringify(sortObjectByKeys(obj2));
+  // Memoization: avoid recomputation for same object pairs
+  if (obj1 && obj2 && typeof obj1 === 'object' && typeof obj2 === 'object') {
+    let map = deepEqualMemo.get(obj1);
+    if (map && map.has(obj2)) {
+      return map.get(obj2)!;
+    }
+    const result = areObjectsEqual(obj1, obj2);
+    if (!map) {
+      map = new Map<any, boolean>();
+      deepEqualMemo.set(obj1, map);
+    }
+    map.set(obj2, result);
+    return result;
+  }
+  // Fallback for primitives
+  return areObjectsEqual(obj1, obj2);
 };
 
 export const isObject = (input: any): boolean => {
