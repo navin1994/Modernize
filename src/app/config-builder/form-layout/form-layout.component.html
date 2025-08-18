@@ -130,7 +130,7 @@
                     }
                   </div>
                 </div>
-                @if (!!config.ui && !config.ui.formLabel) {
+                @if (isNested && !!config.ui && !config.ui.formLabel) {
                   <div class="d-flex justify-content-center mb-3">
                     <button
                       (click)="

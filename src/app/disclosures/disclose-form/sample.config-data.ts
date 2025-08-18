@@ -3149,7 +3149,7 @@ export const attribute_editor_array: FormConfig = {
   disclosure_type: "ATTRIBUTE_EDITOR_ARRAY",
   ui: {
     type: "form-array",
-    formLabel: "Form Array Attribute Editor",
+    // formLabel: "Form Array Attribute Editor",
     references: {
       attributes: {
         SUB_FORM_GROUP_WITH_NESTED_FORM_ARRAY: {
@@ -3158,7 +3158,7 @@ export const attribute_editor_array: FormConfig = {
           label: "Sub Form Group with Nested Form Array",
           nestedElement: {
             type: FIELD_TYPES.FORM_GROUP,
-            formLabel: "This is nested form group",
+            // formLabel: "This is nested form group",
             references: {
               attributes: {
                 ATTRIBUTE_ID: {
@@ -3281,12 +3281,14 @@ export const attribute_editor_array: FormConfig = {
       textAttributes: {
         SAMPLE_TEXT: {
           id: "SAMPLE_TEXT",
-          text: '<div style="color: red; font-weight: bold; margin-top: 10px;">The <I>criteria</I> parameter is <a href="https://example.com" target="_blank">Visit Example.com</a> a hash containing...</div>',
+          text: '<div style="color: red; font-weight: bold; margin-top: 10px;">The <I>criteria</I> parameter is <a href="https://example.com" target="_blank">Visit Example.com</a> a hash containing...{{ATTRIBUTE_ID}}</div>',
         },
       },
     },
     actions: attribute_editor.ui.actions,
-    elementsLayout: [[{ _refAttributes: "SUB_FORM_GROUP_WITH_NESTED_FORM_ARRAY" }]],
+    elementsLayout: [[{ _refAttributes: "SUB_FORM_GROUP_WITH_NESTED_FORM_ARRAY" }],
+  [{_paragraphAttributes: "SAMPLE_TEXT"}]
+  ],
   },
   version_id: "ajadh83usdfbyHSYSB93nsjn-array",
 };
