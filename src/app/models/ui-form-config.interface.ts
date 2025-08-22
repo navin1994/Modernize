@@ -134,7 +134,6 @@ export type StaticSelectionRequiredType =
   | typeof FIELD_TYPES.CHECKBOX_GROUP;
 
 export type ReferenceAttribute =
-  // input-date: dateFormat required
   | ({
       type: typeof FIELD_TYPES.DATE;
       dateFormat: string;

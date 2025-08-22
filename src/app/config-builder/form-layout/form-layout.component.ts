@@ -24,29 +24,16 @@ import {
   FIELD_TYPES,
   FormConfig,
   UiFormConfig,
+  UiFormReferences,
 } from "src/app/models/ui-form-config.interface";
 import {
-  ARRAY,
-  ARRAY_OF_OBJECTS,
-  BOOLEAN,
-  DATE,
-  DEFAULT_DATE_FORMAT,
   DUMMY_UI,
   EDITABLE_LOGIC,
-  NULL,
-  NUMBER,
-  OBJECT,
-  UNDEFINED,
   UNSAVED,
   VISIBILITY,
 } from "src/app/models/constants";
 import {
   areObjectsSame,
-  isArray,
-  isArrayOfObjects,
-  isBoolean,
-  isNumeric,
-  isObject,
 } from "src/app/utility/utility";
 import { CommonModule } from "@angular/common";
 import { TextElementComponent } from "./form-elements/text-element/text-element.component";
@@ -54,8 +41,6 @@ import { ActionButtonComponent } from "./form-elements/action-buttons/action-but
 import { ToastrService } from "ngx-toastr";
 import { ConfigBuilderService } from "../config-builder.service";
 import { ReplaySubject, takeUntil } from "rxjs";
-import { isDate } from "moment";
-import * as moment from "moment";
 import { MatIcon } from "@angular/material/icon";
 import { MatButton } from "@angular/material/button";
 
@@ -71,7 +56,6 @@ import { MatButton } from "@angular/material/button";
     ActionButtonComponent,
     MatButton,
     MatIcon,
-    // forwardRef(() => FormArrayComponent),
 ],
   templateUrl: "./form-layout.component.html",
   styleUrl: "./form-layout.component.scss",
@@ -112,13 +96,8 @@ export class FormLayoutComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes["config"] && changes["config"]?.currentValue) {
-      this.configBuilderService.setCustomValidations(
-        this.mainForm,
-        changes["config"]?.currentValue,
-        this.status
-      );
-
+    if (changes["config"] && changes["config"].currentValue) {
+      this.applyValidation(changes["config"].currentValue.ui.references);
       // Setup validation relations for both FormGroup and FormArray
       const setupValidationRelations = (form: UntypedFormGroup | UntypedFormArray, config: FormConfig) => {
         if (form instanceof UntypedFormGroup) {
@@ -149,6 +128,14 @@ export class FormLayoutComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
+  applyValidation(references: UiFormReferences): void {
+    this.configBuilderService.setCustomValidations(
+        this.mainForm,
+        references,
+        this.status
+      );
+  }
+
   addNewItemAt(index: number = 0, config?: FormConfig): void {
     let newControl;
     if(config) {
@@ -157,6 +144,7 @@ export class FormLayoutComponent implements OnInit, OnChanges, OnDestroy {
       newControl = new UntypedFormControl("");
     }
     (this.mainForm as UntypedFormArray).insert(index, newControl);
+    this.applyValidation(this.config.ui.references);
   }
 
   removeItem(index: number): void {
@@ -291,14 +279,20 @@ export class FormLayoutComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     // Recursively collect data from all child forms
-    const childData: Record<string, any> = {};
+    const childData: Record<string, any> = this.mainForm instanceof UntypedFormArray ? [] : {};
     if (this.childForms && this.childForms.length) {
-      for (const child of this.childForms.toArray()) {
+      for (const [index, child] of this.childForms.toArray().entries()) {
         // Avoid self-recursion
         if (child !== this) {
           const data = await child.submit({ nextStatus, runValidation, api });
           if (data && data.formData && child.config?.disclosure_type) {
-            childData[child.config.disclosure_type] = data.formData;
+            if (this.mainForm instanceof UntypedFormArray) {
+              // Store data in an array for FormArray
+              childData[index] = data.formData;
+            } else {
+              // Store data as key-value pairs for FormGroup
+              childData[child.config.disclosure_type] = data.formData;
+            }
           }
         }
       }
@@ -321,90 +315,20 @@ export class FormLayoutComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   parseFormValues() {
-    // Handles both FormGroup and FormArray as main form, recursively parses nested structures
-    const parse = (form: UntypedFormGroup | UntypedFormArray, config: FormConfig): any => {
+    const parse = (form: UntypedFormGroup | UntypedFormArray, references: UiFormReferences): any => {
+      const formValues = form.getRawValue();
       if (form instanceof UntypedFormGroup) {
-        const formValues = form.getRawValue() as Record<string, any>;
         return Object.entries(formValues).reduce((acc, [attributeId, controlValue]) => {
-          const attributeConfig = config.ui.references.attributes[attributeId];
-          // Type guards for discriminated union properties
-          let providedFormat = DEFAULT_DATE_FORMAT;
-          let mapping: any = undefined;
-          let staticSelection: any = undefined;
-          if (attributeConfig && attributeConfig.type === FIELD_TYPES.DATE && 'dateFormat' in attributeConfig) {
-            providedFormat = attributeConfig.dateFormat;
-          }
-          if ('get' in attributeConfig && attributeConfig.get) {
-            mapping = attributeConfig.get.mapping;
-          }
-          if ('staticSelection' in attributeConfig && attributeConfig.staticSelection) {
-            staticSelection = attributeConfig.staticSelection;
-          }
-          const dataType = this.getTypeOfData(controlValue);
-          switch (dataType) {
-            case ARRAY_OF_OBJECTS:
-              if (staticSelection) {
-                acc[attributeId] = controlValue.map((val: { [x: string]: any }) => val["value"]);
-              } else if (mapping && mapping.value) {
-                acc[attributeId] = controlValue.map((val: { [x: string]: any }) => val[mapping.value as string]);
-              } else {
-                acc[attributeId] = controlValue;
-              }
-              break;
-            case OBJECT:
-              if (staticSelection) {
-                acc[attributeId] = controlValue["value"];
-              } else if (mapping && mapping.value) {
-                acc[attributeId] = controlValue[mapping.value];
-              } else {
-                acc[attributeId] = controlValue;
-              }
-              break;
-            case DATE:
-              acc[attributeId] = moment(controlValue).format(providedFormat);
-              break;
-            case ARRAY:
-              // Recursively parse nested FormArray if present
-              if (form.get(attributeId) instanceof UntypedFormArray) {
-                acc[attributeId] = parse(form.get(attributeId) as UntypedFormArray, config);
-              } else {
-                acc[attributeId] = controlValue;
-              }
-              break;
-            case NUMBER:
-            case UNDEFINED:
-            case NULL:
-            case BOOLEAN:
-            default:
-              acc[attributeId] = controlValue;
-              break;
-          }
+          acc[attributeId] = this.configBuilderService.parseControlValue(controlValue, attributeId, references);
           return acc;
         }, {} as Record<string, any>);
       } else if (form instanceof UntypedFormArray) {
-        // Recursively parse each control in the array
-        return form.controls.map((ctrl, idx) => {
-          // Try to get config for array item if available
-          const arrayConfig = config;
-          return parse(ctrl as UntypedFormGroup | UntypedFormArray, arrayConfig);
-        });
+        const attributeId = Object.values(references.attributes)[0].id;
+        return this.configBuilderService.parseControlValue(formValues, attributeId, references);
       }
       return null;
     };
-    return parse(this.mainForm, this.config);
-  }
-
-  getTypeOfData(data: any): string {
-    let type = "string";
-    if (isArrayOfObjects(data)) type = ARRAY_OF_OBJECTS;
-    else if (isArray(data)) type = ARRAY;
-    if (isObject(data)) type = OBJECT;
-    if (isBoolean(data)) type = BOOLEAN;
-    if (isDate(data)) type = DATE;
-    if (isNumeric(data)) type = NUMBER;
-    if (data === null) type = NULL;
-    if (data === undefined) type = UNDEFINED;
-    return type;
+    return parse(this.mainForm, this.config.ui.references);
   }
 
   ngOnDestroy(): void {

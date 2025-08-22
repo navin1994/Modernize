@@ -39,7 +39,6 @@
             this.visibleLayers().flat().includes(element) &&
             element._refAttributes
           ) {
-            <!-- If form is group -->
             @let attr = config.ui.references.attributes[element._refAttributes];
             @if (attr) {
               @if (isFormGroup()) {
@@ -104,7 +103,7 @@
                             class="delete-btn"
                             (click)="addOrRemoveElement(false, i)"
                           >
-                            @if (!attr.nestedElement.formLabel && i !== 0) {
+                            @if (!attr.nestedElement.formLabel && i !== 0 && !mainForm.disabled) {
                               <mat-icon>delete_forever</mat-icon>
                             }
                           </span>
@@ -130,7 +129,7 @@
                     }
                   </div>
                 </div>
-                @if (isNested && !!config.ui && !config.ui.formLabel) {
+                @if (isNested && !!config.ui && !config.ui.formLabel && !mainForm.disabled) {
                   <div class="d-flex justify-content-center mb-3">
                     <button
                       (click)="

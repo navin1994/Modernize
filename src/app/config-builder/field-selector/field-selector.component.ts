@@ -87,7 +87,6 @@ export class FieldSelectorComponent implements OnInit {
   showDeleteButton = input<boolean>(false);
   showAddButton = input<boolean>(false);
   addOrRemoveControl = output<boolean>();
-  // formStatus = input<string>();
 
   fieldTypes = FIELD_TYPES;
   direction = DIRECTION;

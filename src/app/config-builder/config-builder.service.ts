@@ -20,9 +20,23 @@ import {
   UiFormReferences,
   Validation,
 } from "../models/ui-form-config.interface";
-import { EDITABLE_LOGIC, VISIBILITY } from "../models/constants";
+import {
+  ARRAY,
+  ARRAY_OF_OBJECTS,
+  BOOLEAN,
+  DATE,
+  DEFAULT_DATE_FORMAT,
+  EDITABLE_LOGIC,
+  NULL,
+  NUMBER,
+  OBJECT,
+  UNDEFINED,
+  VISIBILITY,
+} from "../models/constants";
 import {
   dateToNumber,
+  isArray,
+  isArrayOfObjects,
   isBoolean,
   isDate,
   isEmptyArray,
@@ -30,40 +44,44 @@ import {
   isObject,
   toBoolean,
 } from "../utility/utility";
+import * as moment from "moment";
 
 @Injectable({ providedIn: "root" })
 export class ConfigBuilderService {
-
-  public setUpConfigFormRoot(config: FormConfig): UntypedFormGroup | UntypedFormArray {
+  public setUpConfigFormRoot(
+    config: FormConfig,
+  ): UntypedFormGroup | UntypedFormArray {
     if (config.ui.type === FIELD_TYPES.FORM_ARRAY) {
       // Only one attribute allowed in attributes for FORM_ARRAY
       const attrKeys = Object.keys(config.ui.references.attributes);
       if (attrKeys.length !== 1) {
-        throw new Error('FORM_ARRAY config must have exactly one attribute in references.attributes');
+        throw new Error(
+          "FORM_ARRAY config must have exactly one attribute in references.attributes",
+        );
       }
       const attr = config.ui.references.attributes[attrKeys[0]];
       const initial = attr.initialValue || [];
       const formArray = new UntypedFormArray([]);
       // If attribute is a FORM_GROUP or FORM_ARRAY, use nestedElement
       if (attr.type === FIELD_TYPES.FORM_GROUP && attr.nestedElement) {
-          formArray.push(
-            this.setUpConfigFormRoot({
-              disclosure_name: attr.label,
-              disclosure_type: attr.id,
-              ui: attr.nestedElement as UiFormConfig,
-            }) as UntypedFormGroup
-          );
+        formArray.push(
+          this.setUpConfigFormRoot({
+            disclosure_name: attr.label,
+            disclosure_type: attr.id,
+            ui: attr.nestedElement as UiFormConfig,
+          }) as UntypedFormGroup,
+        );
       } else if (attr.type === FIELD_TYPES.FORM_ARRAY && attr.nestedElement) {
-          formArray.push(
-            this.setUpConfigFormRoot({
-              disclosure_name: attr.label,
-              disclosure_type: attr.id,
-              ui: attr.nestedElement as UiFormConfig,
-            }) as UntypedFormArray
-          );
+        formArray.push(
+          this.setUpConfigFormRoot({
+            disclosure_name: attr.label,
+            disclosure_type: attr.id,
+            ui: attr.nestedElement as UiFormConfig,
+          }) as UntypedFormArray,
+        );
       } else {
         // Basic field or other types
-          formArray.push(new UntypedFormControl(initial));
+        formArray.push(new UntypedFormControl(initial));
       }
       return formArray;
     } else if (config.ui.type === FIELD_TYPES.FORM_GROUP) {
@@ -71,7 +89,8 @@ export class ConfigBuilderService {
       config.ui.elementsLayout.forEach((layer: ElementLayoutData[]) => {
         layer.forEach((element: ElementLayoutData) => {
           if (element?._refAttributes) {
-            const attr = config.ui.references.attributes[element._refAttributes];
+            const attr =
+              config.ui.references.attributes[element._refAttributes];
             if (!attr) return;
             // --- FORM GROUP ---
             if (attr.type === FIELD_TYPES.FORM_GROUP && attr.nestedElement) {
@@ -81,23 +100,26 @@ export class ConfigBuilderService {
                   disclosure_name: attr.label,
                   disclosure_type: attr.id,
                   ui: attr.nestedElement as UiFormConfig,
-                }) as UntypedFormGroup
+                }) as UntypedFormGroup,
               );
-            // --- FORM ARRAY ---
-            } else if (attr.type === FIELD_TYPES.FORM_ARRAY && attr.nestedElement) {
+              // --- FORM ARRAY ---
+            } else if (
+              attr.type === FIELD_TYPES.FORM_ARRAY &&
+              attr.nestedElement
+            ) {
               formGroup.addControl(
                 attr.id,
                 this.setUpConfigFormRoot({
                   disclosure_name: attr.label,
                   disclosure_type: attr.id,
                   ui: attr.nestedElement as UiFormConfig,
-                }) as UntypedFormArray
+                }) as UntypedFormArray,
               );
-            // --- BASIC FIELD ---
+              // --- BASIC FIELD ---
             } else {
               formGroup.addControl(
                 element._refAttributes,
-                new UntypedFormControl(attr.initialValue)
+                new UntypedFormControl(attr.initialValue),
               );
             }
           }
@@ -105,14 +127,14 @@ export class ConfigBuilderService {
       });
       return formGroup;
     } else {
-      throw new Error('Unknown config.ui.type: ' + config.ui);
+      throw new Error("Unknown config.ui.type: " + config.ui);
     }
   }
 
   public setCustomValidations(
     form: UntypedFormGroup | UntypedFormArray,
     references: UiFormReferences,
-    status: string
+    status: string,
   ): void {
     if (!references || !references.attributes) return;
     if (form instanceof UntypedFormGroup) {
@@ -120,10 +142,13 @@ export class ConfigBuilderService {
         const attr = references.attributes[id];
         if (!attr) return;
         control.addValidators(
-          this.customValidatorFunction(id, references, form, status)
+          this.customValidatorFunction(id, references, form, status),
         );
         // Handle nested FormGroup/FormArray
-        if (control instanceof UntypedFormGroup || control instanceof UntypedFormArray) {
+        if (
+          control instanceof UntypedFormGroup ||
+          control instanceof UntypedFormArray
+        ) {
           this.setCustomValidations(control, references, status);
         }
       });
@@ -135,10 +160,13 @@ export class ConfigBuilderService {
       form.controls.forEach((control, idx) => {
         if (!attr) return;
         control.addValidators(
-          this.customValidatorFunction(attrKeys[0], references, form, status)
+          this.customValidatorFunction(attrKeys[0], references, form, status),
         );
         // Handle nested FormGroup/FormArray
-        if (control instanceof UntypedFormGroup || control instanceof UntypedFormArray) {
+        if (
+          control instanceof UntypedFormGroup ||
+          control instanceof UntypedFormArray
+        ) {
           this.setCustomValidations(control, references, status);
         }
       });
@@ -149,7 +177,7 @@ export class ConfigBuilderService {
     attributeId: string,
     references: UiFormReferences,
     form: UntypedFormGroup | UntypedFormArray,
-    status: string
+    status: string,
   ): ValidatorFn[] {
     const { validations, attributes } = references;
     const attribute = attributes[attributeId];
@@ -175,7 +203,7 @@ export class ConfigBuilderService {
             attributeId,
             attributes,
             form,
-            status
+            status,
           );
           return result ? { [Math.random().toString()]: message } : null;
         }
@@ -187,7 +215,7 @@ export class ConfigBuilderService {
   removeAttributeAndCleanup(
     arr: ElementLayoutData[][],
     attribute: string,
-    formGroup: UntypedFormGroup | UntypedFormArray
+    formGroup: UntypedFormGroup | UntypedFormArray,
   ) {
     const cleanedArray = arr.reduce((acc, innerArray) => {
       const filteredArray = innerArray.filter((item) => {
@@ -197,14 +225,13 @@ export class ConfigBuilderService {
             formGroup.get(attribute)?.setValue("");
             formGroup.get(attribute)?.setErrors(null);
           } else if (formGroup instanceof UntypedFormArray) {
-            formGroup.controls.forEach(ctrl => {
-              if (ctrl instanceof UntypedFormGroup || ctrl instanceof UntypedFormArray) {
+            formGroup.controls.forEach((ctrl) => {
+              if (
+                ctrl instanceof UntypedFormGroup ||
+                ctrl instanceof UntypedFormArray
+              ) {
                 // Recursively clean nested groups/arrays
-                this.removeAttributeAndCleanup(
-                  [innerArray],
-                  attribute,
-                  ctrl
-                );
+                this.removeAttributeAndCleanup([innerArray], attribute, ctrl);
               } else if (ctrl instanceof UntypedFormControl) {
                 ctrl.setValue("");
                 ctrl.setErrors(null);
@@ -235,17 +262,17 @@ export class ConfigBuilderService {
     id: string | number,
     attributesConfig: Record<string, ReferenceAttribute>,
     formGroup: UntypedFormGroup | UntypedFormArray,
-    status: string
+    status: string,
   ): { result: boolean; message: string | null } {
     // Support both FormGroup and FormArray for data extraction
     let data: any;
     if (formGroup instanceof UntypedFormGroup) {
       data = formGroup.getRawValue();
     } else if (formGroup instanceof UntypedFormArray) {
-      data = formGroup.controls.map(ctrl =>
+      data = formGroup.controls.map((ctrl) =>
         ctrl instanceof UntypedFormGroup || ctrl instanceof UntypedFormArray
           ? ctrl.getRawValue()
-          : ctrl.value
+          : ctrl.value,
       );
     } else {
       data = {};
@@ -274,7 +301,7 @@ export class ConfigBuilderService {
       if (formGroup instanceof UntypedFormGroup) {
         formGroup.get(id as string)?.disable();
       } else if (formGroup instanceof UntypedFormArray) {
-        formGroup.controls.forEach(ctrl => ctrl.disable());
+        formGroup.controls.forEach((ctrl) => ctrl.disable());
       }
       return { result: true, message: `${id} attribute is readonly` };
     }
@@ -312,20 +339,26 @@ export class ConfigBuilderService {
               let currentValue, originalValue;
               if (formGroup instanceof UntypedFormArray) {
                 // For arrays, use index as sourceAttribute if possible
-                const idx = typeof group.sourceAttribute === 'number' ? group.sourceAttribute : 0;
+                const idx =
+                  typeof group.sourceAttribute === "number"
+                    ? group.sourceAttribute
+                    : 0;
                 currentValue = data[idx];
                 originalValue = group.conditionValue || data[idx];
               } else {
                 currentValue = this.getDataByType(
                   data[group.sourceAttribute as string],
                   attributesConfig,
-                  group.sourceAttribute
+                  group.sourceAttribute,
                 );
                 originalValue =
                   group.conditionValue ||
                   data[group.conditionalAttribute as string];
               }
-              const conditionValue = this.getDataByType(originalValue, attributesConfig);
+              const conditionValue = this.getDataByType(
+                originalValue,
+                attributesConfig,
+              );
               switch (group.condition) {
                 case COMPARISON_TYPES.EQUAL:
                   return currentValue == conditionValue;
@@ -341,28 +374,28 @@ export class ConfigBuilderService {
                 case COMPARISON_TYPES.GREATER_THAN: {
                   const { currVal, condVal } = this.checkIfDateValueAndConvert(
                     currentValue,
-                    conditionValue
+                    conditionValue,
                   );
                   return Number(currVal) > Number(condVal);
                 }
                 case COMPARISON_TYPES.GREATER_THAN_EQUAL_TO: {
                   const { currVal, condVal } = this.checkIfDateValueAndConvert(
                     currentValue,
-                    conditionValue
+                    conditionValue,
                   );
                   return Number(currVal) >= Number(condVal);
                 }
                 case COMPARISON_TYPES.LESS_THAN: {
                   const { currVal, condVal } = this.checkIfDateValueAndConvert(
                     currentValue,
-                    conditionValue
+                    conditionValue,
                   );
                   return Number(currVal) < Number(condVal);
                 }
                 case COMPARISON_TYPES.LESS_THAN: {
                   const { currVal, condVal } = this.checkIfDateValueAndConvert(
                     currentValue,
-                    conditionValue
+                    conditionValue,
                   );
                   return Number(currVal) <= Number(condVal);
                 }
@@ -385,9 +418,85 @@ export class ConfigBuilderService {
     return { result: false, message: null };
   }
 
+  parseControlValue(
+    controlValue: any,
+    attributeId: string,
+    references: UiFormReferences,
+  ): any {
+    const attributeConfig = references.attributes[attributeId];
+    // Type guards for discriminated union properties
+    let providedFormat = DEFAULT_DATE_FORMAT;
+    let mapping: any = undefined;
+    let staticSelection: any = undefined;
+    if (
+      attributeConfig &&
+      attributeConfig.type === FIELD_TYPES.DATE &&
+      "dateFormat" in attributeConfig
+    ) {
+      providedFormat = attributeConfig.dateFormat;
+    }
+    if ("get" in attributeConfig && attributeConfig.get) {
+      mapping = attributeConfig.get.mapping;
+    }
+    if (
+      "staticSelection" in attributeConfig &&
+      attributeConfig.staticSelection
+    ) {
+      staticSelection = attributeConfig.staticSelection;
+    }
+    const dataType = this.getTypeOfData(controlValue);
+    switch (dataType) {
+      case ARRAY_OF_OBJECTS:
+        if (staticSelection) {
+          return controlValue.map(
+            (val: { [x: string]: any }) => val["value"],
+          );
+        } else if (mapping && mapping.value) {
+          return controlValue.map(
+            (val: { [x: string]: any }) => val[mapping.value as string],
+          );
+        } else {
+          return controlValue;
+        }
+        break;
+      case OBJECT:
+        if (staticSelection) {
+          return controlValue["value"];
+        } else if (mapping && mapping.value) {
+          return controlValue[mapping.value];
+        } else {
+          return controlValue;
+        }
+        break;
+      case DATE:
+        return moment(controlValue).format(providedFormat);
+        break;
+      case ARRAY:
+      case NUMBER:
+      case UNDEFINED:
+      case NULL:
+      case BOOLEAN:
+      default:
+        return controlValue;
+    }
+  }
+
+  getTypeOfData(data: any): string {
+    let type = "string";
+    if (isArrayOfObjects(data)) type = ARRAY_OF_OBJECTS;
+    else if (isArray(data)) type = ARRAY;
+    if (isObject(data)) type = OBJECT;
+    if (isBoolean(data)) type = BOOLEAN;
+    if (isDate(data)) type = DATE;
+    if (isNumeric(data)) type = NUMBER;
+    if (data === null) type = NULL;
+    if (data === undefined) type = UNDEFINED;
+    return type;
+  }
+
   checkIfDateValueAndConvert(
     currentValue: any,
-    conditionValue: any
+    conditionValue: any,
   ): { currVal: any; condVal: any } {
     currentValue = isDate(currentValue)
       ? dateToNumber(currentValue)
@@ -407,7 +516,11 @@ export class ConfigBuilderService {
     return false;
   }
 
-  getDataByType(data: any, attributes: Record<string, ReferenceAttribute>, sourceAttribute?: string): any {
+  getDataByType(
+    data: any,
+    attributes: Record<string, ReferenceAttribute>,
+    sourceAttribute?: string,
+  ): any {
     if (data == null || data == undefined || data == "") return "";
     if (isBoolean(data)) return toBoolean(data);
     if (isNumeric(data)) return data;
@@ -417,8 +530,8 @@ export class ConfigBuilderService {
       // Type guard for discriminated union: only access 'get' if present
       if (
         attributeConfig &&
-        typeof attributeConfig === 'object' &&
-        'get' in attributeConfig &&
+        typeof attributeConfig === "object" &&
+        "get" in attributeConfig &&
         attributeConfig.get &&
         attributeConfig.get.mapping &&
         attributeConfig.get.mapping.value
@@ -428,5 +541,63 @@ export class ConfigBuilderService {
       return this.getDataByType(data[valueKey], attributes);
     }
     return JSON.stringify(data)?.replace(/^"(.*)"$/, "$1");
+  }
+
+  patchFormRecursive(
+    form: UntypedFormGroup | UntypedFormArray,
+    data: any,
+    config: FormConfig
+  ): void {
+    const hasNestedElement = (attr: any): attr is { nestedElement: UiFormConfig } => {
+      return attr && typeof attr === 'object' && 'nestedElement' in attr;
+    };
+
+    if (form instanceof UntypedFormGroup) {
+      // Iterate over the keys in the data object
+      Object.entries(data).forEach(([key, value]) => {
+        const control = form.get(key);
+
+        if (control instanceof UntypedFormGroup || control instanceof UntypedFormArray) {
+          // Recursively patch nested FormGroup or FormArray
+          const attribute = config.ui.references.attributes[key];
+          if (hasNestedElement(attribute)) {
+            this.patchFormRecursive(control, value, {
+              ...config,
+              ui: attribute.nestedElement,
+            });
+          }
+        } else if (control) {
+          // Patch value for basic controls
+          control.patchValue(value);
+        }
+      });
+    } else if (form instanceof UntypedFormArray) {
+      // Ensure the FormArray has enough controls for the data
+      while (form.length < data.length) {
+        const attribute = config.ui.references.attributes[Object.keys(config.ui.references.attributes)[0]];
+        if (hasNestedElement(attribute)) {
+          form.push(this.setUpConfigFormRoot({
+            ...config,
+            ui: attribute.nestedElement,
+          }));
+        }
+      }
+
+      // Patch each control in the FormArray
+      data.forEach((item: any, index: number) => {
+        const control = form.at(index);
+        if (control instanceof UntypedFormGroup || control instanceof UntypedFormArray) {
+          const attribute = config.ui.references.attributes[Object.keys(config.ui.references.attributes)[0]];
+          if (hasNestedElement(attribute)) {
+            this.patchFormRecursive(control, item, {
+              ...config,
+              ui: attribute.nestedElement,
+            });
+          }
+        } else if (control) {
+          control.patchValue(item);
+        }
+      });
+    }
   }
 }

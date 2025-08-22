@@ -1,8 +1,12 @@
+import * as moment from "moment";
+
 export const isEmptyArray = (input: any): boolean => {
   return !!(isArray(input) ? (input.length === 0 ? true : false) : false);
 };
 
-export const isDate = (value: any): boolean => value && !isNaN(new Date(value.toString()).getTime());
+export const isDate = (value: any): boolean => {
+  return moment(value, moment.ISO_8601, true).isValid();
+};
 
 export const dateToNumber = (input: string): number =>
   new Date(input).getTime();
