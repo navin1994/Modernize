@@ -7,6 +7,7 @@ import { ConfigBuilderService } from "src/app/config-builder/config-builder.serv
 import {
   attribute_editor,
   attribute_editor_array,
+  attribute_editor_formGroup,
   attribute_editor_single_field_array,
   testConfig,
 } from "./sample.config-data";
@@ -26,7 +27,8 @@ export class DiscloseFormComponent implements OnInit {
   // Holds either UntypedFormGroup or UntypedFormArray
   form: UntypedFormGroup | UntypedFormArray = new UntypedFormGroup({});
   missingDisclosure = signal<boolean>(false);
-  fullData = signal({
+  fullData = signal(
+   {
     "ATTRIBUTE_ID": "1",
     "ATTRIBUTE_TYPE": "input-autocomplete",
     "ATTRIBUTE_LABEL": "Attribute Label Basic Input",

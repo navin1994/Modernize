@@ -48,6 +48,26 @@ import { DateUtilityService } from "../services/date-utility.service";
 @Injectable({ providedIn: "root" })
 export class ConfigBuilderService {
   private dateUtility = inject(DateUtilityService);
+  
+  // Performance optimization: Cache for frequently accessed config data
+  private configCache = new Map<string, any>();
+  private attributeKeysCache = new Map<object, string[]>();
+
+  /**
+   * Clear caches for memory management
+   */
+  public clearCaches(): void {
+    this.configCache.clear();
+    this.attributeKeysCache.clear();
+  }
+
+  private getCachedAttributeKeys(attributes: any): string[] {
+    if (!this.attributeKeysCache.has(attributes)) {
+      this.attributeKeysCache.set(attributes, Object.keys(attributes));
+    }
+    return this.attributeKeysCache.get(attributes)!;
+  }
+
   public setUpConfigFormRoot(
     config: FormConfig,
   ): UntypedFormGroup | UntypedFormArray {
@@ -456,7 +476,6 @@ export class ConfigBuilderService {
         } else {
           return controlValue;
         }
-        break;
       case OBJECT:
         if (staticSelection) {
           return controlValue["value"];
@@ -465,10 +484,7 @@ export class ConfigBuilderService {
         } else {
           return controlValue;
         }
-        break;
       case DATE:
-        return this.dateUtility.formatDate(controlValue, providedFormat);
-        break;
       case ARRAY:
       case NUMBER:
       case UNDEFINED:
@@ -558,105 +574,221 @@ export class ConfigBuilderService {
     form: UntypedFormGroup | UntypedFormArray,
     data: any,
     config: FormConfig,
+    depth: number = 0,
   ): void {
-    const hasNestedElement = (
-      attr: any,
-    ): attr is { nestedElement: UiFormConfig } => {
-      return attr && typeof attr === "object" && "nestedElement" in attr;
+    // Early exit optimizations
+    if (depth > 10 || data == null || data === '') return;
+
+    const hasNestedElement = (attr: any): attr is { nestedElement: UiFormConfig } => {
+      return attr?.nestedElement != null;
     };
 
-    if (form instanceof UntypedFormGroup) {
-      // Iterate over the keys in the data object
-      Object.entries(data).forEach(([key, value]) => {
-        const control = form.get(key);
+    // Use faster instanceof check pattern
+    const isFormGroup = form instanceof UntypedFormGroup;
+    
+    if (isFormGroup) {
+      this.patchFormGroupOptimized(form, data, config, depth, hasNestedElement);
+    } else {
+      this.patchFormArrayOptimized(form as UntypedFormArray, data, config, depth, hasNestedElement);
+    }
+  }
 
-        if (
-          control instanceof UntypedFormGroup ||
-          control instanceof UntypedFormArray
-        ) {
-          // Recursively patch nested FormGroup or FormArray
-          const attribute = config.ui.references.attributes[key];
-          if (hasNestedElement(attribute)) {
-            this.patchFormRecursive(control, value, {
-              ...config,
-              ui: attribute.nestedElement,
-            });
-          }
-        } else if (control) {
-          // Patch value for basic controls with proper error handling
-          try {
-            let patchValue = value;
-            
-            // Handle date fields specially to prevent Material datepicker parse errors
-            const attribute = config.ui.references.attributes[key];
-            if (attribute?.type === FIELD_TYPES.DATE && value) {
-              patchValue = this.dateUtility.parseAnyDateFormat(value);
-            }
-            
-            control.patchValue(patchValue, { emitEvent: false });
-            // Clear any existing errors first
-            control.setErrors(null);
-            // Update validation after setting value
-            setTimeout(() => {
-              control.updateValueAndValidity({ emitEvent: true });
-            }, 0);
-          } catch (error) {
-            console.warn(`Error patching value for control ${key}:`, error);
-            // Set a fallback value or handle the error appropriately
-            control.patchValue(null, { emitEvent: false });
-          }
-        }
-      });
-    } else if (form instanceof UntypedFormArray) {
-      // Ensure the FormArray has enough controls for the data
-      while (form.length < data.length) {
-        const attribute =
-          config.ui.references.attributes[
-            Object.keys(config.ui.references.attributes)[0]
-          ];
+  private patchFormGroupOptimized(
+    form: UntypedFormGroup,
+    data: any,
+    config: FormConfig,
+    depth: number,
+    hasNestedElement: (attr: any) => attr is { nestedElement: UiFormConfig }
+  ): void {
+    // Early type check
+    if (typeof data !== 'object' || Array.isArray(data)) {
+      console.warn('patchFormGroup: Expected object data, received:', typeof data);
+      return;
+    }
+
+    // Cache attributes reference to avoid repeated property access
+    const attributes = config.ui.references.attributes;
+    const formControls = form.controls;
+    
+    // Use cached attribute keys for better performance
+    const dataKeys = this.getCachedAttributeKeys(data);
+    
+    // Batch process controls to minimize function call overhead
+    for (let i = 0; i < dataKeys.length; i++) {
+      const key = dataKeys[i];
+      const value = data[key];
+      const control = formControls[key];
+      
+      if (!control) {
+        if (depth === 0) console.warn(`Control '${key}' not found`);
+        continue;
+      }
+
+      const attribute = attributes[key];
+      
+      // Fast path for simple controls (most common case)
+      if (!(control instanceof UntypedFormGroup || control instanceof UntypedFormArray)) {
+        this.patchSimpleControlOptimized(control, value, attribute);
+        continue;
+      }
+      
+      // Handle nested structures
+      if (hasNestedElement(attribute)) {
+        // Create nested config once and reuse
+        const nestedConfig = {
+          ...config,
+          ui: attribute.nestedElement,
+        };
+        this.patchFormRecursive(control, value, nestedConfig, depth + 1);
+      }
+    }
+  }
+
+  private patchFormArrayOptimized(
+    form: UntypedFormArray,
+    data: any,
+    config: FormConfig,
+    depth: number,
+    hasNestedElement: (attr: any) => attr is { nestedElement: UiFormConfig }
+  ): void {
+    if (!Array.isArray(data)) {
+      console.warn('patchFormArray: Expected array data, received:', typeof data);
+      return;
+    }
+
+    // Cache references for better performance
+    const attributes = config.ui.references.attributes;
+    const attributeKeys = this.getCachedAttributeKeys(attributes);
+    if (attributeKeys.length !== 1) {
+      console.warn('patchFormArray: FormArray should have exactly one attribute');
+      return;
+    }
+
+    const attributeKey = attributeKeys[0];
+    const attribute = attributes[attributeKey];
+    
+    // Transform data once upfront
+    const processedData = this.transformDataForNestedFormArrayOptimized(data, attribute);
+    const targetLength = processedData.length;
+    const currentLength = form.length;
+    
+    // Optimize control management with batch operations
+    if (currentLength < targetLength) {
+      // Add controls in batch
+      const controlsToAdd = targetLength - currentLength;
+      const newControls: AbstractControl[] = [];
+      
+      for (let i = 0; i < controlsToAdd; i++) {
+        let newControl: AbstractControl;
+        
         if (hasNestedElement(attribute)) {
-          form.push(
-            this.setUpConfigFormRoot({
-              ...config,
-              ui: attribute.nestedElement,
-            }),
-          );
+          newControl = this.setUpConfigFormRoot({
+            ...config,
+            ui: attribute.nestedElement,
+          });
+        } else {
+          newControl = new UntypedFormControl(attribute.initialValue || null);
+        }
+        
+        newControls.push(newControl);
+      }
+      
+      // Batch add all controls
+      newControls.forEach(control => form.push(control));
+      
+    } else if (currentLength > targetLength) {
+      // Remove excess controls in batch
+      const controlsToRemove = currentLength - targetLength;
+      for (let i = 0; i < controlsToRemove; i++) {
+        form.removeAt(form.length - 1);
+      }
+    }
+
+    // Cache nested config creation if needed
+    let nestedConfig: FormConfig | null = null;
+    const needsNestedConfig = hasNestedElement(attribute);
+    
+    if (needsNestedConfig) {
+      nestedConfig = {
+        ...config,
+        ui: attribute.nestedElement,
+      };
+    }
+
+    // Optimized patching loop
+    const controls = form.controls;
+    for (let i = 0; i < targetLength; i++) {
+      const control = controls[i];
+      const item = processedData[i];
+      
+      if (!control) continue;
+
+      if (control instanceof UntypedFormGroup || control instanceof UntypedFormArray) {
+        if (needsNestedConfig && nestedConfig) {
+          this.patchFormRecursive(control, item, nestedConfig, depth + 1);
+        }
+      } else {
+        this.patchSimpleControlOptimized(control, item, attribute);
+      }
+    }
+  }
+
+  private transformDataForNestedFormArrayOptimized(data: any[], attribute: any): any[] {
+    // Early exit for most common case
+    if (!attribute?.nestedElement?.type || attribute.nestedElement.type !== FIELD_TYPES.FORM_ARRAY) {
+      return data;
+    }
+
+    const nestedAttributes = attribute.nestedElement.references?.attributes;
+    if (!nestedAttributes) return data;
+    
+    const nestedAttributeKeys = this.getCachedAttributeKeys(nestedAttributes);
+    
+    // Fast path: check if transformation is needed
+    if (nestedAttributeKeys.length !== 1 || 
+        data.length === 0 || 
+        (typeof data[0] === 'object' && data[0] !== null)) {
+      return data;
+    }
+    
+    // Optimized transformation
+    const nestedAttributeKey = nestedAttributeKeys[0];
+    return data.map(value => ({ [nestedAttributeKey]: value }));
+  }
+
+  private patchSimpleControlOptimized(
+    control: AbstractControl,
+    value: any,
+    attribute: any
+  ): void {
+    try {
+      let patchValue = value;
+
+      // Fast path for null/undefined
+      if (value == null) {
+        patchValue = null;
+      } else {
+        // Optimize date handling
+        if (attribute?.type === FIELD_TYPES.DATE && value) {
+          const parsedDate = this.dateUtility.parseAnyDateFormat(value);
+          if (parsedDate) patchValue = parsedDate;
+        } else if (Array.isArray(value) && attribute?.multiple === false && value.length > 0) {
+          // Handle array to single value conversion
+          patchValue = value[0];
         }
       }
 
-      // Patch each control in the FormArray
-      data.forEach((item: any, index: number) => {
-        const control = form.at(index);
-        if (
-          control instanceof UntypedFormGroup ||
-          control instanceof UntypedFormArray
-        ) {
-          const attribute =
-            config.ui.references.attributes[
-              Object.keys(config.ui.references.attributes)[0]
-            ];
-          if (hasNestedElement(attribute)) {
-            this.patchFormRecursive(control, item, {
-              ...config,
-              ui: attribute.nestedElement,
-            });
-          }
-        } else if (control) {
-          try {
-            control.patchValue(item, { emitEvent: false });
-            control.setErrors(null);
-            setTimeout(() => {
-              control.updateValueAndValidity({ emitEvent: true });
-            }, 0);
-          } catch (error) {
-            console.warn(
-              `Error patching value for FormArray control at index ${index}:`,
-              error,
-            );
-            control.patchValue(null, { emitEvent: false });
-          }
-        }
-      });
+      // Batch DOM updates by setting both value and errors together
+      control.patchValue(patchValue, { emitEvent: false });
+      if (control.errors) {
+        control.setErrors(null);
+      }
+
+    } catch (error) {
+      if (typeof console !== 'undefined') {
+        console.warn('Error patching control:', error);
+      }
+      control.patchValue(null, { emitEvent: false });
     }
   }
 }
