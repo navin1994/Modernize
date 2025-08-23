@@ -4007,7 +4007,7 @@ export const testConfig: FormConfig = {
         },
       },
       validationRelations: {},
-      showErrorAfterSubmit: true,
+      showErrorAfterSubmit: false,
     },
     paragraphs: {
       textAttributes: {},
