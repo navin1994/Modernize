@@ -308,8 +308,6 @@ export class FieldSelectorComponent implements OnInit {
   }
 
   setErrorMessage(errorMsg: any) :string {
-    console.log(this.formField.errors);
-    
     // Handle Material datepicker parse errors specifically
     if (errorMsg && typeof errorMsg === 'object' && errorMsg.text) {
       return 'Please enter a valid date';

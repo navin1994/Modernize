@@ -248,6 +248,33 @@ export class FormLayoutComponent implements OnInit, OnChanges, OnDestroy {
     );
   }
 
+  validateVisibleLayers(): boolean {
+    if (!this.mainForm) return false;
+    
+    const visibleControls = this.visibleLayers().flat(Infinity);
+    
+    if (this.mainForm instanceof UntypedFormGroup) {
+      // For FormGroup: Check each visible control referenced by _refAttributes
+      return visibleControls.some((item: any) => {
+        if (item?._refAttributes && this.mainForm.get(item._refAttributes)?.invalid) {
+          return true;
+        }
+        return false;
+      });
+    } else if (this.mainForm instanceof UntypedFormArray) {
+      // For FormArray: Only check direct controls (not FormGroup/FormArray since they are validated as child forms)
+      return this.mainForm.controls.some((arrayControl) => {
+        // Only validate if it's a simple control (not FormGroup or FormArray)
+        if (!(arrayControl instanceof UntypedFormGroup) && !(arrayControl instanceof UntypedFormArray)) {
+          return arrayControl.invalid;
+        }
+        return false;
+      });
+    }
+    
+    return false;
+  }
+
   async submit({
     nextStatus,
     runValidation,
@@ -258,26 +285,17 @@ export class FormLayoutComponent implements OnInit, OnChanges, OnDestroy {
     api: string | undefined;
   }) {
     // Set form as submitted
-    if (!this.isFormSubmitted()) this.isFormSubmitted.set(true);
-
-    // Validation logic for both FormGroup and FormArray
-    let isNotValid = false;
+    if (!this.isFormSubmitted()) this.isFormSubmitted.set(true);    
+    
+    // Validate this form's visible layers for both FormGroup and FormArray
     if (runValidation) {
-      if (this.mainForm instanceof UntypedFormGroup) {
-        const visibleControls = this.visibleLayers().flat(Infinity);
-        isNotValid = visibleControls.some((item: any) => {
-          if (item?._refAttributes && this.mainForm.get(item._refAttributes)?.invalid) return true;
-          return false;
-        });
-      } else if (this.mainForm instanceof UntypedFormArray) {
-        isNotValid = this.mainForm.controls.some(ctrl => ctrl.invalid);
-      }
+      const isNotValid = this.validateVisibleLayers();
       if (isNotValid) {
         this.toaster.error("Invalid form details");
-        return;
+        return; // Early return prevents further execution
       }
     }
-
+    
     // Recursively collect data from all child forms
     const childData: Record<string, any> = this.mainForm instanceof UntypedFormArray ? [] : {};
     if (this.childForms && this.childForms.length) {
@@ -285,6 +303,10 @@ export class FormLayoutComponent implements OnInit, OnChanges, OnDestroy {
         // Avoid self-recursion
         if (child !== this) {
           const data = await child.submit({ nextStatus, runValidation, api });
+          // If child validation fails, it returns undefined, so we should stop processing
+          if (runValidation && !data) {
+            return; // Child validation failed, don't proceed
+          }
           if (data && data.formData && child.config?.disclosure_type) {
             if (this.mainForm instanceof UntypedFormArray) {
               // Store data in an array for FormArray
@@ -297,7 +319,7 @@ export class FormLayoutComponent implements OnInit, OnChanges, OnDestroy {
         }
       }
     }
-
+    
     // Parse this form's data (handles both group and array)
     const parsedFormValues = this.parseFormValues();
 
@@ -309,6 +331,7 @@ export class FormLayoutComponent implements OnInit, OnChanges, OnDestroy {
     // Emit data (or return for parent)
     const result = { formData: parsedFormValues, nextStatus, api };
     if (!this.isChildForm()) {
+      this.toaster.info("Submitting form...");
       this.submittedFormData.emit(result);
     }
     return result;
