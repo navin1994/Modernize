@@ -46,6 +46,8 @@ import { CheckboxGroupComponent } from "src/app/config-builder/form-layout/form-
 import { MatMenuModule } from "@angular/material/menu";
 import { MatMomentDateModule } from "@angular/material-moment-adapter";
 import { AppDateFormatDirective } from "src/app/app-directives/app-date-format.directive";
+import { ConfigBuilderService } from "../config-builder.service";
+import { DateUtilityService } from "../../services/date-utility.service";
 
 @Component({
   selector: "app-field-selector",
@@ -82,6 +84,8 @@ export class FieldSelectorComponent implements OnInit {
   @Input({ required: true }) formField: UntypedFormControl;
   private dataService = inject(DataService);
   private sharedUtilityService = inject(SharedUtilityService);
+  private configBuilderService = inject(ConfigBuilderService);
+  private dateUtility = inject(DateUtilityService);
   onChange = output<any>();
   isFormSubmitted = input<boolean>(false);
   showDeleteButton = input<boolean>(false);
@@ -130,8 +134,16 @@ export class FieldSelectorComponent implements OnInit {
 
   initField(): void {
     if (!this.formField.value && this.element?.initialValue) {
-      this.formField.setValue(this.element.initialValue);
+      // Handle date fields specially to prevent Material datepicker parse errors
+      if (this.element.type === this.fieldTypes.DATE) {
+        // Use the centralized date parsing service
+        const parsedDate = this.dateUtility.parseAnyDateFormat(this.element.initialValue);
+        this.formField.setValue(parsedDate);
+      } else {
+        this.formField.setValue(this.element.initialValue);
+      }
     }
+    
     switch (this.element.type) {
       case this.fieldTypes.BASIC:
         break;
@@ -296,6 +308,13 @@ export class FieldSelectorComponent implements OnInit {
   }
 
   setErrorMessage(errorMsg: any) :string {
+    console.log(this.formField.errors);
+    
+    // Handle Material datepicker parse errors specifically
+    if (errorMsg && typeof errorMsg === 'object' && errorMsg.text) {
+      return 'Please enter a valid date';
+    }
+    
     return JSON.stringify(errorMsg)?.replace(/^"(.*)"$/, "$1");
   }
 
@@ -303,4 +322,9 @@ export class FieldSelectorComponent implements OnInit {
     // Remove when false, add when true
     this.addOrRemoveControl.emit(flag);
   }
+
+  // Allow all dates - effectively disables Material datepicker validation
+  allowAllDates = (): boolean => {
+    return true;
+  };
 }

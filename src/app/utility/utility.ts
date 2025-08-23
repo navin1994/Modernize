@@ -5,11 +5,80 @@ export const isEmptyArray = (input: any): boolean => {
 };
 
 export const isDate = (value: any): boolean => {
-  return moment(value, moment.ISO_8601, true).isValid();
+  if (!value) return false;
+  
+  // Handle Date objects
+  if (value instanceof Date) {
+    return !isNaN(value.getTime());
+  }
+  
+  // Handle strings and numbers
+  if (typeof value === 'string' || typeof value === 'number') {
+    // First try moment's intelligent parsing
+    const momentDate = moment(value);
+    if (momentDate.isValid()) {
+      // Additional validation: make sure it's not parsing random strings as dates
+      const year = momentDate.year();
+      // Reasonable year range (1900-2100)
+      if (year >= 1900 && year <= 2100) {
+        return true;
+      }
+    }
+    
+    // If string, try common date patterns with strict parsing
+    if (typeof value === 'string') {
+      const commonFormats = [
+        'YYYY-MM-DD',           // 2025-08-20
+        'DD/MM/YYYY',           // 20/08/2025
+        'MM/DD/YYYY',           // 08/20/2025
+        'DD-MM-YYYY',           // 20-08-2025
+        'YYYY/MM/DD',           // 2025/08/20
+        'MMMM Do, YYYY',        // August 4th, 2025
+        'MMMM D, YYYY',         // August 4, 2025
+        'MMM DD, YYYY',         // Aug 20, 2025
+        'DD MMM YYYY',          // 20 Aug 2025
+        'DD-MMM-YYYY',          // 20-Aug-2025
+        'YYYY-MM-DD HH:mm:ss',  // 2025-08-20 14:30:00
+        'DD/MM/YYYY HH:mm',     // 20/08/2025 14:30
+        'MM-DD-YYYY',           // 08-20-2025
+        'YYYY.MM.DD',           // 2025.08.20
+        'DD.MM.YYYY',           // 20.08.2025
+        moment.ISO_8601         // ISO format
+      ];
+      
+      for (const format of commonFormats) {
+        const strictParsed = moment(value, format, true);
+        if (strictParsed.isValid()) {
+          const year = strictParsed.year();
+          if (year >= 1900 && year <= 2100) {
+            return true;
+          }
+        }
+      }
+    }
+    
+    // If numeric, check if it could be a timestamp
+    if (typeof value === 'number' || (typeof value === 'string' && !isNaN(Number(value)))) {
+      const num = Number(value);
+      // Check for Unix timestamp (seconds since 1970) - convert to milliseconds
+      if (num > 0 && num < 2147483647) { // Max 32-bit timestamp in seconds
+        const date = moment.unix(num);
+        if (date.isValid() && date.year() >= 1970 && date.year() <= 2100) {
+          return true;
+        }
+      }
+      // Check for JavaScript timestamp (milliseconds since 1970)
+      if (num > 0 && num < 4102444800000) { // Year 2100 in milliseconds
+        const date = moment(num);
+        if (date.isValid() && date.year() >= 1970 && date.year() <= 2100) {
+          return true;
+        }
+      }
+    }
+  }
+  
+  return false;
 };
-
-export const dateToNumber = (input: string): number =>
-  new Date(input).getTime();
 
 export const isArray = (type: any): boolean => {
   return !!Array.isArray(type) ? true : false;

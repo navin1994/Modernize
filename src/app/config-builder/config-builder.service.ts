@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import {
   AbstractControl,
   UntypedFormArray,
@@ -34,7 +34,6 @@ import {
   VISIBILITY,
 } from "../models/constants";
 import {
-  dateToNumber,
   isArray,
   isArrayOfObjects,
   isBoolean,
@@ -44,10 +43,11 @@ import {
   isObject,
   toBoolean,
 } from "../utility/utility";
-import * as moment from "moment";
+import { DateUtilityService } from "../services/date-utility.service";
 
 @Injectable({ providedIn: "root" })
 export class ConfigBuilderService {
+  private dateUtility = inject(DateUtilityService);
   public setUpConfigFormRoot(
     config: FormConfig,
   ): UntypedFormGroup | UntypedFormArray {
@@ -392,7 +392,7 @@ export class ConfigBuilderService {
                   );
                   return Number(currVal) < Number(condVal);
                 }
-                case COMPARISON_TYPES.LESS_THAN: {
+                case COMPARISON_TYPES.LESS_THAN_EQUAL_TO: {
                   const { currVal, condVal } = this.checkIfDateValueAndConvert(
                     currentValue,
                     conditionValue,
@@ -448,9 +448,7 @@ export class ConfigBuilderService {
     switch (dataType) {
       case ARRAY_OF_OBJECTS:
         if (staticSelection) {
-          return controlValue.map(
-            (val: { [x: string]: any }) => val["value"],
-          );
+          return controlValue.map((val: { [x: string]: any }) => val["value"]);
         } else if (mapping && mapping.value) {
           return controlValue.map(
             (val: { [x: string]: any }) => val[mapping.value as string],
@@ -469,7 +467,7 @@ export class ConfigBuilderService {
         }
         break;
       case DATE:
-        return moment(controlValue).format(providedFormat);
+        return this.dateUtility.formatDate(controlValue, providedFormat);
         break;
       case ARRAY:
       case NUMBER:
@@ -498,13 +496,8 @@ export class ConfigBuilderService {
     currentValue: any,
     conditionValue: any,
   ): { currVal: any; condVal: any } {
-    currentValue = isDate(currentValue)
-      ? dateToNumber(currentValue)
-      : currentValue;
-    conditionValue = isDate(conditionValue)
-      ? dateToNumber(conditionValue)
-      : conditionValue;
-    return { currVal: currentValue, condVal: conditionValue };
+    // Use the centralized date utility service
+    return this.dateUtility.prepareDateComparison(currentValue, conditionValue);
   }
 
   checkTypeValue(checkType: string): boolean {
@@ -524,6 +517,12 @@ export class ConfigBuilderService {
     if (data == null || data == undefined || data == "") return "";
     if (isBoolean(data)) return toBoolean(data);
     if (isNumeric(data)) return data;
+    
+    // Use centralized date utility for date detection and conversion
+    if (this.dateUtility.isValidDate(data)) {
+      return this.dateUtility.convertDateToTimestamp(data);
+    }
+    
     if (isObject(data) && sourceAttribute) {
       const attributeConfig = attributes[sourceAttribute];
       let valueKey = "value";
@@ -540,16 +539,30 @@ export class ConfigBuilderService {
       }
       return this.getDataByType(data[valueKey], attributes);
     }
+    
+    // Handle objects that might contain date information
+    if (isObject(data)) {
+      // Check if it might be a date-like object with text property
+      if (data.text && typeof data.text === 'string' && this.dateUtility.isValidDate(data.text)) {
+        const parsedDate = this.dateUtility.parseAnyDateFormat(data);
+        if (parsedDate) {
+          return parsedDate.getTime();
+        }
+      }
+    }
+    
     return JSON.stringify(data)?.replace(/^"(.*)"$/, "$1");
   }
 
   patchFormRecursive(
     form: UntypedFormGroup | UntypedFormArray,
     data: any,
-    config: FormConfig
+    config: FormConfig,
   ): void {
-    const hasNestedElement = (attr: any): attr is { nestedElement: UiFormConfig } => {
-      return attr && typeof attr === 'object' && 'nestedElement' in attr;
+    const hasNestedElement = (
+      attr: any,
+    ): attr is { nestedElement: UiFormConfig } => {
+      return attr && typeof attr === "object" && "nestedElement" in attr;
     };
 
     if (form instanceof UntypedFormGroup) {
@@ -557,7 +570,10 @@ export class ConfigBuilderService {
       Object.entries(data).forEach(([key, value]) => {
         const control = form.get(key);
 
-        if (control instanceof UntypedFormGroup || control instanceof UntypedFormArray) {
+        if (
+          control instanceof UntypedFormGroup ||
+          control instanceof UntypedFormArray
+        ) {
           // Recursively patch nested FormGroup or FormArray
           const attribute = config.ui.references.attributes[key];
           if (hasNestedElement(attribute)) {
@@ -567,27 +583,58 @@ export class ConfigBuilderService {
             });
           }
         } else if (control) {
-          // Patch value for basic controls
-          control.patchValue(value);
+          // Patch value for basic controls with proper error handling
+          try {
+            let patchValue = value;
+            
+            // Handle date fields specially to prevent Material datepicker parse errors
+            const attribute = config.ui.references.attributes[key];
+            if (attribute?.type === FIELD_TYPES.DATE && value) {
+              patchValue = this.dateUtility.parseAnyDateFormat(value);
+            }
+            
+            control.patchValue(patchValue, { emitEvent: false });
+            // Clear any existing errors first
+            control.setErrors(null);
+            // Update validation after setting value
+            setTimeout(() => {
+              control.updateValueAndValidity({ emitEvent: true });
+            }, 0);
+          } catch (error) {
+            console.warn(`Error patching value for control ${key}:`, error);
+            // Set a fallback value or handle the error appropriately
+            control.patchValue(null, { emitEvent: false });
+          }
         }
       });
     } else if (form instanceof UntypedFormArray) {
       // Ensure the FormArray has enough controls for the data
       while (form.length < data.length) {
-        const attribute = config.ui.references.attributes[Object.keys(config.ui.references.attributes)[0]];
+        const attribute =
+          config.ui.references.attributes[
+            Object.keys(config.ui.references.attributes)[0]
+          ];
         if (hasNestedElement(attribute)) {
-          form.push(this.setUpConfigFormRoot({
-            ...config,
-            ui: attribute.nestedElement,
-          }));
+          form.push(
+            this.setUpConfigFormRoot({
+              ...config,
+              ui: attribute.nestedElement,
+            }),
+          );
         }
       }
 
       // Patch each control in the FormArray
       data.forEach((item: any, index: number) => {
         const control = form.at(index);
-        if (control instanceof UntypedFormGroup || control instanceof UntypedFormArray) {
-          const attribute = config.ui.references.attributes[Object.keys(config.ui.references.attributes)[0]];
+        if (
+          control instanceof UntypedFormGroup ||
+          control instanceof UntypedFormArray
+        ) {
+          const attribute =
+            config.ui.references.attributes[
+              Object.keys(config.ui.references.attributes)[0]
+            ];
           if (hasNestedElement(attribute)) {
             this.patchFormRecursive(control, item, {
               ...config,
@@ -595,7 +642,19 @@ export class ConfigBuilderService {
             });
           }
         } else if (control) {
-          control.patchValue(item);
+          try {
+            control.patchValue(item, { emitEvent: false });
+            control.setErrors(null);
+            setTimeout(() => {
+              control.updateValueAndValidity({ emitEvent: true });
+            }, 0);
+          } catch (error) {
+            console.warn(
+              `Error patching value for FormArray control at index ${index}:`,
+              error,
+            );
+            control.patchValue(null, { emitEvent: false });
+          }
         }
       });
     }

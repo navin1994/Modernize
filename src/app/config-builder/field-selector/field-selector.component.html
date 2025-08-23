@@ -121,6 +121,7 @@
         (dateChange)="emitChange($event)"
         (click)="picker.open()"
         [appDateFormat]="element.dateFormat"
+        [matDatepickerFilter]="allowAllDates"
       />
       } @case (fieldTypes.PASSWORD) {
       <!-- If field is input-password -->
@@ -241,7 +242,7 @@
 
 <!-- this is for error section only -->
 @for (error of formField.errors | keyvalue; track error.key; let i = $index) {
-@if(formField.invalid && (formField.touched || formField.dirty) && isFormSubmitted()) {
+@if(formField.invalid && isFormSubmitted()) {
 <div class="errorMsg">
   <mat-error>{{ $index + 1 + ": " + setErrorMessage(error.value) }}</mat-error>
 </div>

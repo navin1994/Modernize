@@ -11,10 +11,8 @@ import {
 } from '@angular/core';
 import { NgControl } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import * as _moment from 'moment';
 import { DEFAULT_DATE_FORMAT } from '../models/constants';
-
-const moment = _moment;
+import { DateUtilityService } from '../services/date-utility.service';
 
 @Directive({
   selector: '[appDateFormat]',
@@ -24,6 +22,7 @@ export class AppDateFormatDirective implements OnInit, OnDestroy {
   private el = inject(ElementRef<HTMLInputElement>);
   private renderer = inject(Renderer2);
   private ngControl = inject(NgControl, { optional: true });
+  private dateUtility = inject(DateUtilityService);
   private subscription?: Subscription;
   private readonly defaultFormat = signal(DEFAULT_DATE_FORMAT);
   readonly appDateFormat = input<string|undefined>(this.defaultFormat());
@@ -61,16 +60,11 @@ export class AppDateFormatDirective implements OnInit, OnDestroy {
     
     const expectedFormat = this.appDateFormat();
     
-    // Try to parse the date in various formats, including the expected format
-    let parsedMoment = moment(raw, expectedFormat);
+    // Use centralized date utility for parsing with fallback
+    const parsedMoment = this.dateUtility.parseWithFallback(raw, expectedFormat || DEFAULT_DATE_FORMAT);
     
-    // If that doesn't work, try parsing with moment's default parsing
-    if (!parsedMoment.isValid()) {
-      parsedMoment = moment(raw);
-    }
-    
-    if (parsedMoment.isValid()) {
-      const formatted = parsedMoment.format(expectedFormat);
+    if (parsedMoment && parsedMoment.isValid()) {
+      const formatted = parsedMoment.format(expectedFormat || DEFAULT_DATE_FORMAT);
       this.setValue(formatted);
     } else {
       // If all parsing fails, leave the original value
