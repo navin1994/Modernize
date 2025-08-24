@@ -10,6 +10,16 @@ export const navItems: NavItem[] = [
     route: '/form',
   },
   {
+    displayName: 'Form Builder',
+    iconName: 'layout-grid-add',
+    route: '/form-builder',
+  },
+  {
+    displayName: 'Window System Demo',
+    iconName: 'window',
+    route: '/window-demo',
+  },
+  {
     navCap: 'Home',
   },
   {

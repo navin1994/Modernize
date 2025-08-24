@@ -1,0 +1,25 @@
+
+<div class="window-container">
+    <!-- Visible Windows -->
+    @for (window of windowManager.visibleWindows(); track window.id) {
+      <app-dynamic-window
+        [windowState]="window"
+        (windowClose)="onWindowClose($event)"
+        (windowMinimize)="onWindowMinimize($event)"
+        (windowMaximize)="onWindowMaximize($event)"
+        (windowFocus)="onWindowFocus($event)"
+        (positionChange)="onPositionChange($event)"
+        (sizeChange)="onSizeChange($event)">
+      </app-dynamic-window>
+    }
+    
+    <!-- Taskbar for All Windows - Show if there are any windows open -->
+    @if (windowManager.hasActiveWindows()) {
+      <app-window-taskbar
+        [allWindows]="windowManager.windows()"
+        (restoreWindow)="onRestoreWindow($event)"
+        (centerAndFocusWindow)="onCenterAndFocusWindow($event)"
+        (closeWindow)="onTaskbarClose($event)">
+      </app-window-taskbar>
+    }
+</div>

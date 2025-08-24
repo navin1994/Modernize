@@ -1,0 +1,28 @@
+@if (allWindows().length > 0) {
+  <div class="taskbar-container">
+    <div class="taskbar-scroll-indicator left" [class.visible]="canScrollLeft()"></div>
+    <div class="taskbar" #taskbarElement>
+      @for (window of allWindows(); track window.id) {
+        <div 
+          class="taskbar-item"
+          [class.minimized]="window.isMinimized"
+          [class.active]="!window.isMinimized"
+          (click)="onTaskbarItemClick(window.id, window)"
+          [matTooltip]="window.title + (window.isMinimized ? ' (Minimized)' : '')">
+          
+          <mat-icon class="taskbar-icon">web_asset</mat-icon>
+          <span class="taskbar-title">{{ getTruncatedTitle(window.title) }}</span>
+          
+          <button 
+            mat-mini-fab
+            class="taskbar-close-btn"
+            (click)="onTaskbarClose($event, window.id)"
+            [matTooltip]="'Close'">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      }
+    </div>
+    <div class="taskbar-scroll-indicator right" [class.visible]="canScrollRight()"></div>
+  </div>
+}

@@ -1,0 +1,84 @@
+<mat-card 
+  class="window-modal cardWithShadow"
+  [style.z-index]="windowState().zIndex"
+  [style.width.px]="windowState().size.width"
+  [style.height.px]="windowState().size.height"
+  [style.left.px]="windowState().position.x"
+  [style.top.px]="windowState().position.y"
+  [style.position]="'absolute'"
+  [class.window-minimized]="windowState().isMinimized"
+  cdkDrag
+  [cdkDragDisabled]="!windowState().config.draggable"
+  (cdkDragMoved)="onDragMoved($event)"
+  (cdkDragStarted)="onDragStarted()"
+  (cdkDragEnded)="onDragEnded()"
+  (click)="onWindowClick()"
+  #windowElement>
+  
+  <!-- Title Bar -->
+  <mat-card-header 
+    class="window-title-bar bg-info" 
+    #titleBar
+    cdkDragHandle
+    [class.draggable]="windowState().config.draggable">
+    
+    <div class="window-title">
+      <mat-icon class="window-icon">web_asset</mat-icon>
+      <mat-card-title class="title-text">{{ windowState().title }}</mat-card-title>
+    </div>
+    
+    <div class="window-controls">
+      @if (windowState().config.minimizable) {
+        <button 
+          mat-mini-fab
+          class="control-btn minimize-btn"
+          (click)="onMinimize($event)"
+          [matTooltip]="'Minimize'">
+          <mat-icon>remove</mat-icon>
+        </button>
+      }
+      
+      @if (windowState().config.resizable) {
+        <button 
+          mat-mini-fab
+          class="control-btn maximize-btn"
+          (click)="onMaximize($event)"
+          [matTooltip]="windowState().isMaximized ? 'Restore' : 'Maximize'">
+          <mat-icon>{{ windowState().isMaximized ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
+        </button>
+      }
+      
+      @if (windowState().config.closable) {
+        <button 
+          mat-mini-fab
+          class="control-btn close-btn"
+          (click)="onClose($event)"
+          [matTooltip]="'Close'">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </div>
+  </mat-card-header>
+  
+  <!-- Window Content -->
+  <div class="window-content">
+    <div class="scroll-inner">
+      <!-- Dynamic component will be rendered here -->
+      <ng-container #contentContainer></ng-container>
+    </div>
+  </div>
+  
+  <!-- Resize Handles -->
+  @if (windowState().config.resizable && !windowState().isMinimized) {
+    <div class="resize-handles">
+      <div class="resize-handle resize-handle-n" (mousedown)="startResize($event, 'n')"></div>
+      <div class="resize-handle resize-handle-s" (mousedown)="startResize($event, 's')"></div>
+      <div class="resize-handle resize-handle-e" (mousedown)="startResize($event, 'e')"></div>
+      <div class="resize-handle resize-handle-w" (mousedown)="startResize($event, 'w')"></div>
+      <div class="resize-handle resize-handle-ne" (mousedown)="startResize($event, 'ne')"></div>
+      <div class="resize-handle resize-handle-nw" (mousedown)="startResize($event, 'nw')"></div>
+      <div class="resize-handle resize-handle-se" (mousedown)="startResize($event, 'se')"></div>
+      <div class="resize-handle resize-handle-sw" (mousedown)="startResize($event, 'sw')"></div>
+    </div>
+  }
+</mat-card>

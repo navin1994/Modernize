@@ -1,0 +1,50 @@
+:host {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.window-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+// Make sure windows are interactive
+app-dynamic-window {
+  pointer-events: all;
+}
+
+// Make sure taskbar is interactive
+app-window-taskbar {
+  pointer-events: all;
+}
+
+// Ensure proper stacking
+:host {
+  // Each window will have its own z-index
+  > .window-container > app-dynamic-window {
+    position: relative;
+  }
+  
+  // Taskbar should always be on top
+  > .window-container > app-window-taskbar {
+    z-index: 10001;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  :host {
+    // On mobile, ensure windows don't go off-screen
+    app-dynamic-window {
+      max-width: 95vw;
+      max-height: 90vh;
+    }
+  }
+}

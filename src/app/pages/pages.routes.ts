@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { StarterComponent } from './starter/starter.component';
+import { WindowDemoComponent } from './window-demo/window-demo.component';
 
 export const PagesRoutes: Routes = [
   {

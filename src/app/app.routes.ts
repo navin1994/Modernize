@@ -1,56 +1,72 @@
-import { Routes } from '@angular/router';
-import { BlankComponent } from './layouts/blank/blank.component';
-import { FullComponent } from './layouts/full/full.component';
-import { AppFormComponent } from './form/form.component';
+import { Routes } from "@angular/router";
+import { BlankComponent } from "./layouts/blank/blank.component";
+import { FullComponent } from "./layouts/full/full.component";
+import { AppFormComponent } from "./form/form.component";
+import { WindowDemoComponent } from "./pages/window-demo/window-demo.component";
 
 export const routes: Routes = [
   {
-    path: '',
+    path: "",
     component: FullComponent,
     children: [
       {
-        path: '',
-        redirectTo: '/dashboard',
-        pathMatch: 'full',
+        path: "",
+        redirectTo: "/dashboard",
+        pathMatch: "full",
       },
       {
-        path: 'dashboard',
+        path: "dashboard",
         loadChildren: () =>
-          import('./pages/pages.routes').then((m) => m.PagesRoutes),
+          import("./pages/pages.routes").then((m) => m.PagesRoutes),
       },
       {
-        path: 'form',
+        path: "form",
         component: AppFormComponent,
       },
       {
-        path: 'ui-components',
+        path: "form-builder",
+        component: AppFormComponent,
+      },
+      {
+        path: "window-demo",
+        component: WindowDemoComponent,
+        data: {
+          title: "Window System Demo",
+          urls: [
+            { title: "Dashboard", url: "/dashboard" },
+            { title: "Window Demo" },
+          ],
+        },
+      },
+      {
+        path: "ui-components",
         loadChildren: () =>
-          import('./pages/ui-components/ui-components.routes').then(
-            (m) => m.UiComponentsRoutes
+          import("./pages/ui-components/ui-components.routes").then(
+            (m) => m.UiComponentsRoutes,
           ),
       },
       {
-        path: 'extra',
+        path: "extra",
         loadChildren: () =>
-          import('./pages/extra/extra.routes').then((m) => m.ExtraRoutes),
+          import("./pages/extra/extra.routes").then((m) => m.ExtraRoutes),
       },
     ],
   },
   {
-    path: '',
+    path: "",
     component: BlankComponent,
     children: [
       {
-        path: 'authentication',
+        path: "authentication",
         loadChildren: () =>
-          import('./pages/authentication/authentication.routes').then(
-            (m) => m.AuthenticationRoutes
+          import("./pages/authentication/authentication.routes").then(
+            (m) => m.AuthenticationRoutes,
           ),
       },
     ],
   },
   {
-    path: '**',
-    redirectTo: 'authentication/error',
+    path: "**",
+    redirectTo: "authentication/error",
   },
 ];

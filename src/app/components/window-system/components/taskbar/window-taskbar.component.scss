@@ -1,0 +1,371 @@
+:host {
+  .taskbar-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    z-index: 1000;
+    max-width: calc(100vw - 40px);
+  }
+
+  .taskbar {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 8px 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    // Handle horizontal overflow with scrolling
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-width: 100%;
+    
+    // Custom scrollbar styling
+    &::-webkit-scrollbar {
+      height: 4px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 2px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: rgba(13, 110, 253, 0.3);
+      border-radius: 2px;
+      
+      &:hover {
+        background: rgba(13, 110, 253, 0.5);
+      }
+    }
+    
+    // For Firefox
+    scrollbar-width: thin;
+    scrollbar-color: rgba(13, 110, 253, 0.3) rgba(0, 0, 0, 0.1);
+
+    &:hover {
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .taskbar-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+      min-width: 120px; // Ensure minimum width for readability
+      max-width: 200px;
+      width: auto;
+      height: 44px;
+      flex-shrink: 0; // Prevent items from shrinking when scrolling
+
+      &:hover {
+        background: rgba(13, 110, 253, 0.1);
+        border-color: rgba(13, 110, 253, 0.2);
+        transform: scale(1.02);
+      }
+
+      &:active {
+        transform: scale(0.98);
+      }
+
+      .taskbar-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0d6efd;
+        flex-shrink: 0;
+      }
+
+      .taskbar-title {
+        font-size: 13px;
+        font-weight: 500;
+        color: #333;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex: 1;
+        min-width: 0;
+        line-height: 1.2;
+        display: flex;
+        align-items: center;
+      }
+
+      .taskbar-close-btn {
+        width: 24px;
+        height: 24px;
+        color: #666;
+        opacity: 0;
+        flex-shrink: 0;
+
+        // Override default mini-fab styles for taskbar
+        .mdc-fab {
+          width: 24px;
+          height: 24px;
+          background-color: transparent;
+          box-shadow: none;
+        }
+
+        mat-icon {
+          font-size: 14px;
+          width: 14px;
+          height: 14px;
+        }
+
+        &:hover {
+          .mdc-fab {
+            background-color: #dc3545;
+          }
+          color: white;
+          transform: scale(1.1);
+        }
+
+        &:active {
+          transform: scale(0.9);
+        }
+      }
+
+      &:hover .taskbar-close-btn {
+        opacity: 1;
+      }
+
+      // Active (visible) window state
+      &.active {
+        background: rgba(13, 110, 253, 0.15);
+        border-color: rgba(13, 110, 253, 0.3);
+        
+        .taskbar-icon {
+          color: #0d6efd;
+        }
+        
+        .taskbar-title {
+          color: #0d6efd;
+          font-weight: 600;
+        }
+      }
+
+      // Minimized window state
+      &.minimized {
+        background: rgba(108, 117, 125, 0.1);
+        border-color: rgba(108, 117, 125, 0.2);
+        opacity: 0.8;
+        
+        .taskbar-icon {
+          color: #6c757d;
+        }
+        
+        .taskbar-title {
+          color: #6c757d;
+          font-style: italic;
+        }
+
+        &:hover {
+          background: rgba(108, 117, 125, 0.2);
+          border-color: rgba(108, 117, 125, 0.3);
+          opacity: 1;
+        }
+      }
+    }
+  }
+
+  // Scroll indicators for the container
+  .taskbar-scroll-indicator {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 2;
+
+    &.visible {
+      opacity: 1;
+    }
+
+    &.left {
+      left: 0;
+      background: linear-gradient(to right, 
+        rgba(255, 255, 255, 0.9) 0%, 
+        rgba(255, 255, 255, 0.6) 50%, 
+        transparent 100%);
+      border-radius: 12px 0 0 12px;
+    }
+
+    &.right {
+      right: 0;
+      background: linear-gradient(to left, 
+        rgba(255, 255, 255, 0.9) 0%, 
+        rgba(255, 255, 255, 0.6) 50%, 
+        transparent 100%);
+      border-radius: 0 12px 12px 0;
+    }
+
+    // Add subtle arrows
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+    }
+
+    &.left::after {
+      left: 6px;
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+      border-right: 6px solid rgba(13, 110, 253, 0.6);
+    }
+
+    &.right::after {
+      right: 6px;
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+      border-left: 6px solid rgba(13, 110, 253, 0.6);
+    }
+  }
+
+  // Animation for taskbar appearance  
+  .taskbar-container {
+    animation: taskbarSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @keyframes taskbarSlideUp {
+    from {
+      transform: translateX(-50%) translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  }
+}
+
+// Light theme
+@media (prefers-color-scheme: light) {
+  .taskbar {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-top-color: #cbd5e1;
+  }
+  
+  .taskbar-item {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #1f2937;
+    
+    &:hover {
+      background: rgba(0, 0, 0, 0.1);
+      border-color: rgba(0, 0, 0, 0.2);
+    }
+    
+    .taskbar-close-btn {
+      color: #1f2937;
+    }
+  }
+}
+
+// Mobile responsiveness
+@media (max-width: 768px) {
+  .taskbar-container {
+    bottom: 10px; // Closer to bottom on mobile
+    max-width: calc(100vw - 20px); // Even less margin on mobile
+  }
+
+  .taskbar {
+    height: 60px;
+    padding: 0 8px;
+    gap: 4px;
+    
+    // Show scrollbar on mobile for better UX
+    &::-webkit-scrollbar {
+      height: 6px;
+    }
+  }
+  
+  .taskbar-item {
+    min-width: 80px; // Smaller minimum on mobile
+    max-width: 120px;
+    padding: 6px 8px;
+    
+    .taskbar-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+    
+    .taskbar-title {
+      font-size: 11px;
+    }
+    
+    .taskbar-close-btn {
+      width: 20px;
+      height: 20px;
+      min-width: 20px;
+      
+      .mdc-fab {
+        width: 20px;
+        height: 20px;
+      }
+      
+      mat-icon {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+      }
+    }
+  }
+}
+
+// Very small screens (phones in portrait)
+@media (max-width: 480px) {
+  .taskbar-container {
+    max-width: calc(100vw - 16px);
+  }
+
+  .taskbar {
+    padding: 0 6px;
+    gap: 3px;
+  }
+  
+  .taskbar-item {
+    min-width: 60px;
+    max-width: 100px;
+    padding: 4px 6px;
+    
+    .taskbar-title {
+      font-size: 10px;
+    }
+  }
+}
+
+// Animation for taskbar items appearing/disappearing
+.taskbar-item {
+  animation: taskbarItemIn 0.3s ease;
+}
+
+@keyframes taskbarItemIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
