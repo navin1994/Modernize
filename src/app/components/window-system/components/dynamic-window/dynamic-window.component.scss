@@ -22,35 +22,6 @@
     pointer-events: none;
   }
   
-  // Disable transitions when dragging for immediate response
-  &.cdk-drag-dragging {
-    transition: none !important;
-    will-change: transform;
-    // Add subtle shadow during drag for visual feedback
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2), 
-                0 8px 24px rgba(0, 0, 0, 0.15) !important;
-    
-    // Prevent pointer events on children during drag for performance
-    * {
-      pointer-events: none;
-    }
-  }
-  
-  // Improve dragging performance - always ready for transform
-  &.cdk-drag {
-    will-change: transform;
-    transform-style: preserve-3d;
-    backface-visibility: hidden;
-  }
-
-  // Override CDK drag positioning to use our custom positioning
-  &.cdk-drag:not(.cdk-drag-placeholder) {
-    // Reset any CDK drag transforms since we handle positioning manually
-    &:not(.cdk-drag-dragging) {
-      transform: none !important;
-    }
-  }
-  
   // Override mat-card default styles
   .mdc-card {
     border-radius: 12px;
@@ -66,10 +37,6 @@
   user-select: none;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   margin: 0;
-  
-  &.draggable {
-    cursor: move;
-  }
   
   .window-title {
     display: flex;

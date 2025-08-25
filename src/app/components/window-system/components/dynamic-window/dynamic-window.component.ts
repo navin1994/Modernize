@@ -18,7 +18,6 @@ import {
   output
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -31,8 +30,6 @@ import { WindowState, WindowPosition, DynamicComponentInterface } from '../../mo
   standalone: true,
   imports: [
     CommonModule,
-    CdkDrag,
-    CdkDragHandle,
     MatIconModule,
     MatButtonModule,
     MatCardModule,
@@ -53,10 +50,8 @@ export class DynamicWindowComponent implements OnInit, AfterViewInit, OnDestroy,
   positionChange = output<{ id: string; position: WindowPosition }>();
   sizeChange = output<{ id: string; size: { width: number; height: number } }>();
 
-  @ViewChild('windowElement', { static: true }) windowElement!: ElementRef<HTMLElement>;
-  @ViewChild('titleBar', { static: true }) titleBar!: ElementRef<HTMLElement>;
+  @ViewChild('windowElement', { static: false }) windowElement?: ElementRef<HTMLElement>;
   @ViewChild('contentContainer', { static: false, read: ViewContainerRef }) contentContainer!: ViewContainerRef;
-  @ViewChild(CdkDrag, { static: true }) cdkDrag!: CdkDrag;
 
   private readonly destroyRef = inject(DestroyRef);
   
@@ -67,9 +62,7 @@ export class DynamicWindowComponent implements OnInit, AfterViewInit, OnDestroy,
   private initialWindowPos = signal({ x: 0, y: 0 });
   // Component reference signal - public for template access
   componentRef = signal<ComponentRef<any> | null>(null);
-  private dragStartPosition = signal<WindowPosition>({ x: 0, y: 0 });
-  private isDragging = signal(false);
-
+  
   ngOnInit(): void {
     this.setupResizeListeners();
   }
@@ -85,26 +78,6 @@ export class DynamicWindowComponent implements OnInit, AfterViewInit, OnDestroy,
     if (changes['windowState'] && this.windowState()) {
       // Handle window state changes
       this.updateDynamicComponent();
-      
-      // Reset CDK drag position when window position changes externally (but not during dragging)
-      if (changes['windowState'].currentValue?.position && 
-          changes['windowState'].previousValue?.position &&
-          !this.isDragging() && 
-          this.cdkDrag) {
-        
-        const prevPos = changes['windowState'].previousValue.position;
-        const currPos = changes['windowState'].currentValue.position;
-        
-        // Check if position actually changed
-        if (prevPos.x !== currPos.x || prevPos.y !== currPos.y) {
-          // Reset the CDK drag to sync with the new position
-          setTimeout(() => {
-            if (this.cdkDrag) {
-              this.cdkDrag.reset();
-            }
-          });
-        }
-      }
     }
   }
 
@@ -121,12 +94,16 @@ export class DynamicWindowComponent implements OnInit, AfterViewInit, OnDestroy,
       const componentRef = this.contentContainer.createComponent(this.windowState().component);
       this.componentRef.set(componentRef);
       
-      // Always try to set windowData directly
-      if (componentRef.instance && this.windowState().data) {
-        componentRef.instance.windowData = this.windowState().data;
+      // Safe data passing: Only set inputs if data exists
+      // This will gracefully handle components with or without inputs
+      const windowData = this.windowState().data;
+      if (windowData) {
+        this.setComponentInputs(componentRef, windowData);
+      } else {
+        console.debug('No data provided for dynamic component - component will use default values');
       }
       
-      // Trigger change detection
+      // Trigger change detection to apply any input changes
       componentRef.changeDetectorRef.detectChanges();
       
       // Set up callbacks if component implements the interface
@@ -148,8 +125,124 @@ export class DynamicWindowComponent implements OnInit, AfterViewInit, OnDestroy,
 
   private updateDynamicComponent(): void {
     const currentComponent = this.componentRef();
-    if (currentComponent && this.implementsDynamicInterface(currentComponent.instance)) {
-      currentComponent.instance.windowData = this.windowState().data;
+    const windowData = this.windowState().data;
+    
+    if (currentComponent) {
+      // Only update inputs if data exists
+      if (windowData) {
+        this.setComponentInputs(currentComponent, windowData);
+      }
+      // Always trigger change detection to ensure updates are reflected
+      currentComponent.changeDetectorRef.detectChanges();
+    }
+  }
+
+  /**
+   * Robust data passing that safely handles:
+   * 1. @Input() decorators via ComponentRef.setInput()
+   * 2. input() signal functions via ComponentRef.setInput()
+   * 3. Graceful handling when no inputs exist (no errors thrown)
+   * 4. Backward compatibility with windowData interface
+   */
+  private setComponentInputs(componentRef: ComponentRef<any>, data: any): void {
+    if (!data || typeof data !== 'object') {
+      return; // Nothing to set
+    }
+
+    const instance = componentRef.instance;
+    let inputsSet = 0;
+
+    // Check if component has any @Input() or input() signals first
+    // by introspecting the component's input definitions
+    const hasInputs = this.componentHasInputs(componentRef);
+
+    if (hasInputs && componentRef.setInput) {
+      // Primary Method: Use ComponentRef.setInput() for both @Input() and input() signals
+      // This is the recommended Angular approach that works with both types
+      Object.keys(data).forEach(key => {
+        try {
+          componentRef.setInput(key, data[key]);
+          inputsSet++;
+          console.debug(`✓ Successfully set input '${key}' via setInput`);
+        } catch (error) {
+          // Input doesn't exist - this is expected and not an error
+          // Silently ignore to prevent console spam
+        }
+      });
+    } else if (!hasInputs) {
+      // Component has no inputs - skip trying to set any
+      console.debug('Component has no @Input() or input() declarations - skipping input assignment');
+    }
+
+    // Fallback Method: Direct property assignment for edge cases
+    // Only for properties that exist and aren't functions (to avoid overwriting methods)
+    if (inputsSet === 0 && hasInputs) {
+      Object.keys(data).forEach(key => {
+        try {
+          if (key in instance && typeof instance[key] !== 'function') {
+            // Check if it's a signal with set method (input() signals)
+            if (instance[key] && typeof instance[key].set === 'function') {
+              instance[key].set(data[key]);
+              inputsSet++;
+              console.debug(`✓ Set signal input '${key}' via .set() method`);
+            } else {
+              // Traditional property assignment
+              instance[key] = data[key];
+              inputsSet++;
+              console.debug(`✓ Set property '${key}' via direct assignment`);
+            }
+          }
+        } catch (error) {
+          // Silently ignore assignment errors
+        }
+      });
+    }
+
+    // Legacy Support: Set windowData for backward compatibility
+    // Only if the component has this property and no specific inputs were set
+    if (inputsSet === 0 && ('windowData' in instance || instance.windowData !== undefined)) {
+      try {
+        instance.windowData = data;
+        console.debug('✓ Set windowData for backward compatibility');
+      } catch (error) {
+        // Silently ignore windowData assignment errors
+      }
+    }
+
+    // Log result - this helps with debugging but doesn't throw errors
+    if (inputsSet > 0) {
+      console.debug(`Successfully set ${inputsSet} input(s) on component`);
+    } else {
+      console.debug('No inputs set - component either has no inputs or data properties don\'t match input names');
+    }
+  }
+
+  /**
+   * Check if a component has any @Input() decorators or input() signals
+   * by examining the component's input definitions
+   */
+  private componentHasInputs(componentRef: ComponentRef<any>): boolean {
+    try {
+      // Angular 16+ provides input definitions on the component type
+      const componentType = componentRef.componentType as any;
+      
+      // Check for input definitions (Angular 16+)
+      if (componentType.ɵcmp?.inputs) {
+        const inputs = componentType.ɵcmp.inputs;
+        return Object.keys(inputs).length > 0;
+      }
+
+      // Fallback: Check for common input properties on the instance
+      const instance = componentRef.instance;
+      const commonInputProps = ['title', 'data', 'value', 'config', 'windowData'];
+      
+      return commonInputProps.some(prop => {
+        // Check if property exists and is not a method
+        return prop in instance && typeof instance[prop] !== 'function';
+      });
+    } catch (error) {
+      // If we can't determine, assume it might have inputs to be safe
+      return true;
     }
   }
 
@@ -169,6 +262,7 @@ export class DynamicWindowComponent implements OnInit, AfterViewInit, OnDestroy,
     this.windowFocus.emit(this.windowState().id);
   }
 
+  // === WINDOW CONTROL HANDLERS ===
   onClose(event: Event): void {
     event.stopPropagation();
     this.windowClose.emit(this.windowState().id);
@@ -184,38 +278,7 @@ export class DynamicWindowComponent implements OnInit, AfterViewInit, OnDestroy,
     this.windowMaximize.emit(this.windowState().id);
   }
 
-  onDragMoved(event: any): void {
-    // Get the current position from CDK drag
-    const cdkPosition = event.source.getFreeDragPosition();
-    const basePosition = this.dragStartPosition();
-    
-    const position: WindowPosition = {
-      x: basePosition.x + cdkPosition.x,
-      y: basePosition.y + cdkPosition.y
-    };
-    
-    this.positionChange.emit({ 
-      id: this.windowState().id, 
-      position 
-    });
-  }
-
-  onDragStarted(): void {
-    // Store the starting position when drag begins
-    this.dragStartPosition.set({ ...this.windowState().position });
-    this.isDragging.set(true);
-    
-    // Add dragging class to disable transitions
-    this.windowElement.nativeElement.classList.add('cdk-drag-dragging');
-  }
-
-  onDragEnded(): void {
-    this.isDragging.set(false);
-    
-    // Remove dragging class to re-enable transitions
-    this.windowElement.nativeElement.classList.remove('cdk-drag-dragging');
-  }
-
+  // === RESIZE HANDLERS ===
   startResize(event: MouseEvent, direction: string): void {
     event.preventDefault();
     event.stopPropagation();

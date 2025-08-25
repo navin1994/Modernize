@@ -7,20 +7,12 @@
   [style.top.px]="windowState().position.y"
   [style.position]="'absolute'"
   [class.window-minimized]="windowState().isMinimized"
-  cdkDrag
-  [cdkDragDisabled]="!windowState().config.draggable"
-  (cdkDragMoved)="onDragMoved($event)"
-  (cdkDragStarted)="onDragStarted()"
-  (cdkDragEnded)="onDragEnded()"
   (click)="onWindowClick()"
   #windowElement>
   
   <!-- Title Bar -->
   <mat-card-header 
-    class="window-title-bar bg-info" 
-    #titleBar
-    cdkDragHandle
-    [class.draggable]="windowState().config.draggable">
+    class="window-title-bar bg-info">
     
     <div class="window-title">
       <mat-icon class="window-icon">web_asset</mat-icon>

@@ -8,6 +8,8 @@ import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { WindowManagerService } from '../../components/window-system/services/window-manager.service';
 import { TestWindowComponent } from '../../components/test-window/test-window.component';
+import { EnhancedTestWindowComponent } from '../../components/enhanced-test-window/enhanced-test-window.component';
+import { SimpleTestWindowComponent } from '../../components/simple-test-window/simple-test-window.component';
 import { DiscloseFormComponent } from '../../disclosures/disclose-form/disclose-form.component';
 
 @Component({
@@ -52,6 +54,16 @@ import { DiscloseFormComponent } from '../../disclosures/disclose-form/disclose-
               <button mat-raised-button color="warn" (click)="openMultipleWindows()">
                 <mat-icon>view_module</mat-icon>
                 Open Multiple Windows
+              </button>
+              
+              <button mat-raised-button color="accent" (click)="openEnhancedInputWindow()">
+                <mat-icon>input</mat-icon>
+                Enhanced Input Test
+              </button>
+              
+              <button mat-raised-button color="primary" (click)="openSimpleWindow()">
+                <mat-icon>lightbulb</mat-icon>
+                Simple Component (No Inputs)
               </button>
             </div>
           </div>
@@ -284,6 +296,72 @@ export class WindowDemoComponent {
           console.log(`${config.title} result:`, result);
         });
       }, index * 200); // Stagger the opening
+    });
+  }
+
+  openEnhancedInputWindow() {
+    // Test data for enhanced input system - supports @Input(), input() signals, and windowData
+    const testData = {
+      // For @Input() properties
+      title: 'Enhanced Input Test',
+      description: 'Testing enhanced input data passing system',
+      count: 42,
+      isActive: true,
+      items: ['Item 1', 'Item 2', 'Item 3'],
+      user: { name: 'John Doe', age: 30, email: 'john@example.com' },
+      
+      // For input() signals (same data, different mechanism)
+      signalMessage: 'This is a signal-based input!',
+      signalNumber: 123,
+      signalFlag: false,
+      
+      // For windowData interface
+      windowData: {
+        id: 'enhanced-test',
+        metadata: {
+          version: '1.0',
+          created: new Date().toISOString(),
+          features: ['@Input() decorators', 'input() signals', 'windowData interface']
+        }
+      }
+    };
+
+    this.windowManager.openWindow({
+      id: 'enhanced-test-window-' + Date.now(),
+      title: 'Enhanced Input Test Window',
+      component: EnhancedTestWindowComponent,
+      data: testData,
+      width: 600,
+      height: 500,
+      position: { x: 100, y: 100 }
+    }).subscribe((result: any) => {
+      console.log('Enhanced Input Test window result:', result);
+    });
+  }
+
+  openSimpleWindow() {
+    // Test data that will be passed to a component with NO inputs
+    // This should NOT cause any errors - the system should handle it gracefully
+    const testData = {
+      someProperty: 'This data will not be used',
+      anotherProperty: 42,
+      complexData: {
+        nested: 'object',
+        array: [1, 2, 3],
+        boolean: true
+      }
+    };
+
+    this.windowManager.openWindow({
+      id: 'simple-test-window-' + Date.now(),
+      title: 'Simple Component Test',
+      component: SimpleTestWindowComponent,
+      data: testData, // Data provided but component has no inputs - should be safe
+      width: 500,
+      height: 400,
+      position: { x: 150, y: 150 }
+    }).subscribe((result: any) => {
+      console.log('Simple Test window result:', result);
     });
   }
 }
