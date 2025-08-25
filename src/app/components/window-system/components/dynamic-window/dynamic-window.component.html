@@ -8,9 +8,9 @@
   [style.top.px]="windowState().position.y"
   [class.window-minimized]="windowState().isMinimized"
   [class.window-maximized]="windowState().isMaximized"
+  [class.window-centered]="windowState().isCentered"
   [cdkDragDisabled]="windowState().isMaximized"
   (click)="onWindowClick()"
-  (cdkDragEnded)="onDragEnded($event)"
   (cdkDragStarted)="onDragStarted($event)"
   #windowElement
 >

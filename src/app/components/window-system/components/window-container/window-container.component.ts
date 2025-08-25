@@ -1,6 +1,5 @@
 import { 
   Component, 
-  OnInit, 
   ChangeDetectionStrategy,
   inject
 } from '@angular/core';
@@ -8,7 +7,7 @@ import { CommonModule } from '@angular/common';
 import { WindowManagerService } from '../../services/window-manager.service';
 import { DynamicWindowComponent } from '../dynamic-window/dynamic-window.component';
 import { WindowTaskbarComponent } from '../taskbar/window-taskbar.component';
-import { WindowPosition } from '../../models/window.interface';
+import { WindowPosition, WindowState } from '../../models/window.interface';
 
 @Component({
   selector: 'app-window-container',
@@ -48,6 +47,10 @@ export class WindowContainerComponent {
 
   onSizeChange(event: { id: string; size: { width: number; height: number } }): void {
     this.windowManager.updateWindowSize(event.id, event.size);
+  }
+
+  onStateChange(event: { id: string; changes: Partial<WindowState> }): void {
+    this.windowManager.updateWindowState(event.id, event.changes);
   }
 
   onRestoreWindow(windowId: string): void {

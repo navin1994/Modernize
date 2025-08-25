@@ -48,6 +48,7 @@ export class DynamicWindowComponent implements OnInit, AfterViewInit, OnDestroy,
   windowFocus = output<string>();
   positionChange = output<{ id: string; position: WindowPosition }>();
   sizeChange = output<{ id: string; size: { width: number; height: number } }>();
+  stateChange = output<{ id: string; changes: Partial<WindowState> }>();
 
   @ViewChild('windowElement', { static: false }) windowElement?: ElementRef<HTMLElement>;
   @ViewChild('contentContainer', { static: false, read: ViewContainerRef }) contentContainer!: ViewContainerRef;
@@ -287,45 +288,19 @@ export class DynamicWindowComponent implements OnInit, AfterViewInit, OnDestroy,
   onDragStarted(event: CdkDragStart): void {
     // Focus window when drag starts
     this.windowFocus.emit(this.windowState().id);
-  }
-
-  onDragEnded(event: CdkDragEnd): void {
-    // Calculate new position based on the drag distance
-    const currentPosition = this.windowState().position;
-    const dragDistance = event.distance;
     
-    const newPosition: WindowPosition = {
-      x: currentPosition.x + dragDistance.x,
-      y: currentPosition.y + dragDistance.y
-    };
-
-    // Constrain to screen bounds
-    const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
-    const screenHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
-    const windowWidth = this.windowState().size.width;
-    const windowHeight = this.windowState().size.height;
-    const minMargin = 20;
-
-    // Ensure window stays within screen bounds
-    newPosition.x = Math.max(minMargin, Math.min(newPosition.x, screenWidth - windowWidth - minMargin));
-    newPosition.y = Math.max(minMargin, Math.min(newPosition.y, screenHeight - windowHeight - minMargin));
-
-    // Reset the transform applied by CDK Drag
-    if (this.windowElement) {
-      const element = this.windowElement.nativeElement;
-      element.style.transform = 'none';
+    // Clear centered state when dragging starts
+    if (this.windowState().isCentered) {
+      this.stateChange.emit({
+        id: this.windowState().id,
+        changes: { isCentered: false }
+      });
     }
-
-    // Update the position through the window manager
-    this.positionChange.emit({
-      id: this.windowState().id,
-      position: newPosition
-    });
   }
 
   private resetDragTransform(): void {
     // Reset any CDK drag transforms
-    if (this.windowElement) {
+    if (this.windowElement?.nativeElement) {
       const element = this.windowElement.nativeElement;
       element.style.transform = 'none';
     }

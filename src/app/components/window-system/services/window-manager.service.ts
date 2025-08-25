@@ -145,6 +145,7 @@ export class WindowManagerService {
       title: finalConfig.title!,
       isMinimized: false,
       isMaximized: false,
+      isCentered: false,
       isVisible: true,
       zIndex: this.getNextZIndex(),
       position,
@@ -193,6 +194,7 @@ export class WindowManagerService {
   minimizeWindow(windowId: string): void {
     this.updateWindow(windowId, {
       isMinimized: true,
+      isCentered: false,
       isVisible: false
     }, { action: 'minimize' });
   }
@@ -212,12 +214,14 @@ export class WindowManagerService {
       ? {
           // Restore
           isMaximized: false,
+          isCentered: false,
           size: window.previousSize || window.size,
           position: window.previousPosition || window.position
         }
       : {
           // Maximize
           isMaximized: true,
+          isCentered: false,
           previousSize: window.size,
           previousPosition: window.position,
           size: { 
@@ -235,11 +239,33 @@ export class WindowManagerService {
   }
 
   /**
+   * Center and focus a window (convenience method for taskbar clicks)
+   */
+  centerAndFocusWindow(windowId: string): void {
+    const window = this.windowsMap().get(windowId);
+    if (!window) return;
+
+    // If window is maximized or minimized, restore it first
+    if (window.isMaximized || window.isMinimized) {
+      return;
+    } else {
+      // Just center the window at its current size
+      this.updateWindow(windowId, {
+        isCentered: true,
+        position: this.calculateCenterPosition(window.size)
+      }, { action: 'center' });
+    }
+    
+    this.focusWindow(windowId);
+  }
+
+  /**
    * Restore a minimized window
    */
   restoreWindow(windowId: string): void {
     this.updateWindow(windowId, {
       isMinimized: false,
+      isCentered: false,
       isVisible: true,
       zIndex: this.getNextZIndex()
     });
@@ -260,23 +286,6 @@ export class WindowManagerService {
   }
 
   /**
-   * Center window on screen and bring to front (for taskbar clicks)
-   */
-  centerAndFocusWindow(windowId: string): void {
-    const window = this.windowsMap().get(windowId);
-    if (!window) return;
-
-    const centerPosition = this.calculateCenterPosition(window.size);
-    
-    this.updateWindow(windowId, {
-      isMinimized: false,
-      isVisible: true,
-      zIndex: this.getNextZIndex(),
-      position: centerPosition
-    });
-  }
-
-  /**
    * Update window position
    */
   updateWindowPosition(windowId: string, position: WindowPosition): void {
@@ -288,6 +297,13 @@ export class WindowManagerService {
    */
   updateWindowSize(windowId: string, size: { width: number; height: number }): void {
     this.updateWindow(windowId, { size });
+  }
+
+  /**
+   * Update window state with partial changes
+   */
+  updateWindowState(windowId: string, changes: Partial<WindowState>): void {
+    this.updateWindow(windowId, changes);
   }
 
   /**

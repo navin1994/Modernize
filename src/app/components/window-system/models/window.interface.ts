@@ -33,6 +33,7 @@ export interface WindowState {
   title: string;
   isMinimized: boolean;
   isMaximized: boolean;
+  isCentered: boolean;
   isVisible: boolean;
   zIndex: number;
   position: WindowPosition;
@@ -46,7 +47,7 @@ export interface WindowState {
 }
 
 export interface WindowResult {
-  action: 'close' | 'minimize' | 'maximize' | 'restore' | 'data';
+  action: 'close' | 'minimize' | 'maximize' | 'restore' | 'center' | 'data';
   data?: any;
 }
 

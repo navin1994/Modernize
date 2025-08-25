@@ -23,6 +23,13 @@
     transform: none !important;
   }
   
+  &.window-centered {
+    // Center the window on screen regardless of position
+    transform: translate(-50%, -50%) !important;
+    left: 50% !important;
+    top: 50% !important;
+  }
+  
   &.window-animating {
     pointer-events: none;
   }
