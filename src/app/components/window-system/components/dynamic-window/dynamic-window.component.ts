@@ -7,13 +7,10 @@ import {
   OnDestroy,
   ChangeDetectionStrategy,
   signal,
-  computed,
   ViewContainerRef,
   ComponentRef,
   OnChanges,
   SimpleChanges,
-  inject,
-  DestroyRef,
   input,
   output
 } from '@angular/core';
@@ -22,8 +19,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WindowState, WindowPosition, DynamicComponentInterface } from '../../models/window.interface';
+import { CdkDrag, CdkDragHandle, CdkDragEnd, CdkDragStart } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-dynamic-window',
@@ -33,7 +30,9 @@ import { WindowState, WindowPosition, DynamicComponentInterface } from '../../mo
     MatIconModule,
     MatButtonModule,
     MatCardModule,
-    MatTooltipModule
+    MatTooltipModule,
+    CdkDrag,
+    CdkDragHandle
   ],
   templateUrl: './dynamic-window.component.html',
   styleUrls: ['./dynamic-window.component.scss'],
@@ -53,7 +52,6 @@ export class DynamicWindowComponent implements OnInit, AfterViewInit, OnDestroy,
   @ViewChild('windowElement', { static: false }) windowElement?: ElementRef<HTMLElement>;
   @ViewChild('contentContainer', { static: false, read: ViewContainerRef }) contentContainer!: ViewContainerRef;
 
-  private readonly destroyRef = inject(DestroyRef);
   
   private isResizing = signal(false);
   private resizeDirection = signal('');
@@ -78,6 +76,13 @@ export class DynamicWindowComponent implements OnInit, AfterViewInit, OnDestroy,
     if (changes['windowState'] && this.windowState()) {
       // Handle window state changes
       this.updateDynamicComponent();
+      
+      // Reset drag transforms when window state changes (especially for maximize/restore)
+      if (changes['windowState'].currentValue) {
+        setTimeout(() => {
+          this.resetDragTransform();
+        }, 0);
+      }
     }
   }
 
@@ -276,6 +281,54 @@ export class DynamicWindowComponent implements OnInit, AfterViewInit, OnDestroy,
   onMaximize(event: Event): void {
     event.stopPropagation();
     this.windowMaximize.emit(this.windowState().id);
+  }
+
+  // === DRAG HANDLERS ===
+  onDragStarted(event: CdkDragStart): void {
+    // Focus window when drag starts
+    this.windowFocus.emit(this.windowState().id);
+  }
+
+  onDragEnded(event: CdkDragEnd): void {
+    // Calculate new position based on the drag distance
+    const currentPosition = this.windowState().position;
+    const dragDistance = event.distance;
+    
+    const newPosition: WindowPosition = {
+      x: currentPosition.x + dragDistance.x,
+      y: currentPosition.y + dragDistance.y
+    };
+
+    // Constrain to screen bounds
+    const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
+    const screenHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
+    const windowWidth = this.windowState().size.width;
+    const windowHeight = this.windowState().size.height;
+    const minMargin = 20;
+
+    // Ensure window stays within screen bounds
+    newPosition.x = Math.max(minMargin, Math.min(newPosition.x, screenWidth - windowWidth - minMargin));
+    newPosition.y = Math.max(minMargin, Math.min(newPosition.y, screenHeight - windowHeight - minMargin));
+
+    // Reset the transform applied by CDK Drag
+    if (this.windowElement) {
+      const element = this.windowElement.nativeElement;
+      element.style.transform = 'none';
+    }
+
+    // Update the position through the window manager
+    this.positionChange.emit({
+      id: this.windowState().id,
+      position: newPosition
+    });
+  }
+
+  private resetDragTransform(): void {
+    // Reset any CDK drag transforms
+    if (this.windowElement) {
+      const element = this.windowElement.nativeElement;
+      element.style.transform = 'none';
+    }
   }
 
   // === RESIZE HANDLERS ===

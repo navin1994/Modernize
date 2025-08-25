@@ -2,15 +2,13 @@ import {
   Component, 
   OnInit, 
   ChangeDetectionStrategy,
-  inject,
-  DestroyRef
+  inject
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WindowManagerService } from '../../services/window-manager.service';
 import { DynamicWindowComponent } from '../dynamic-window/dynamic-window.component';
 import { WindowTaskbarComponent } from '../taskbar/window-taskbar.component';
-import { WindowState, WindowPosition } from '../../models/window.interface';
+import { WindowPosition } from '../../models/window.interface';
 
 @Component({
   selector: 'app-window-container',
@@ -24,14 +22,9 @@ import { WindowState, WindowPosition } from '../../models/window.interface';
   styleUrls: ['./window-container.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class WindowContainerComponent implements OnInit {
+export class WindowContainerComponent {
   // Modern dependency injection
   protected readonly windowManager = inject(WindowManagerService);
-  private readonly destroyRef = inject(DestroyRef);
-
-  ngOnInit(): void {
-    // Auto-cleanup is handled by takeUntilDestroyed
-  }
 
   onWindowClose(windowId: string): void {
     this.windowManager.closeWindow(windowId);
